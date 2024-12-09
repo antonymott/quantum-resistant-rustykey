@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>C++ PQClean wrapper for WASM</title>
+</head>
+<body>
+<span style="font-size: 50px;">🐶</span>
+Open Javascript console to see it in action!
+<script type='text/javascript'>
+    var Module = {
+        onRuntimeInitialized: function() {
+            const instance = new Module.MlKem1024()
+            var keypair = instance.keypair()
+            console.log("public_key: ", instance.buffer_to_string(keypair.get('public_key')))
+            console.log("private_key: ", instance.buffer_to_string(keypair.get('private_key')))
+            var encrypt = instance.encrypt(keypair.get('public_key'))
+            console.log("cyphertext: ", instance.buffer_to_string(encrypt.get('cyphertext')))
+            console.log("secret: ", instance.buffer_to_string(encrypt.get('secret')))
+
+            var secret = instance.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
+            console.log("secret: ", instance.buffer_to_string(secret))
+
+            //keypair.onclick = () => alert()
+            //encrypt.onclick = () => alert(instance.key_to_string(instance.keypair()))
+            //decrypt.onclick = () => alert(instance.key_to_string(instance.keypair()))
+
+            //instance.delete();
+        }
+    };
+</script>
+<script async type="text/javascript" src="./kyber_crystals_wasm_engine.js"></script>
+
+</body>
+</html>
