@@ -1,0 +1,1 @@
+// https://stackoverflow.com/questions/78394696/using-webassembly-with-web-workers-and-cdn
