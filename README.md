@@ -6,7 +6,7 @@
 - ✅ Constant-time validation libsodium blah blah
 - ✅ newer modules [let's be kind and not necessarily name who were better than]
 - ✅ Tree-shaking friendly...if it is
-- ✅ Fix [KyberSlash](https://kyberslash.cr.yp.to/index.html) vulnerability.
+- ✅ Latest implementation (avoids [KyberSlash](https://kyberslash.cr.yp.to/index.html) vulnerability)
 - ✅ ML-KEM ([NIST FIPS 203](https://csrc.nist.gov/pubs/fips/203/final))
   support.
 
