@@ -10,7 +10,7 @@
 - ✅ ML-KEM ([NIST FIPS 203](https://csrc.nist.gov/pubs/fips/203/final))
   support.
 
-## usage
+## usage (the Classes, if any, and the function names are just placeholders of course for the WASM functions we actually expose)
 
 ```ts
 import { MlKem768 } from "mlkem"; // or from "crystals-kyber-js"
