@@ -1,7 +1,7 @@
 # WASM+web-worker implementation mlKem (from c/c++)
 
 ## ⚠️ uses web-worker both on node.js (backend) and browser (frontend) to avoid blocking the main thread
-
+- ✅ tested only on node v22.5.1
 - ✅ our unique benefit or two blah blah
 - ✅ Constant-time validation libsodium blah blah
 - ✅ newer modules [let's be kind and not necessarily name who were better than]
