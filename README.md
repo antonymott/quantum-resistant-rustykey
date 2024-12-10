@@ -1,6 +1,6 @@
 # WASM+web-worker implementation mlKem (from c/c++)
 
-## uses web-worker both on node.js (backend) and browser (frontend) to avoid blocking the main thread
+## ⚠️ uses web-worker both on node.js (backend) and browser (frontend) to avoid blocking the main thread
 
 ## How to Build
 ### 1. To build it for WASM install emscripten into your $HOME path
