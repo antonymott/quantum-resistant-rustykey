@@ -1,3 +1,5 @@
+import { Worker } from "node:worker_threads"
+
 export const add = (a: number, b: number) => {
   return a + b
 }
