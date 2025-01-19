@@ -2,7 +2,7 @@
   "name": "quantum-resistant-rustykey",
   "description": "",
   "license": "ISC",
-  "version": null,
+  "version": "0.0.0",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
