@@ -11,6 +11,9 @@ importers:
       '@noble/hashes':
         specifier: 1.6.1
         version: 1.6.1
+      src:
+        specifier: link:/Users/am/npm_packages/quantum-resistant-rustykey/src
+        version: link:src
       web-worker:
         specifier: 1.3.0
         version: 1.3.0
