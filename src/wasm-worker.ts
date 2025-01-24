@@ -1,3 +1,5 @@
+import { Module } from 'kyber_crystals_wasm_engine.js'
+
 WebAssembly.instantiateStreaming(fetch('kyber_crystals_wasm_engine.wasm'), importObject).then(
 (obj) => obj.instance.exports.exported_func(),
 )
