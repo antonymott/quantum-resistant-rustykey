@@ -1,6 +1,6 @@
 {
   "name": "quantum-resistant-rustykey",
-  "description": "",
+  "description": "Cryptographic Kyber primitive",
   "license": "ISC",
   "version": "0.0.0",
   "main": "dist/index.js",

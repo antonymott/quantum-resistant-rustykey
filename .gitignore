@@ -1,8 +1,8 @@
-.idea
 .build
 .install
 
 node_modules
 dist
 coverage
-.DS_store
+.DS_Store
+.env

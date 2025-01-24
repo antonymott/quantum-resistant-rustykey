@@ -1,4 +1,4 @@
-import { Worker } from "node:worker_threads"
+import Worker from 'web-worker'
 
 export const add = (a: number, b: number) => {
   return a + b
@@ -6,4 +6,15 @@ export const add = (a: number, b: number) => {
 
 export const kp = 1
 
-export { MlKem1024 } from './mlKem/mlKem1024'
+const url = new URL('./wasm-worker.js', import.meta.url)
+const worker = new Worker(url)
+
+worker.addEventListener('message', (e: { data: any }) => {
+  console.log(e.data) // "hiya!"
+})
+
+worker.postMessage('hello')
+
+worker.onmessage = function(message: string) {
+  console.log(message)
+}

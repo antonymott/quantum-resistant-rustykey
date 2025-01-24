@@ -9,15 +9,15 @@
 <body>
 <span style="font-size: 50px;">🐶</span>
 Open Javascript console to see it in action!
-<button id="keypair">Generate keypair</button>
+<!-- <button id="keypair">Generate keypair</button>
 <button id="encrypt">Encrypt</button>
-<button id="decrypt">Decrypt</button>
+<button id="decrypt">Decrypt</button> -->
 <script type='text/javascript'>
     var Module = {
         onRuntimeInitialized: function() {
             const mlkem1024 = new Module.MlKem1024()
             var keypair = mlkem1024.keypair()
-            console.log("public_key: ", mlkem1024.buffer_to_string(keypair.get('public_key')))
+            console.log(" mlkem1024 public_key: ", mlkem1024.buffer_to_string(keypair.get('public_key')))
             console.log("private_key: ", mlkem1024.buffer_to_string(keypair.get('private_key')))
             var encrypt = mlkem1024.encrypt(keypair.get('public_key'))
             console.log("cyphertext: ", mlkem1024.buffer_to_string(encrypt.get('cyphertext')))
@@ -29,7 +29,7 @@ Open Javascript console to see it in action!
 
             const mlkem768 = new Module.MlKem768()
             var keypair = mlkem768.keypair()
-            console.log("public_key: ", mlkem768.buffer_to_string(keypair.get('public_key')))
+            console.log("mlkem768 public_key: ", mlkem768.buffer_to_string(keypair.get('public_key')))
             console.log("private_key: ", mlkem768.buffer_to_string(keypair.get('private_key')))
             var encrypt = mlkem768.encrypt(keypair.get('public_key'))
             console.log("cyphertext: ", mlkem768.buffer_to_string(encrypt.get('cyphertext')))
@@ -41,7 +41,7 @@ Open Javascript console to see it in action!
 
             const mlkem512 = new Module.MlKem512()
             var keypair = mlkem512.keypair()
-            console.log("public_key: ", mlkem512.buffer_to_string(keypair.get('public_key')))
+            console.log("mlkem512public_key: ", mlkem512.buffer_to_string(keypair.get('public_key')))
             console.log("private_key: ", mlkem512.buffer_to_string(keypair.get('private_key')))
             var encrypt = mlkem512.encrypt(keypair.get('public_key'))
             console.log("cyphertext: ", mlkem512.buffer_to_string(encrypt.get('cyphertext')))
@@ -50,9 +50,11 @@ Open Javascript console to see it in action!
             var secret = mlkem512.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
             console.log("secret: ", mlkem512.buffer_to_string(secret))
             mlkem512.delete();
-            //keypair.onclick = () => alert()
-            //encrypt.onclick = () => alert()
-            //decrypt.onclick = () => alert()
+            // keypair.onclick = () => alert(instance.key_to_string(instance.keypair()))
+            // encrypt.onclick = () => alert(instance.key_to_string(instance.keypair()))
+            // decrypt.onclick = () => alert(instance.key_to_string(instance.keypair()))
+
+            // instance.delete();
         }
     };
 </script>

@@ -18,15 +18,15 @@ describe('#sum', () => {
   })
 })
 
-import { MlKem1024 } from './mlKem/mlKem1024'
+// import { MlKem1024 } from './mlKem/mlKem1024'
 
 it('...', async () => {
-  const recipient = new MlKem1024()
+  // const recipient = new MlKem1024()
 
 
   //const [pkR, skR] = await recipient.generateKeyPair()
 
-  const sender = new MlKem1024()
+  // const sender = new MlKem1024()
   //const [ct, ssS] = await sender.encap(pkR)
 
   //const ssR = await recipient.decap(ct, skR)
