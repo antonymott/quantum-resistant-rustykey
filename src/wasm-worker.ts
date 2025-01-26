@@ -1,9 +1,11 @@
-import { Module } from 'kyber_crystals_wasm_engine.js'
+// import { Module } from 'kyber_crystals_wasm_engine.js'
+// import  onRuntimeInitialized from './kyber_crystals_wasm_engine.js'
+// import './kyber_crystals_wasm_engine.wasm'
 
-WebAssembly.instantiateStreaming(fetch('kyber_crystals_wasm_engine.wasm'), importObject).then(
-(obj) => obj.instance.exports.exported_func(),
-)
-  
+// WebAssembly.instantiateStreaming(fetch('kyber_crystals_wasm_engine.wasm'), importObject).then(
+// (obj) => obj.instance.exports.exported_func(),
+// )
+
 
 addEventListener('message', e => {
     if (e.data === 'hello') {
