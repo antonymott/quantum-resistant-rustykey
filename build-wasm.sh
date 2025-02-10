@@ -11,4 +11,5 @@ cmake -Bbuild \
 -DCMAKE_INSTALL_PREFIX=./install \
 -DCMAKE_TOOLCHAIN_FILE=$HOME/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
 cmake --build build --target install
+cp ./install/kyber_crystals_wasm_engine.wasm ./src/
 

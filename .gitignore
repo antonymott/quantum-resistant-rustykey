@@ -1,3 +1,8 @@
-.idea
 .build
 .install
+
+node_modules
+dist
+coverage
+.DS_Store
+.env
