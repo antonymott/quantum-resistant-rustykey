@@ -15,6 +15,8 @@ file(GLOB MLKEM512_SOURCES
 		PQClean/common/*.c
 		PQClean/crypto_kem/ml-kem-512/clean/*.c)
 
+set(EMSCRIPTEN_LINK_FLAGS "-s WASM=1 -s SIDE_MODULE=2 -v")
+
 list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_LIST_DIR}/PQClean/common/randombytes.c)
 
 add_executable(${PROJECT_NAME}_engine
