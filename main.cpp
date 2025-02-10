@@ -177,9 +177,9 @@ void sodium_misuse()
   // TODO: To be done
 }
 
-#ifndef __EMSCRIPTEN__
+//#ifndef __EMSCRIPTEN__
 int main(int argc, char* argv[])
 {
   return 0;
 }
-#endif
+//#endif

@@ -10,50 +10,54 @@
 <span style="font-size: 50px;">🐶</span>
 Open Javascript console to see it in action!
 <script type='text/javascript'>
-    var Module = {
-        onRuntimeInitialized: function() {
-            const mlkem1024 = new Module.MlKem1024()
-            var keypair = mlkem1024.keypair()
-            console.log("public_key: ", mlkem1024.buffer_to_string(keypair.get('public_key')))
-            console.log("private_key: ", mlkem1024.buffer_to_string(keypair.get('private_key')))
-            var encrypt = mlkem1024.encrypt(keypair.get('public_key'))
-            console.log("cyphertext: ", mlkem1024.buffer_to_string(encrypt.get('cyphertext')))
-            console.log("secret: ", mlkem1024.buffer_to_string(encrypt.get('secret')))
+    (async function () {
+        const imports = {
+            env: {
+                memory: new WebAssembly.Memory({ initial: 1 }),
+                STACKTOP: 0,
+            },
+        };
+        const { instance } = await WebAssembly.instantiateStreaming(fetch('./kyber_crystals_wasm_engine.wasm'), imports,);
+        const mlkem1024 = new instance.exports.MlKem1024(); //new Module.MlKem1024()
+        var keypair = mlkem1024.keypair()
+        console.log("public_key: ", mlkem1024.buffer_to_string(keypair.get('public_key')))
+        console.log("private_key: ", mlkem1024.buffer_to_string(keypair.get('private_key')))
+        var encrypt = mlkem1024.encrypt(keypair.get('public_key'))
+        console.log("cyphertext: ", mlkem1024.buffer_to_string(encrypt.get('cyphertext')))
+        console.log("secret: ", mlkem1024.buffer_to_string(encrypt.get('secret')))
 
-            var secret = mlkem1024.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
-            console.log("secret: ", mlkem1024.buffer_to_string(secret))
-            mlkem1024.delete();
+        var secret = mlkem1024.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
+        console.log("secret: ", mlkem1024.buffer_to_string(secret))
+        mlkem1024.delete();
 
-            const mlkem768 = new Module.MlKem768()
-            var keypair = mlkem768.keypair()
-            console.log("public_key: ", mlkem768.buffer_to_string(keypair.get('public_key')))
-            console.log("private_key: ", mlkem768.buffer_to_string(keypair.get('private_key')))
-            var encrypt = mlkem768.encrypt(keypair.get('public_key'))
-            console.log("cyphertext: ", mlkem768.buffer_to_string(encrypt.get('cyphertext')))
-            console.log("secret: ", mlkem768.buffer_to_string(encrypt.get('secret')))
+        const mlkem768 = new Module.MlKem768()
+        var keypair = mlkem768.keypair()
+        console.log("public_key: ", mlkem768.buffer_to_string(keypair.get('public_key')))
+        console.log("private_key: ", mlkem768.buffer_to_string(keypair.get('private_key')))
+        var encrypt = mlkem768.encrypt(keypair.get('public_key'))
+        console.log("cyphertext: ", mlkem768.buffer_to_string(encrypt.get('cyphertext')))
+        console.log("secret: ", mlkem768.buffer_to_string(encrypt.get('secret')))
 
-            var secret = mlkem768.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
-            console.log("secret: ", mlkem768.buffer_to_string(secret))
-            mlkem768.delete();
+        var secret = mlkem768.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
+        console.log("secret: ", mlkem768.buffer_to_string(secret))
+        mlkem768.delete();
 
-            const mlkem512 = new Module.MlKem512()
-            var keypair = mlkem512.keypair()
-            console.log("public_key: ", mlkem512.buffer_to_string(keypair.get('public_key')))
-            console.log("private_key: ", mlkem512.buffer_to_string(keypair.get('private_key')))
-            var encrypt = mlkem512.encrypt(keypair.get('public_key'))
-            console.log("cyphertext: ", mlkem512.buffer_to_string(encrypt.get('cyphertext')))
-            console.log("secret: ", mlkem512.buffer_to_string(encrypt.get('secret')))
+        const mlkem512 = new Module.MlKem512()
+        var keypair = mlkem512.keypair()
+        console.log("public_key: ", mlkem512.buffer_to_string(keypair.get('public_key')))
+        console.log("private_key: ", mlkem512.buffer_to_string(keypair.get('private_key')))
+        var encrypt = mlkem512.encrypt(keypair.get('public_key'))
+        console.log("cyphertext: ", mlkem512.buffer_to_string(encrypt.get('cyphertext')))
+        console.log("secret: ", mlkem512.buffer_to_string(encrypt.get('secret')))
 
-            var secret = mlkem512.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
-            console.log("secret: ", mlkem512.buffer_to_string(secret))
-            mlkem512.delete();
-            //keypair.onclick = () => alert()
-            //encrypt.onclick = () => alert()
-            //decrypt.onclick = () => alert()
-        }
-    };
+        var secret = mlkem512.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
+        console.log("secret: ", mlkem512.buffer_to_string(secret))
+        mlkem512.delete();
+        //keypair.onclick = () => alert()
+        //encrypt.onclick = () => alert()
+        //decrypt.onclick = () => alert()
+    })();
 </script>
-<script async type="text/javascript" src="./kyber_crystals_wasm_engine.js"></script>
 
 </body>
 </html>

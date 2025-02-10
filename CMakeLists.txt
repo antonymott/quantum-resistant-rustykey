@@ -39,7 +39,7 @@ target_link_libraries(${PROJECT_NAME}_engine
         PRIVATE
         embind)
 
-set(CMAKE_EXECUTABLE_SUFFIX ".js")
+set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
 
 install(TARGETS ${PROJECT_NAME}_engine
 		ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}
