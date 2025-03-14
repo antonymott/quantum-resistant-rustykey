@@ -5,3 +5,4 @@ PQClean
 libsodium
 pycparser
 build
+.DS_Store
