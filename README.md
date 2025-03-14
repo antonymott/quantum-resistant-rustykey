@@ -1,20 +1,22 @@
 # c/c++ implementation mlKem
 
-## How to Build
-### 1. To build it for WASM install emscripten into your $HOME path
-Lead official instructions here could be helpful:
-```
-$HOME/emsdk/emsdk install latest
-$HOME/emsdk/emsdk activate latest
-source $HOME/emsdk/emsdk_env.sh
-```
+## How to Build on MacBook Pro M4 Max Sequoia with Homebrew package manager homebrew (see https://brew.sh)
+### 1. Homebrew "formulae" (macOS packages)
+- brew install emscripten
+- brew install cmake
 
-### 2. Run build_wasm.sh script
-```
-./build_wasm.sh
-```
+### 2. navigate to the directory above where you want the repo
+- git clone https://github.com/antonymott/quantum-resistant-rustykey.git
+- cd quantum-resistant-rustykey
 
-### 3. result will appear in folder install
+### 3. locally recursively build the empty symlink folders libsodium and PQClean
+- git submodule update --init --recursive
+
+### 4. build
+- emcmake cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./install
+- cmake --build build --target install
+- cp ./install/kyber_crystals_wasm_engine.wasm ./src/
+
 ```
 \install
 |-kyber_crystals_wasm_engine.js
@@ -22,14 +24,21 @@ source $HOME/emsdk/emsdk_env.sh
 |-test.html
 ```
 
-### 4. npm package
-TODO
+### 5. enjoy!
+- open install/test.html in live server
+- open dev tools -> console to view encrypt decrypt of the three variants
 
-### 5. jsr package
-TODO
+```mermaid
+---
+title: RustyKey Quantum-resistant
+---
+stateDiagram-v2
+    [*] --> install
+    install --> [*]
 
-### 6. native library deb/rpm/... packages will be added soon
-TODO
+    install --> kyber_crystals_wasm_engine.js
+    kyber_crystals_wasm_engine.js --> kyber_crystals_wasm_engine.wasm
+    kyber_crystals_wasm_engine.wasm --> test.html
+    test.html --> [*]
 
-## How to test
-### Open install/text.html in browser
+```
