@@ -1,4 +1,5 @@
 # quantum-resistant-rustykey
+## kyber wasm conveniently wrapped in es6 module
 
 ## 🚧 WORK IN PROGRESS...do not install 🚧
 ## tested front end and backend ONLY to work node v23.10.0
@@ -112,3 +113,5 @@ stateDiagram-v2
     test.html --> [*]
 
 ```
+### 6. build for standalone .js (.ts) in main thread wrapped in a js worker
+- copy how the developers achieved this with [sqlite-wasm](https://github.com/sqlite/sqlite-wasm)
