@@ -1,12 +1,14 @@
 # quantum-resistant-rustykey
 ## kyber wasm conveniently wrapped in es6 module
+## improved version of standard implementation patched to withstand some side-channel attacks [***raspberryPi recovers secret keys from NIST winner implementation...within minutes***](https://kannwischer.eu/papers/2024_kyberslash_preprint20240628.pdf)
+
 
 ## 🚧 WORK IN PROGRESS...do not install 🚧
 ## tested front end and backend ONLY to work node v23.10.0
 - NOT tested for Bun or earlier node versions
 - feel free to contribute tested pull requests to include earlier node versions or for Bun
 
-A WASM implementation of "Cryptographic Suite for Algebraic Lattices" (CRYSTALS) encompasses two cryptographic primitives: Kyber, an IND-CCA2-secure key-encapsulation mechanism (KEM); and Dilithium, a strongly EUF-CMA-secure digital signature algorithm. Both algorithms are based on hard problems over module lattices, are designed to withstand attacks by large quantum computers, and were selected among the winners of the [NIST post-quantum cryptography project](https://pq-crystals.org/index.shtml)
+A WASM implementation of "Cryptographic Suite for Algebraic Lattices" (CRYSTALS) based on hard problems over module lattices, designed to withstand attacks by large quantum computers, and selected among the winners of the [NIST post-quantum cryptography project](https://pq-crystals.org/index.shtml)
 
 | package           | registry                                                                                                                  | description                                                                                                                                                                                                                          |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
