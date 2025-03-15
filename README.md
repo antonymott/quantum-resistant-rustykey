@@ -4,7 +4,7 @@
 
 
 ## 🚧 WORK IN PROGRESS...do not install 🚧
-## tested front end and backend ONLY to work node v23.10.0
+## tested only on node v23.10.0
 - NOT tested for Bun or earlier node versions
 - feel free to contribute tested pull requests to include earlier node versions or for Bun
 
