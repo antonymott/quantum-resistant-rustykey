@@ -1,6 +1,6 @@
 # quantum-resistant-rustykey
-## kyber wasm conveniently wrapped in es6 module
-## improved version of standard implementation patched to withstand some side-channel attacks [***raspberryPi recovers secret keys from NIST winner implementation...within minutes***](https://kannwischer.eu/papers/2024_kyberslash_preprint20240628.pdf)
+## kyber wasm implementation conveniently wrapped in es6 module
+- improved version of NIST winner's standard implementation, patched to withstand some side-channel attacks, see here: [***raspberryPi recovers secret keys from NIST winner implementation...within minutes***](https://kannwischer.eu/papers/2024_kyberslash_preprint20240628.pdf)
 
 
 ## 🚧 WORK IN PROGRESS...do not install 🚧
