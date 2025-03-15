@@ -55,7 +55,7 @@ try {
 
 - [Installation](#installation)
   - [Node.js](#nodejs)
-- [Usage](#usage)
+- [Use](#use)
 - [Contributing](#contributing)
 
 ## Installation
