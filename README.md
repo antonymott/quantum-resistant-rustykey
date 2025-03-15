@@ -22,7 +22,7 @@ For Node.js, you can install quantum-resistant-rustykey via pnpm, npm or yarn:
 pnpm install quantum-resistant-rustykey
 ```
 
-Use:
+## Use:
 
 ```typescript
 import { rustykey1024, rustykey768, rustykey512 } from "quantum-resistant-rustykey";
