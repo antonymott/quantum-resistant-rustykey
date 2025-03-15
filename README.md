@@ -23,32 +23,29 @@ pnpm install quantum-resistant-rustykey
 Use:
 
 ```typescript
-import { MlKem768 } from "crystals-kyber-rustykey";
+import { rustykey1024, rustykey768, rustykey512 } from "quantum-resistant-rustykey";
 
-async function doMlKem() {
-  // A recipient generates a key pair.
-  const recipient = new MlKem768(); // MlKem512 and MlKem1024 are also available.
-  const [pkR, skR] = await recipient.generateKeyPair();
-  //// Deterministic key generation is also supported
-  // const seed = new Uint8Array(64);
-  // globalThis.crypto.getRandomValues(seed); // node >= 19
-  // const [pkR, skR] = await recipient.deriveKeyPair(seed);
+async function doRustykey() {
+  const keypair = rustykey1024.keypair()
+  const public_key = rustykey1024.buffer_to_string(keypair.get('public_key'))
+  const private_key = rustykey1024.buffer_to_string(keypair.get('private_key'))
+  console.log("public_key:", public_key)
+  console.log("private_key:", private_key)
 
-  // A sender generates a ciphertext and a shared secret with pkR.
-  const sender = new MlKem768();
-  const [ct, ssS] = await sender.encap(pkR);
+  const encrypt = rustykey1024.encrypt(keypair.get('public_key'))
+  console.log("cyphertext: ", rustykey1024.buffer_to_string(encrypt.get('cyphertext')))
+  console.log("secret: ", rustykey1024.buffer_to_string(encrypt.get('secret')))
 
-  // The recipient decapsulates the ciphertext and generates the same shared secret with skR.
-  const ssR = await recipient.decap(ct, skR);
+  const secret = rustykey1024.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
+  console.log("secret: ", rustykey1024.buffer_to_string(secret))
 
-  // ssS === ssR
-  return;
+  return
 }
 
 try {
-  doMlKem();
+  doRustykey()
 } catch (err: unknown) {
-  console.log("failed:", (err as Error).message);
+  console.log("failed:", (err as Error).message)
 }
 ```
 
