@@ -4,9 +4,6 @@
 
 
 ## 🚧 WORK IN PROGRESS...do not install 🚧
-## tested only on node v23.10.0
-- NOT tested for Bun or earlier node versions
-- feel free to contribute tested pull requests to include earlier node versions or for Bun
 
 A WASM implementation of "Cryptographic Suite for Algebraic Lattices" (CRYSTALS) based on hard problems over module lattices, designed to withstand attacks by large quantum computers, and selected among the winners of the [NIST post-quantum cryptography project](https://pq-crystals.org/index.shtml)
 
@@ -56,6 +53,7 @@ try {
 - [Installation](#installation)
   - [Node.js](#nodejs)
 - [Use](#use)
+- [Tests](#tests)
 - [Contributing](#contributing)
 
 ## Installation
@@ -67,7 +65,12 @@ pnpm install quantum-resistant-rustykey
 npm install quantum-resistant-rustykey
 yarn add quantum-resistant-rustykey
 ```
+## Tests
+- tested to work node v23.10.0
 
+## Contributing
+- please make pull requests tested to work on Bun and previous node versions
+  
 # compliance testing: build and test from source on your own machine
 
 ## Only tested to build on MacBook Pro M4 Max Sequoia with Homebrew package manager homebrew (see https://brew.sh)
