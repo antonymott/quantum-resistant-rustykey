@@ -32,13 +32,22 @@ target_include_directories(${PROJECT_NAME}_engine
 		PRIVATE
 		libsodium/src/libsodium/include/sodium
 		pqclean/common
-		pqclean/crypto_kem #/ml-kem-1024/clean
-		$ENV{EMSDK}/upstream/emscripten/system/include)
+		pqclean/crypto_kem
+		$ENV{EMSDK}/upstream/emscripten/cache/sysroot/include)
 
 target_link_libraries(${PROJECT_NAME}_engine
         PRIVATE
         embind)
 
+target_link_options(${PROJECT_NAME}_engine PRIVATE
+		"-sMODULARIZE=1"
+		"-sEXPORT_ES6=1"
+		"-sEXPORT_NAME=kyber_crystals_wasm_engine"
+		"-sENVIRONMENT=web"
+		"-sUSE_ES6_IMPORT_META=1"
+		"-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']"
+	  )
+	  
 set(CMAKE_EXECUTABLE_SUFFIX ".js")
 
 install(TARGETS ${PROJECT_NAME}_engine

@@ -1,0 +1,31 @@
+{
+  "name": "quantum-resistant-rustykey",
+  "version": "0.0.1",
+  "description": "ML-KEM (QRS) compiled to WebAssembly",
+  "type": "module",
+  "files": [
+    "install"
+  ],
+  "main": "./install/index.js",
+  "types": "./install/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./install/index.js",
+      "require": "./install/index.js",
+      "types": "./install/index.d.ts"
+    }
+  },
+  "scripts": {
+    "prebuild": "emcmake cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install && cmake --build build --target install",
+    "build": "npm run build:js",
+    "build:js": "tsc -p .",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.2",
+    "typescript": "^5"
+  }
+}

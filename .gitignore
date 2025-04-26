@@ -1,8 +1,10 @@
 .idea
-.build
-.install
+.vscode
+.DS_Store
+build
+install
+dist
+node_modules
 PQClean
 libsodium
 pycparser
-build
-.DS_Store
