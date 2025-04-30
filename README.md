@@ -1,119 +1,258 @@
-# quantum-resistant-rustykey
-## kyber wasm implementation conveniently wrapped in es6 module
-- improved version of NIST winner's standard implementation, patched to withstand some side-channel attacks, see here: [***raspberryPi recovers secret keys from NIST winner implementation...within minutes***](https://kannwischer.eu/papers/2024_kyberslash_preprint20240628.pdf)
+# Quantum-Resistant RustyKey
 
+A WebAssembly implementation of ML-KEM (Quantum-Resistant Signatures) for both Node.js and web environments. This is an improved version of the NIST winner's standard implementation, patched to withstand side-channel attacks.
 
-## 🚧 WORK IN PROGRESS...do not install 🚧
+> **Note**: 🚧 WORK IN PROGRESS...do not install 🚧
+
+## About
 
 A WASM implementation of "Cryptographic Suite for Algebraic Lattices" (CRYSTALS) based on hard problems over module lattices, designed to withstand attacks by large quantum computers, and selected among the winners of the [NIST post-quantum cryptography project](https://pq-crystals.org/index.shtml)
 
-| package           | registry                                                                                                                  | description                                                                                                                                                                                                                          |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| quantum-resistant-rustykey | [![npm](https://img.shields.io/npm/v/quantum-resistant-rustykey)](https://www.npmjs.com/package/quantum-resistant-rustykeyy) |  🚧 WORK IN PROGRESS 🚧      |
-
-
-<div align="left">
-For Node.js, you can install quantum-resistant-rustykey via pnpm, npm or yarn:
-
-```sh
-pnpm install quantum-resistant-rustykey
-```
-
-## Use:
-
-```typescript
-import { rustykey1024, rustykey768, rustykey512 } from "quantum-resistant-rustykey";
-
-async function doRustykey() {
-  const keypair = rustykey1024.keypair()
-  const public_key = rustykey1024.buffer_to_string(keypair.get('public_key'))
-  const private_key = rustykey1024.buffer_to_string(keypair.get('private_key'))
-  console.log("public_key:", public_key)
-  console.log("private_key:", private_key)
-
-  const encrypt = rustykey1024.encrypt(keypair.get('public_key'))
-  console.log("cyphertext: ", rustykey1024.buffer_to_string(encrypt.get('cyphertext')))
-  console.log("secret: ", rustykey1024.buffer_to_string(encrypt.get('secret')))
-
-  const secret = rustykey1024.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
-  console.log("secret: ", rustykey1024.buffer_to_string(secret))
-
-  return
-}
-
-try {
-  doRustykey()
-} catch (err: unknown) {
-  console.log("failed:", (err as Error).message)
-}
-```
-
-## Index
-
-- [Installation](#installation)
-  - [Node.js](#nodejs)
-- [Use](#use)
-- [Tests](#tests)
-- [Contributing](#contributing)
+| Package | Registry | Description |
+|---------|----------|-------------|
+| quantum-resistant-rustykey | [![npm](https://img.shields.io/npm/v/quantum-resistant-rustykey)](https://www.npmjs.com/package/quantum-resistant-rustykey) | 🚧 WORK IN PROGRESS 🚧 |
 
 ## Installation
 
-### Node.js
+For Node.js, you can install quantum-resistant-rustykey via pnpm, npm or yarn:
 
-```sh
+```bash
 pnpm install quantum-resistant-rustykey
+# or
 npm install quantum-resistant-rustykey
+# or
 yarn add quantum-resistant-rustykey
 ```
-## Tests
-- tested to work node v23.10.0
 
-## Contributing
-- please make pull requests tested to work on Bun and previous node versions
-  
-# compliance testing: build and test from source on your own machine
+## Usage
 
-## Only tested to build on MacBook Pro M4 Max Sequoia with Homebrew package manager homebrew (see https://brew.sh)
-### 1. Homebrew "formulae" (macOS packages)
-- brew install emscripten
-- brew install cmake
+### Node.js Environment
 
-### 2. navigate to the directory above where you want the repo
-- git clone https://github.com/antonymott/quantum-resistant-rustykey.git
-- cd quantum-resistant-rustykey
+```typescript
+import { loadMlKem1024, loadMlKem768, loadMlKem512 } from "quantum-resistant-rustykey";
 
-### 3. locally recursively build the empty symlink folders libsodium and PQClean
-- git submodule update --init --recursive
+async function main() {
+  try {
+    // Load the desired ML-KEM variant
+    const mlkem = await loadMlKem1024(); // Options: loadMlKem1024, loadMlKem768, loadMlKem512
 
-### 4. build
-- emcmake cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./install
-- cmake --build build --target install
-- cp install/kyber_crystals_wasm_engine.wasm ./src/
+    // Generate key pair
+    const keypair = mlkem.keypair();
+    const publicKey = mlkem.buffer_to_string(keypair.get('public_key'));
+    const privateKey = mlkem.buffer_to_string(keypair.get('private_key'));
+    console.log("Public Key:", publicKey);
+    console.log("Private Key:", privateKey);
 
+    // Encrypt a message
+    const message = "Hello, quantum-resistant world!";
+    const encrypt = mlkem.encrypt(keypair.get('public_key'));
+    const ciphertext = mlkem.buffer_to_string(encrypt.get('cyphertext'));
+    const secret = mlkem.buffer_to_string(encrypt.get('secret'));
+    console.log("Ciphertext:", ciphertext);
+    console.log("Secret:", secret);
+
+    // Decrypt the message
+    const decrypted = mlkem.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'));
+    console.log("Decrypted:", mlkem.buffer_to_string(decrypted));
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+main();
 ```
-\install
-|-kyber_crystals_wasm_engine.js
-|-kyber_crystals_wasm_engine.wasm
-|-test.html
+
+### Web Environment
+
+```typescript
+import { loadMlKem1024, loadMlKem768, loadMlKem512 } from 'quantum-resistant-rustykey';
+
+// Example usage in a web application
+async function handleEncryption() {
+  try {
+    // Load the desired ML-KEM variant
+    const mlkem = await loadMlKem1024(); // Options: loadMlKem1024, loadMlKem768, loadMlKem512
+    
+    // Generate key pair
+    const keypair = mlkem.keypair();
+    const publicKey = mlkem.buffer_to_string(keypair.get('public_key'));
+    const privateKey = mlkem.buffer_to_string(keypair.get('private_key'));
+    
+    // Store keys securely (e.g., in IndexedDB or secure storage)
+    await storeKeys(publicKey, privateKey);
+
+    // Encrypt user data
+    const userData = {
+      username: "user123",
+      email: "user@example.com"
+    };
+    
+    const encrypt = mlkem.encrypt(keypair.get('public_key'));
+    const ciphertext = mlkem.buffer_to_string(encrypt.get('cyphertext'));
+    const secret = mlkem.buffer_to_string(encrypt.get('secret'));
+
+    // Send encrypted data to server
+    await sendToServer(ciphertext, secret);
+  } catch (error) {
+    console.error("Encryption error:", error);
+  }
+}
+
+// Example secure storage implementation
+async function storeKeys(publicKey: string, privateKey: string) {
+  // Implement secure storage (e.g., IndexedDB, Web Crypto API)
+  // This is just a placeholder - implement proper secure storage
+  localStorage.setItem('mlkem_publicKey', publicKey);
+  localStorage.setItem('mlkem_privateKey', privateKey);
+}
+
+// Example server communication
+async function sendToServer(ciphertext: string, secret: string) {
+  // Implement server communication
+  // This is just a placeholder - implement proper API calls
+  const response = await fetch('/api/secure-data', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ ciphertext, secret }),
+  });
+  return response.json();
+}
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', () => {
+  const encryptButton = document.getElementById('encrypt-button');
+  if (encryptButton) {
+    encryptButton.addEventListener('click', handleEncryption);
+  }
+});
 ```
 
-### 5. enjoy!
-- open install/test.html in live server
-- open dev tools -> console to view encrypt decrypt of the three variants
+### Security Considerations for Web Usage
+
+When using ML-KEM in a web environment, consider the following security best practices:
+
+1. **Key Storage**:
+   - Never store private keys in localStorage or sessionStorage
+   - Use secure storage mechanisms like IndexedDB with encryption
+   - Consider using the Web Crypto API for additional security
+
+2. **Key Management**:
+   - Generate new key pairs for each session when possible
+   - Implement proper key rotation policies
+   - Consider using a key management service for production applications
+
+3. **Data Handling**:
+   - Always encrypt sensitive data before transmission
+   - Use HTTPS for all communications
+   - Implement proper error handling to prevent information leakage
+
+4. **Performance**:
+   - Consider using Web Workers for cryptographic operations
+   - Implement proper loading states for long-running operations
+   - Cache public keys when appropriate
+
+## Building from Source
+
+### Prerequisites
+
+- Node.js >= 18
+- npm
+- Emscripten
+- CMake
+
+### Build Instructions
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/quantum-resistant-rustykey.git
+cd quantum-resistant-rustykey
+```
+
+2. Initialize submodules:
+```bash
+git submodule update --init --recursive
+```
+
+3. Install dependencies:
+```bash
+npm install
+```
+
+4. Build the package:
+
+### Environment Configuration
+
+The package supports two different environments:
+
+- **Web Environment**: Set `sENVIRONMENT=web,worker` in CMakeLists.txt
+- **Node.js Environment**: Set `sENVIRONMENT=node,worker` in CMakeLists.txt
+
+```bash
+npm run build
+
+# Copy the WASM file to src directory
+cp install/kyber_crystals_wasm_engine.wasm ./src/
+```
+
+The `sENVIRONMENT` option specifies which environments the WebAssembly module should be built for:
+- `web`: Enables running in web browsers
+- `worker`: Enables running in Web Workers
+- `node`: Enables running in Node.js
+
+For web applications, use `web,worker` to support both browser and Web Worker environments.
+For Node.js applications, use `node,worker` to support both Node.js and Worker Threads.
+
+The build process consists of two main steps:
+1. `prebuild`: Builds the WASM engine using Emscripten and CMake
+2. `build`: Compiles TypeScript files to JavaScript
+
+
+## Testing
+
+- Tested to work with Node.js v23.10.0
+- For web testing, open `install/test.html` in a live server and check the console for encryption/decryption results of the three variants
+
+## Project Structure
 
 ```mermaid
----
-title: RustyKey Quantum-resistant
----
 stateDiagram-v2
     [*] --> install
     install --> [*]
-
     install --> kyber_crystals_wasm_engine.js
     kyber_crystals_wasm_engine.js --> kyber_crystals_wasm_engine.wasm
     kyber_crystals_wasm_engine.wasm --> test.html
     test.html --> [*]
-
 ```
-### 6. build for standalone .js (.ts) in main thread wrapped in a js worker
-- copy how the developers achieved this with [sqlite-wasm](https://github.com/sqlite/sqlite-wasm)
+
+## Publishing
+
+The package is published from the `install` folder. To publish a new version:
+
+1. Update the version in `package.json`
+2. Run the build process
+3. Publish to npm:
+```bash
+npm publish
+```
+
+## Security Considerations
+
+This implementation includes patches to withstand side-channel attacks. For more information about the security improvements, see: [RaspberryPi recovers secret keys from NIST winner implementation...within minutes](https://kannwischer.eu/papers/2024_kyberslash_preprint20240628.pdf)
+
+## Contributing
+
+- Please make pull requests tested to work on Bun and previous Node.js versions
+- Follow the existing code style and testing practices
+- Include tests for new features
+- Update documentation as needed
+
+## License
+
+[Your License Here]
+
+## Acknowledgments
+
+- Based on the NIST post-quantum cryptography project
+- Inspired by the implementation approach of [sqlite-wasm](https://github.com/sqlite/sqlite-wasm)

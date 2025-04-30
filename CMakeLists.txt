@@ -43,7 +43,7 @@ target_link_options(${PROJECT_NAME}_engine PRIVATE
 		"-sMODULARIZE=1"
 		"-sEXPORT_ES6=1"
 		"-sEXPORT_NAME=kyber_crystals_wasm_engine"
-		"-sENVIRONMENT=web"
+		"-sENVIRONMENT=node,worker"
 		"-sUSE_ES6_IMPORT_META=1"
 		"-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']"
 	  )

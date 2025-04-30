@@ -18,8 +18,7 @@
   "scripts": {
     "prebuild": "emcmake cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install && cmake --build build --target install",
     "build": "npm run build:js",
-    "build:js": "tsc -p .",
-    "prepublishOnly": "npm run build"
+    "build:js": "tsc -p ."
   },
   "engines": {
     "node": ">=18"
