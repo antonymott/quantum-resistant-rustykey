@@ -1,13 +1,19 @@
 {
+  "include": ["src"],
+  "exclude": ["**/*.test.ts"],
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ESNext",   
+    "lib": ["ESNext"],
     "module": "ESNext",
-    "moduleResolution": "bundler",
-    "declaration": true,
-    "outDir": "install",
     "rootDir": "src",
+    "moduleResolution": "node",
+    "allowImportingTsExtensions": true,
+    "declaration": true,
+    "noEmit": true,
+    "outDir": "install",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true
-  },
-  "include": ["src"]
+  }
 }

@@ -40,6 +40,10 @@ class MlKemWrapper implements IMlKem {
   }
 }
 
+// export const add = (a: boolean, b: number) => {
+//   return a + b
+// }
+
 export async function loadMlKem1024(): Promise<IMlKem> {
   const wasm = await kyber();
 
