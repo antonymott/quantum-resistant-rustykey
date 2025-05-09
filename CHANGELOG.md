@@ -1,5 +1,11 @@
 # quantum-resistant-rustykey
 
+## 0.0.3
+
+### Patch Changes
+
+- 28a5df5: update readme
+
 ## 0.0.2
 
 ### Patch Changes
