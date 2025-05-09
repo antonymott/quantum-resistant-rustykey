@@ -163,8 +163,9 @@ When using ML-KEM in a web environment, consider the following security best pra
 
 ### Prerequisites
 
-- Node.js >= 18
-- npm
+- Node.js >= 23.6.0 (optimal)
+- Node.js >= 22 (current LTS)
+- pnpm (pnpm for faster cache, but npm also works fine)
 - Emscripten
 - CMake
 
@@ -183,10 +184,10 @@ git submodule update --init --recursive
 
 3. Install dependencies:
 ```bash
-npm install
+pnpm i
 ```
 
-4. Build the package:
+4. Build the WASM engine with Emscripten and CMake
 
 ### Environment Configuration
 
@@ -196,7 +197,7 @@ The package supports two different environments:
 - **Node.js Environment**: Set `sENVIRONMENT=node,worker` in CMakeLists.txt
 
 ```bash
-npm run build
+pnpm pre
 
 # Copy the WASM file to src directory
 cp install/kyber_crystals_wasm_engine.wasm ./src/
@@ -210,14 +211,16 @@ The `sENVIRONMENT` option specifies which environments the WebAssembly module sh
 For web applications, use `web,worker` to support both browser and Web Worker environments.
 For Node.js applications, use `node,worker` to support both Node.js and Worker Threads.
 
-The build process consists of two main steps:
-1. `prebuild`: Builds the WASM engine using Emscripten and CMake
-2. `build`: Compiles TypeScript files to JavaScript
+5. Compile TypeScript files to JavaScript
+
+```bash
+pnpm build
+```
 
 
 ## Testing
 
-- Tested to work with Node.js v23.10.0
+- Tested to work with Node.js v23.6.0
 - For web testing, open `install/test.html` in a live server and check the console for encryption/decryption results of the three variants
 
 ## Project Structure
@@ -235,13 +238,11 @@ stateDiagram-v2
 ## Publishing
 
 The package is published from the `install` folder. To publish a new version:
-
-1. Update the version in `package.json`
-2. Run the build process
-3. Publish to npm:
-```bash
-npm publish
-```
+1. make a new branch locally from main
+2. edit and test your changes
+3. pnpm changeset
+4. build (will run CI/CD tests)
+5. if it works, CI/CD will generate a pull request for admin to approve
 
 ## Security Considerations
 
