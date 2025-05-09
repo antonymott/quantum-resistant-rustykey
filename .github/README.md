@@ -1,4 +1,4 @@
-**Note**: 🚧 WORK IN PROGRESS...do not pnpm install 🚧
+**Note**: 🚧 WORK IN PROGRESS...do not install 🚧
 
 # Quantum-Resistant RustyKey
 
