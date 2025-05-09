@@ -1,11 +1,15 @@
+**Note**: 🚧 WORK IN PROGRESS...do not install 🚧
+
 # Quantum-Resistant RustyKey
 
 A WebAssembly implementation of ML-KEM (Quantum-Resistant Signatures) for both Node.js and web environments. This is an improved version of the NIST winner's standard implementation, patched to withstand side-channel attacks.
 
-> **Note**: 🚧 WORK IN PROGRESS...do not install 🚧
+<!-- > **Note**: 🚧 WORK IN PROGRESS...do not install 🚧 -->
 <p align="center">
   <img src="./kyber.png"/>
 </p>
+
+
 ## About
 
 A WASM implementation of "Cryptographic Suite for Algebraic Lattices" (CRYSTALS) based on hard problems over module lattices, designed to withstand attacks by large quantum computers, and selected among the winners of the [NIST post-quantum cryptography project](https://pq-crystals.org/index.shtml)
