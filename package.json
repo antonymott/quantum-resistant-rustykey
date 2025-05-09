@@ -25,6 +25,7 @@
   "scripts": {
     "pre": "emcmake cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install && cmake --build build --target install",
     "build": "tsup",
+    "postbuild": "cp ./build/kyber_crystals_wasm_engine.js ./install && cp ./build/*.wasm ./install",
     "test": "vitest --coverage",
     "lint": "tsc",
     "release": "changeset publish"
