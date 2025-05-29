@@ -12,44 +12,63 @@ Open Javascript console to see it in action!
 <script type='module'>
     import { loadMlKem1024, loadMlKem768, loadMlKem512 } from './index.js'
 
+    // Example usage with ML-KEM-1024
     const mlkem1024 = await loadMlKem1024()
     var keypair = mlkem1024.keypair()
     console.log("public_key: ", mlkem1024.buffer_to_string(keypair.get('public_key')))
     console.log("private_key: ", mlkem1024.buffer_to_string(keypair.get('private_key')))
+    
+    // Encrypt a message
+    const message = "Hello, this is a secret message!";
     var encrypt = mlkem1024.encrypt(keypair.get('public_key'))
-    console.log("cyphertext: ", mlkem1024.buffer_to_string(encrypt.get('cyphertext')))
-    console.log("secret: ", mlkem1024.buffer_to_string(encrypt.get('secret')))
+    const sharedSecret = encrypt.get('secret')
+    const encryptedMessage = await mlkem1024.encryptMessage(message, sharedSecret)
+    console.log("Encrypted message: ", encryptedMessage)
 
-    var secret = mlkem1024.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
-    console.log("secret: ", mlkem1024.buffer_to_string(secret))
+    // Decrypt the message
+    var decryptedSharedSecret = mlkem1024.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
+    const decryptedMessage = await mlkem1024.decryptMessage(encryptedMessage, decryptedSharedSecret)
+    console.log("Decrypted message: ", decryptedMessage)
+    
     mlkem1024.delete();
 
     const mlkem768 = await loadMlKem768()
     var keypair = mlkem768.keypair()
     console.log("public_key: ", mlkem768.buffer_to_string(keypair.get('public_key')))
     console.log("private_key: ", mlkem768.buffer_to_string(keypair.get('private_key')))
+    
+    // Encrypt a message
+    const message768 = "Hello, this is a secret message for ML-KEM-768!";
     var encrypt = mlkem768.encrypt(keypair.get('public_key'))
-    console.log("cyphertext: ", mlkem768.buffer_to_string(encrypt.get('cyphertext')))
-    console.log("secret: ", mlkem768.buffer_to_string(encrypt.get('secret')))
+    const sharedSecret768 = encrypt.get('secret')
+    const encryptedMessage768 = await mlkem768.encryptMessage(message768, sharedSecret768)
+    console.log("Encrypted message: ", encryptedMessage)
 
-    var secret = mlkem768.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
-    console.log("secret: ", mlkem768.buffer_to_string(secret))
+    // Decrypt the message
+    var decryptedSharedSecret768 = mlkem768.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
+    const decryptedMessage768 = await mlkem768.decryptMessage(encryptedMessage768, decryptedSharedSecret768)
+    console.log("Decrypted message: ", decryptedMessage768)
+    
     mlkem768.delete();
 
     const mlkem512 = await loadMlKem512()
     var keypair = mlkem512.keypair()
     console.log("public_key: ", mlkem512.buffer_to_string(keypair.get('public_key')))
     console.log("private_key: ", mlkem512.buffer_to_string(keypair.get('private_key')))
+    
+    // Encrypt a message
+    const message512 = "Hello, this is a secret message for ML-KEM-512!";
     var encrypt = mlkem512.encrypt(keypair.get('public_key'))
-    console.log("cyphertext: ", mlkem512.buffer_to_string(encrypt.get('cyphertext')))
-    console.log("secret: ", mlkem512.buffer_to_string(encrypt.get('secret')))
+    const sharedSecret512 = encrypt.get('secret')
+    const encryptedMessage512 = await mlkem512.encryptMessage(message512, sharedSecret512)
+    console.log("Encrypted message: ", encryptedMessage)
 
-    var secret = mlkem512.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
-    console.log("secret: ", mlkem512.buffer_to_string(secret))
+    // Decrypt the message
+    var decryptedSharedSecret512 = mlkem512.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
+    const decryptedMessage512 = await mlkem512.decryptMessage(encryptedMessage512, decryptedSharedSecret512)
+    console.log("Decrypted message: ", decryptedMessage512)
+    
     mlkem512.delete();
-    //keypair.onclick = () => alert()
-    //encrypt.onclick = () => alert()
-    //decrypt.onclick = () => alert()
 </script>
 
 </body>

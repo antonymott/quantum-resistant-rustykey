@@ -50,89 +50,22 @@ async function main() {
     console.log("Private Key:", privateKey);
 
     // Encrypt a message
-    const message = "Hello, quantum-resistant world!";
-    const encrypt = mlkem.encrypt(keypair.get('public_key'));
-    const ciphertext = mlkem.buffer_to_string(encrypt.get('cyphertext'));
-    const secret = mlkem.buffer_to_string(encrypt.get('secret'));
-    console.log("Ciphertext:", ciphertext);
-    console.log("Secret:", secret);
+    const message = "Hello, this is a secret message!";
+    var encrypt = mlkem.encrypt(keypair.get('public_key'))
+    const sharedSecret = encrypt.get('secret')
+    const encryptedMessage = await mlkem.encryptMessage(message, sharedSecret)
+    console.log("Encrypted message: ", encryptedMessage)
 
     // Decrypt the message
-    const decrypted = mlkem.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'));
-    console.log("Decrypted:", mlkem.buffer_to_string(decrypted));
+    var decryptedSharedSecret = mlkem.decrypt(encrypt.get('cyphertext'), keypair.get('private_key'))
+    const decryptedMessage = await mlkem.decryptMessage(encryptedMessage, decryptedSharedSecret)
+    console.log("Decrypted message: ", decryptedMessage)
   } catch (error) {
     console.error("Error:", error);
   }
 }
 
 main();
-```
-
-### Web Environment
-
-```typescript
-import { loadMlKem1024, loadMlKem768, loadMlKem512 } from 'quantum-resistant-rustykey';
-
-// Example usage in a web application
-async function handleEncryption() {
-  try {
-    // Load the desired ML-KEM variant
-    const mlkem = await loadMlKem1024(); // Options: loadMlKem1024, loadMlKem768, loadMlKem512
-    
-    // Generate key pair
-    const keypair = mlkem.keypair();
-    const publicKey = mlkem.buffer_to_string(keypair.get('public_key'));
-    const privateKey = mlkem.buffer_to_string(keypair.get('private_key'));
-    
-    // Store keys securely (e.g., in IndexedDB or secure storage)
-    await storeKeys(publicKey, privateKey);
-
-    // Encrypt user data
-    const userData = {
-      username: "user123",
-      email: "user@example.com"
-    };
-    
-    const encrypt = mlkem.encrypt(keypair.get('public_key'));
-    const ciphertext = mlkem.buffer_to_string(encrypt.get('cyphertext'));
-    const secret = mlkem.buffer_to_string(encrypt.get('secret'));
-
-    // Send encrypted data to server
-    await sendToServer(ciphertext, secret);
-  } catch (error) {
-    console.error("Encryption error:", error);
-  }
-}
-
-// Example secure storage implementation
-async function storeKeys(publicKey: string, privateKey: string) {
-  // Implement secure storage (e.g., IndexedDB, Web Crypto API)
-  // This is just a placeholder - implement proper secure storage
-  localStorage.setItem('mlkem_publicKey', publicKey);
-  localStorage.setItem('mlkem_privateKey', privateKey);
-}
-
-// Example server communication
-async function sendToServer(ciphertext: string, secret: string) {
-  // Implement server communication
-  // This is just a placeholder - implement proper API calls
-  const response = await fetch('/api/secure-data', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ ciphertext, secret }),
-  });
-  return response.json();
-}
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', () => {
-  const encryptButton = document.getElementById('encrypt-button');
-  if (encryptButton) {
-    encryptButton.addEventListener('click', handleEncryption);
-  }
-});
 ```
 
 ### Security Considerations for Web Usage
