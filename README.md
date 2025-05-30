@@ -26,33 +26,33 @@ Post-Quantum Security:
 In essence, RustyKey® quantum-resistant npm package creates a secure handshake, establishing a shared secret key that can then be used to encrypt and decrypt data with a more efficient symmetric encryption algorithm
 
 ## Web Assembly implementation
-**Pros**
-**Highly secure***
+### Pros
+#### Highly secure
 Wasm operates within a sandboxed environment, isolating it from the host system. This prevents malicious code within the Wasm module from directly accessing sensitive data or compromising system resources. JavaScript, while also sandboxed, has a larger attack surface due to its dynamic nature and access to a wider range of APIs.
-**Reduced Attack Surface**
+#### Reduced Attack Surface
 Since Wasm modules have limited access to system resources and APIs, their attack surface is smaller than that of JavaScript. This makes it more difficult for attackers to exploit vulnerabilities.
-**fast**
+#### fast
 (mostly!) as Web Assembly (WASM) implementations of algorithms offer near-native performance due to WASM's low-level of bytecode, which itself is usually orders of magnitude faster than JavaScript for computationally intensive tasks.
-**Controlled Imports**
+#### Controlled Imports
 Wasm modules have explicit import declarations, defining the exact functions they can access from the host environment (usually JavaScript). This allows for fine-grained control over the module's capabilities. In contrast, JavaScript has more implicit access to APIs, making it harder to restrict its behavior.
-**Static Analysis**
+#### Static Analysis
 Wasm's binary format allows for static analysis and code validation. This enables browsers to verify the module's structure and behavior before execution, reducing the risk of introducing vulnerabilities. JavaScript, being dynamically typed and interpreted, is more challenging to analyze statically.
-**Compilation and Validation**
+#### Compilation and Validation
 Wasm code is compiled into a low-level bytecode that is validated before execution. This process helps to identify and prevent many types of vulnerabilities that are common in JavaScript, such as buffer overflows.
 
-**Cons**
-**Complex**
+### Cons
+#### Complex
 WASM is more complex to work with than JavaScript, and requires a build process to compile code into WASM modules and manual memory management, which is why this package exists...to make it easier for developers and end-users to incorporate the benefits of increased security and faster speed into their authentication, authorization and other encryption/decryption workflows.
-**No Direct DOM Access**
+#### No Direct DOM Access
 WASM cannot directly manipulate the DOM. It relies on JavaScript to interact with the DOM, which adds complexity and can affect performance when frequent DOM interactions are needed.
-**Garbage Collection**
+#### Garbage Collection
 WASM relies on JavaScript for garbage collection, which can be less efficient compared to languages with native garbage collection.
-**Limited API Access**
+#### Limited API Access
 WASM has limited access to browser and Node.js APIs compared to JavaScript, requiring JavaScript to act as a bridge for these interactions.
-**Data Transfer Overhead**
+#### Data Transfer Overhead
 Passing data between WASM and JavaScript can incur performance overhead due to serialization and deserialization.
 
-### algorithm source
+### Algorithm source
 Based on a suite of "Cryptographic Suite for Algebraic Lattices" (CRYSTALS) based on hard problems over module lattices, designed to withstand attacks by large quantum computers, and selected among the winners of the [NIST post-quantum cryptography project](https://pq-crystals.org/index.shtml)
 
 | Package | Registry | Description |
