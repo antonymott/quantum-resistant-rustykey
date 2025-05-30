@@ -43,6 +43,7 @@ Wasm code is compiled into a low-level bytecode that is validated before executi
 ### Cons
 #### Complex
 WASM is more complex to work with than JavaScript, and requires a build process to compile code into WASM modules and manual memory management, which is why this package exists...to make it easier for developers and end-users to incorporate the benefits of increased security and faster speed into their authentication, authorization and other encryption/decryption workflows.
+
 #### No Direct DOM Access
 WASM cannot directly manipulate the DOM. It relies on JavaScript to interact with the DOM, which adds complexity and can affect performance when frequent DOM interactions are needed.
 #### Garbage Collection
