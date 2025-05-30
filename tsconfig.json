@@ -3,7 +3,7 @@
   "exclude": ["**/*.test.ts"],
   "compilerOptions": {
     "target": "ESNext",   
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
     "module": "ESNext",
     "rootDir": "src",
     "moduleResolution": "node",
