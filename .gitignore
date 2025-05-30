@@ -5,6 +5,6 @@ build
 install
 dist
 node_modules
-# PQClean
+PQClean
 libsodium
 pycparser
