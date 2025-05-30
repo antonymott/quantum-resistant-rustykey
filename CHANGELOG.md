@@ -1,5 +1,11 @@
 # quantum-resistant-rustykey
 
+## 0.0.5
+
+### Patch Changes
+
+- 9ee00d3: updated html
+
 ## 0.0.3
 
 ### Patch Changes
