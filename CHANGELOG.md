@@ -1,5 +1,11 @@
 # quantum-resistant-rustykey
 
+## 0.4.0
+
+### Minor Changes
+
+- 1dd3095: include nextJs+react test project for frontend and backend testing (with worker/webworker)
+
 ## 0.2.1
 
 ### Patch Changes
