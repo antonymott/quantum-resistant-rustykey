@@ -1,6 +1,6 @@
 {
   "name": "quantum-resistant-rustykey",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "ML-KEM (QRS) compiled to WebAssembly",
   "license": "ISC",
   "keywords": [

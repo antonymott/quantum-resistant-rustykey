@@ -1,5 +1,11 @@
 # quantum-resistant-rustykey
 
+## 0.4.1
+
+### Patch Changes
+
+- 63f29be: updated test project
+
 ## 0.4.0
 
 ### Minor Changes
