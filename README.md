@@ -138,7 +138,7 @@ When using ML-KEM in a web environment, consider the following security best pra
 
 ### Prerequisites
 
-- Node.js >= 23.6.0 (optimal)
+- Node.js >= 24.1.0 (optimal)
 - Node.js >= 22 (current LTS)
 - pnpm (pnpm for faster cache, but npm also works fine)
 - Emscripten
