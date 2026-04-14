@@ -1,6 +1,6 @@
-# <img src="./logo.png" width="55" align="center" /> Quantum-resistant RustyKey®
+# <img src="./logo.png" width="57" align="center" /> Quantum-resistant RustyKey®
 
-A WebAssembly implementation of ML-KEM for both Node.js and web environments.
+Fast, secure WebAssembly implementations of useful post-quantum-resistant tools both for backend (node) and frontend web.
 
 ## Implementation status
 
