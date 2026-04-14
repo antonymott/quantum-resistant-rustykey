@@ -234,3 +234,9 @@ This project was generously supported by:
 - RustyKey®
 - Customers' Yachts® Advisors
 - BuzzyBee® [buzzybee.ai]
+
+<img src="./logo.png" width="200" />
+
+![Logo]
+(./logo.png)
+
