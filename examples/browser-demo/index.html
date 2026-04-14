@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>quantum-resistant-rustykey — browser demo</title>
+		<style>
+			:root {
+				font-family: system-ui, sans-serif;
+				line-height: 1.5;
+				color: #1a1a1a;
+				background: #f6f7f9;
+			}
+			body {
+				max-width: 52rem;
+				margin: 2rem auto;
+				padding: 0 1rem;
+			}
+			h1 {
+				font-size: 1.35rem;
+			}
+			label {
+				font-weight: 600;
+				margin-right: 0.5rem;
+			}
+			select,
+			button {
+				font: inherit;
+				padding: 0.35rem 0.6rem;
+			}
+			button {
+				cursor: pointer;
+				margin-left: 0.5rem;
+			}
+			pre {
+				background: #111;
+				color: #e6e6e6;
+				padding: 1rem;
+				border-radius: 8px;
+				overflow: auto;
+				min-height: 6rem;
+				white-space: pre-wrap;
+				word-break: break-word;
+			}
+			.row {
+				margin: 1rem 0;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>quantum-resistant-rustykey — browser smoke test</h1>
+		<p>
+			Pick a parameter set, run KEM + AES-GCM round-trip. Open DevTools if something fails.
+		</p>
+		<div class="row">
+			<label for="variant">ML-KEM</label>
+			<select id="variant">
+				<option value="768" selected>768</option>
+				<option value="512">512</option>
+				<option value="1024">1024</option>
+			</select>
+			<button type="button" id="run">Run test</button>
+		</div>
+		<pre id="log"></pre>
+		<script type="module" src="/src/main.ts"></script>
+	</body>
+</html>

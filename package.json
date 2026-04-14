@@ -1,0 +1,41 @@
+{
+  "name": "quantum-resistant-rustykey",
+  "version": "0.5.6",
+  "description": "WebAssembly ML-KEM (post-quantum) key encapsulation for Node.js and web.",
+  "license": "ISC",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "lint": "biome check . && tsc --project tsconfig.lint.json",
+    "lint:fix": "biome check --write .",
+    "build:wasm": "node scripts/build-wasm.mjs",
+    "bundle:mlkem": "node scripts/bundle-mlkem.mjs",
+    "build:vendor": "pnpm build:wasm && pnpm bundle:mlkem",
+    "build": "tsdown && node scripts/copy-assets.mjs",
+    "test": "vitest run",
+    "release": "changeset publish",
+    "example:browser": "pnpm --filter browser-demo dev"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.10",
+    "@changesets/cli": "2.30.0",
+    "@types/node": "25.5.0",
+    "esbuild": "0.27.4",
+    "tsdown": "0.21.7",
+    "typescript": "5.9.2",
+    "vitest": "4.1.2"
+  }
+}

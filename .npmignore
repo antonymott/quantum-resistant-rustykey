@@ -1,0 +1,27 @@
+# Source files
+*.ts
+!*.d.ts
+
+# Build files
+build/
+dist/test/
+
+# Development files
+.git/
+.gitignore
+.npmignore
+.vscode/
+.idea/
+*.log
+*.md
+!README.md
+
+# Test files
+test.html
+test/
+coverage/
+
+# Documentation
+docs/
+*.md
+!README.md 

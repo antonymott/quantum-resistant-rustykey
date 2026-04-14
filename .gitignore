@@ -1,0 +1,10 @@
+.idea
+.vscode
+.DS_Store
+build
+install
+dist
+node_modules
+pycparser
+wasm/build
+vendor/mlkem-native
