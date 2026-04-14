@@ -1,5 +1,11 @@
 # quantum-resistant-rustykey
 
+## 0.6.2
+
+### Patch Changes
+
+- update readme
+
 ## 0.6.1
 
 ### Patch Changes
