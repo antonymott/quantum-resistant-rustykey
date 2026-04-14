@@ -1,0 +1,106 @@
+name: Publish
+on:
+  push:
+    branches:
+      - '**'
+      # - main
+# on:
+#   workflow_run:
+#     workflows: [CI]
+#     branches: [main]
+#     types: [completed]
+env:
+  ## TESTING
+  TEST_MODE: 'false' # 👈 set to false when testing is complete!
+  # git add . && git commit -m "#[ccce9f5,2,2,0]" && git push
+  # gh pr create --fill && gh pr merge --merge --delete-branch=false
+  NODE_VERSION: '25.x'
+  NODE_ENV: production
+  PNPM_VERSION: '10.32.1'
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  publish:
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      # ✅ ALWAYS RUN: Checkout
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1 # Shallow clone for faster checkout
+
+      # ✅ ALWAYS RUN: Install dependencies
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      # ✅ ALWAYS RUN: Setup Node
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+
+      # ✅ ALWAYS RUN: Install dependencies (NOW with cache!)
+      - name: Install dependencies
+        run: pnpm install
+          
+      # - name: Linting typescript
+      #   run: pnpm lint
+
+      # - name: Test
+      #   run: pnpm test
+
+      - name: Check the version
+        id: check
+        run: |
+          CURRENT_VERSION=$(jq -r .version package.json)
+          echo "Current version: $CURRENT_VERSION"
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
+
+          LATEST_VERSION=${LATEST_TAG#v}
+
+          if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; 
+          then
+            echo "Version changed"
+            echo "version_changed=true" >> $GITHUB_OUTPUT
+            echo "new_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "Version not changed"
+            echo "version_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build
+        run: pnpm build
+        if: steps.check.outputs.version_changed == 'true'
+
+      # Publishing is intentionally disabled:
+      # - npm 2FA prevents token-only CI publish in this repo
+      # - releases are published manually from a maintainer machine
+      #
+      # - name: Publish
+      #   if: steps.check.outputs.version_changed == 'true'
+      #   id: changesets
+      #   uses: changesets/action@v1
+      #   with:
+      #     publish: pnpm release
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Tag release
+      #   if: steps.check.outputs.version_changed == 'true'
+      #   run: |
+      #     git config --local user.email "github-actions[bot]@users.noreply.github.com"
+      #     git config --local user.name "github-actions[bot]"
+      #     git tag -a "v${{ steps.check.outputs.new_version }}" -m "v${{ steps.check.outputs.new_version }}"
+      #     git push origin "v${{ steps.check.outputs.new_version }}"
