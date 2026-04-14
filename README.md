@@ -1,4 +1,4 @@
-# <img src="./logo.png" width="57" align="center" /> Quantum-resistant RustyKey®
+# <img src="./logo-rustykey.png" width="57" align="center" /> Quantum-resistant RustyKey®
 
 Fast, secure WebAssembly implementations of useful post-quantum-resistant tools both for backend (node) and frontend web.
 
@@ -241,6 +241,4 @@ This project was generously supported by:
 - Customers' Yachts® Advisors
 - [BuzzyBee®](https://buzzybee.ai)
 
-<img src="./logo.png" width="120" />
-
-
+<img src="./logo-rustykey.png" width="120" img src="./logo-buzzybee.ai.png" width="120"/>
