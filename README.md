@@ -4,7 +4,13 @@ Fast, secure WebAssembly implementations of useful post-quantum-resistant tools 
 
 ## Implementation status
 
-- **ML-KEM-512**, **ML-KEM-768**, and **ML-KEM-1024** all use the same stack: [mlkem-native](https://github.com/pq-code-package/mlkem-native) (C) built with **Emscripten**.
+- NIST derived or NIST 'on-ramp' eg SQISign
+- signature algorithms (coming soon):
+  - *FN-DSA (Falcon-512, Falcon-1024)*
+  - *ML-DSA (Dilithium variants)*
+  - *SQISign*
+- module-lattice-based key-encapsulation mechanism
+  - **ML-KEM-512**, **ML-KEM-768**, and **ML-KEM-1024** all use the same stack: [mlkem-native](https://github.com/pq-code-package/mlkem-native) (.c) built with **Emscripten**.
 
 ## Security assurance and verification
 
