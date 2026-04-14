@@ -233,10 +233,8 @@ This project was generously supported by:
 - University of Quantum Science
 - RustyKey®
 - Customers' Yachts® Advisors
-- BuzzyBee® [buzzybee.ai]
+- [BuzzyBee®](https://buzzybee.ai)
 
-<img src="./logo.png" width="200" />
+<img src="./logo.png" width="120" />
 
-![Logo]
-(./logo.png)
 
