@@ -1,5 +1,15 @@
 # quantum-resistant-rustykey
 
+## 0.6.0
+
+### Minor Changes
+
+- 79a4666: Cleanup
+
+### Patch Changes
+
+- update packages
+
 ## 0.5.6
 
 ### Patch Changes
