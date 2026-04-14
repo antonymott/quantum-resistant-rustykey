@@ -1,9 +1,15 @@
 {
   "name": "quantum-resistant-rustykey",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "WebAssembly post-quantum-resistant tools for web",
   "author": "Antony R Mott <a@auditcanary.com> (https://rustykey.app)",
   "license": "ISC",
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/antonymott"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/antonymott/quantum-resistant-rustykey.git"

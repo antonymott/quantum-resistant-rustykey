@@ -4,8 +4,7 @@ A WebAssembly implementation of ML-KEM for both Node.js and web environments.
 
 ## Implementation status
 
-- **ML-KEM-512**, **ML-KEM-768**, and **ML-KEM-1024** all use the same stack: [mlkem-native](https://github.com/pq-code-package/mlkem-native) (C) built with **Emscripten**, plus TypeScript adapted from Dmitry Chestnykh’s [mlkem-wasm](https://github.com/dchest/mlkem-wasm), vendored in this repo (no runtime npm dependency on `mlkem-wasm`).
-- **PQClean** and **libsodium** are no longer part of this package’s build or runtime path.
+- **ML-KEM-512**, **ML-KEM-768**, and **ML-KEM-1024** all use the same stack: [mlkem-native](https://github.com/pq-code-package/mlkem-native) (C) built with **Emscripten**.
 
 ## Security assurance and verification
 
@@ -54,12 +53,17 @@ pnpm build:vendor
 
 Notes:
 - The upstream project documents scope/assumptions in `SOUNDNESS.md`; review this when making compliance assertions.
-- This package uses ML-KEM-1024 (not "1028").
 
 ## Credits
 
-- Core approach adapted from Dmitry Chestnykh's `mlkem-wasm`:
-  - https://github.com/dchest/mlkem-wasm
+- NIST
+- signature algorithms:
+  - FN-DSA (Falcon-512, Falcon-1024)
+  - ML-DSA (Dilithium variants)
+  - SQISign
+- module-lattice-based key-encapsulation mechanism
+  - ML-KEM
+  - approach adapted from Dmitry Chestnykh's `mlkem-wasm`: https://github.com/dchest/mlkem-wasm
 
 ## Installation
 
@@ -93,7 +97,7 @@ async function main() {
     console.log("Private Key:", privateKey);
 
     // Encrypt a message
-    const message = "Hello, this is a secret message!";
+    const message = "Rusty keys, the rustier the better!";
     const encrypt = mlkem.encrypt(keypair.get('public_key'))
     const sharedSecret = encrypt.get('secret')
     const encryptedMessage = await mlkem.encryptMessage(message, sharedSecret)
@@ -147,7 +151,7 @@ Security note for web apps:
 
 ### Prerequisites
 
-- Node.js >= 22 (LTS)
+- Node.js >= 25.9.0
 - pnpm (or npm)
 - Emscripten **or** Docker — only needed if you run `pnpm build:vendor` to regenerate `src/vendor/mlkem*.js`
 
@@ -198,7 +202,7 @@ See `examples/browser-demo/README.md` for details.
 
 ## Project Structure
 
-ML-KEM logic comes from **mlkem-native** (C), compiled with **Emscripten** under `wasm/`, wrapped by TypeScript derived from [mlkem-wasm](https://github.com/dchest/mlkem-wasm) in `mlkem-src/`, then bundled into `src/vendor/mlkem*.js`.
+ML-KEM logic comes from **mlkem-native** (C), compiled with **Emscripten** under `wasm/`, wrapped by TypeScript in `mlkem-src/`, then bundled into `src/vendor/mlkem*.js`.
 
 ## Publishing
 
@@ -224,7 +228,9 @@ This implementation includes patches to withstand side-channel attacks. For more
 
 ISC
 
-## Acknowledgments
-
-- Based on the NIST post-quantum cryptography project
-- Inspired by the implementation approach of [sqlite-wasm](https://github.com/sqlite/sqlite-wasm)
+## Funding
+This project was generously supported by:
+- University of Quantum Science
+- RustyKey®
+- Customers' Yachts® Advisors
+- BuzzyBee® [buzzybee.ai]
