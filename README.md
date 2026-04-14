@@ -241,6 +241,6 @@ This project was generously supported by:
 - Customers' Yachts® Advisors
 - [BuzzyBee®](https://buzzybee.ai)
 
-<img src="./logo-rustykey.png" width="120" alt="RustyKey Logo" />
-<img src="./logo-buzzybee.ai.png" width="120" alt="BuzzyBee Logo" />
-
+| | |
+| :---: | :---: |
+| <img src="./logo-rustykey.png" width="60" alt="RustyKey Logo" /> | <img src="./logo-buzzybee.ai.png" width="60" alt="BuzzyBee Logo" /> |
