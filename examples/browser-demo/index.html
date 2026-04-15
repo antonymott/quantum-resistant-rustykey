@@ -50,10 +50,15 @@
 	<body>
 		<h1>quantum-resistant-rustykey — browser smoke test</h1>
 		<p>
-			Pick a parameter set, run KEM + AES-GCM round-trip. Open DevTools if something fails.
+			Pick an algorithm and parameter set, then run a browser smoke test.
 		</p>
 		<div class="row">
-			<label for="variant">ML-KEM</label>
+			<label for="algorithm">Algorithm</label>
+			<select id="algorithm">
+				<option value="mlkem" selected>ML-KEM</option>
+				<option value="fndsa">FN-DSA (Falcon)</option>
+			</select>
+			<label for="variant">Variant</label>
 			<select id="variant">
 				<option value="768" selected>768</option>
 				<option value="512">512</option>

@@ -21,3 +21,19 @@ export interface IMlKem {
 }
 
 export type KemVariant = "k1024" | "k768" | "k512";
+
+export type FnDsaVariant = "falcon512" | "falcon1024";
+
+export interface IFnDsa {
+	keypair(): KeyPair;
+	sign(
+		message: Uint8Array | ArrayBuffer | string,
+		private_key: unknown,
+	): Promise<Uint8Array>;
+	verify(
+		signature: Uint8Array | ArrayBuffer | string,
+		message: Uint8Array | ArrayBuffer | string,
+		public_key: unknown,
+	): Promise<boolean>;
+	buffer_to_string(value: Uint8Array | ArrayBuffer | string): string;
+}

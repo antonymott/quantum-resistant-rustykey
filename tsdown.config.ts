@@ -12,6 +12,6 @@ export default defineConfig({
 	fixedExtension: false,
 	// Emscripten glue may reference Node built-ins; keep them external at bundle time.
 	deps: {
-		neverBundle: ["module", "fs", "path", "url"],
+		neverBundle: ["module", "fs", "path", "url", "node:fs/promises"],
 	},
 });

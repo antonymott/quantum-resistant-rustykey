@@ -1,10 +1,13 @@
 import {
+	loadFnDsa1024,
+	loadFnDsa512,
 	loadMlKem1024,
 	loadMlKem512,
 	loadMlKem768,
 } from "quantum-resistant-rustykey";
 
 const logEl = document.querySelector("#log") as HTMLPreElement;
+const algorithmEl = document.querySelector("#algorithm") as HTMLSelectElement;
 const variantEl = document.querySelector("#variant") as HTMLSelectElement;
 const runBtn = document.querySelector("#run") as HTMLButtonElement;
 
@@ -15,10 +18,33 @@ function log(msg: string) {
 async function run() {
 	logEl.textContent = "";
 	runBtn.disabled = true;
+	const algorithm = algorithmEl.value;
 	const v = variantEl.value;
-	log(`Loading ML-KEM-${v}…`);
 
 	try {
+		if (algorithm === "fndsa") {
+			if (v !== "512" && v !== "1024") {
+				throw new Error("FN-DSA supports only Falcon-512 and Falcon-1024");
+			}
+
+			log(`Loading FN-DSA Falcon-${v}…`);
+			const fndsa = v === "512" ? await loadFnDsa512() : await loadFnDsa1024();
+			const kp = fndsa.keypair();
+			const publicKey = await kp.get("public_key");
+			const privateKey = await kp.get("private_key");
+			const msg = new TextEncoder().encode("hello from the browser demo");
+			const signature = await fndsa.sign(msg, privateKey);
+			const ok = await fndsa.verify(signature, msg, publicKey);
+			if (!ok) {
+				throw new Error("signature verification failed");
+			}
+
+			log("FN-DSA sign/verify OK.");
+			log("All checks passed.");
+			return;
+		}
+
+		log(`Loading ML-KEM-${v}…`);
 		const kem =
 			v === "512"
 				? await loadMlKem512()
@@ -60,4 +86,17 @@ async function run() {
 
 runBtn.addEventListener("click", () => {
 	void run();
+});
+
+algorithmEl.addEventListener("change", () => {
+	if (algorithmEl.value === "fndsa") {
+		if (variantEl.value === "768") {
+			variantEl.value = "512";
+		}
+		return;
+	}
+
+	if (variantEl.value !== "512" && variantEl.value !== "768" && variantEl.value !== "1024") {
+		variantEl.value = "768";
+	}
 });

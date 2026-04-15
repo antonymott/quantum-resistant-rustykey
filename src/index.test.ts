@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { loadMlKem512, loadMlKem768, loadMlKem1024 } from "./index";
+import {
+	loadFnDsa512,
+	loadFnDsa1024,
+	loadMlKem512,
+	loadMlKem768,
+	loadMlKem1024,
+} from "./index";
 
 describe("quantum-resistant-rustykey (mlkem-wasm adapter)", () => {
 	it("round-trips encrypt/decrypt + AES-GCM message", async () => {
@@ -77,5 +83,31 @@ describe("quantum-resistant-rustykey (mlkem-wasm adapter)", () => {
 			sharedSecretDec,
 		);
 		expect(decryptedMessage).toBe(msg);
+	});
+
+	it("signs and verifies with FN-DSA Falcon-512", async () => {
+		const fndsa = await loadFnDsa512();
+		const kp = fndsa.keypair();
+		const publicKey = (await kp.get("public_key")) as Uint8Array;
+		const privateKey = (await kp.get("private_key")) as Uint8Array;
+
+		const message = new TextEncoder().encode("hello falcon-512");
+		const signature = await fndsa.sign(message, privateKey);
+		const ok = await fndsa.verify(signature, message, publicKey);
+
+		expect(ok).toBe(true);
+	});
+
+	it("signs and verifies with FN-DSA Falcon-1024", async () => {
+		const fndsa = await loadFnDsa1024();
+		const kp = fndsa.keypair();
+		const publicKey = (await kp.get("public_key")) as Uint8Array;
+		const privateKey = (await kp.get("private_key")) as Uint8Array;
+
+		const message = new TextEncoder().encode("hello falcon-1024");
+		const signature = await fndsa.sign(message, privateKey);
+		const ok = await fndsa.verify(signature, message, publicKey);
+
+		expect(ok).toBe(true);
 	});
 });

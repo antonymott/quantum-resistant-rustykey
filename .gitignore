@@ -8,3 +8,4 @@ node_modules
 pycparser
 wasm/build
 vendor/mlkem-native
+fndsa-rs/target

@@ -3,6 +3,8 @@ import mlkem768 from "./vendor/mlkem.js";
 import mlkem512 from "./vendor/mlkem512.js";
 import mlkem1024 from "./vendor/mlkem1024.js";
 
+export { loadFnDsa512, loadFnDsa1024 } from "./fndsa";
+
 /** Minimal surface used by this package (mlkem-wasm–style API). */
 type MlKemImpl = {
 	generateKey(
