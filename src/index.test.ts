@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
 	loadFnDsa512,
 	loadFnDsa1024,
+	loadMlDsa3,
+	loadMlDsa5,
 	loadMlKem512,
 	loadMlKem768,
 	loadMlKem1024,
@@ -107,6 +109,32 @@ describe("quantum-resistant-rustykey (mlkem-wasm adapter)", () => {
 		const message = new TextEncoder().encode("hello falcon-1024");
 		const signature = await fndsa.sign(message, privateKey);
 		const ok = await fndsa.verify(signature, message, publicKey);
+
+		expect(ok).toBe(true);
+	});
+
+	it("signs and verifies with ML-DSA Dilithium3", async () => {
+		const mldsa = await loadMlDsa3();
+		const kp = mldsa.keypair();
+		const publicKey = (await kp.get("public_key")) as Uint8Array;
+		const privateKey = (await kp.get("private_key")) as Uint8Array;
+
+		const message = new TextEncoder().encode("hello dilithium3");
+		const signature = await mldsa.sign(message, privateKey);
+		const ok = await mldsa.verify(signature, message, publicKey);
+
+		expect(ok).toBe(true);
+	});
+
+	it("signs and verifies with ML-DSA Dilithium5", async () => {
+		const mldsa = await loadMlDsa5();
+		const kp = mldsa.keypair();
+		const publicKey = (await kp.get("public_key")) as Uint8Array;
+		const privateKey = (await kp.get("private_key")) as Uint8Array;
+
+		const message = new TextEncoder().encode("hello dilithium5");
+		const signature = await mldsa.sign(message, privateKey);
+		const ok = await mldsa.verify(signature, message, publicKey);
 
 		expect(ok).toBe(true);
 	});

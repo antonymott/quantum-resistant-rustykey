@@ -23,6 +23,7 @@ export interface IMlKem {
 export type KemVariant = "k1024" | "k768" | "k512";
 
 export type FnDsaVariant = "falcon512" | "falcon1024";
+export type MlDsaVariant = "dilithium3" | "dilithium5";
 
 export interface IFnDsa {
 	keypair(): KeyPair;
@@ -37,3 +38,5 @@ export interface IFnDsa {
 	): Promise<boolean>;
 	buffer_to_string(value: Uint8Array | ArrayBuffer | string): string;
 }
+
+export type IMlDsa = IFnDsa;

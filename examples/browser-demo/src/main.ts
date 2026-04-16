@@ -1,6 +1,8 @@
 import {
 	loadFnDsa1024,
 	loadFnDsa512,
+	loadMlDsa3,
+	loadMlDsa5,
 	loadMlKem1024,
 	loadMlKem512,
 	loadMlKem768,
@@ -40,6 +42,30 @@ async function run() {
 			}
 
 			log("FN-DSA sign/verify OK.");
+			log("All checks passed.");
+			return;
+		}
+
+		if (algorithm === "mldsa") {
+			if (v !== "512" && v !== "1024") {
+				throw new Error(
+					"ML-DSA demo maps 512 -> Dilithium3 and 1024 -> Dilithium5",
+				);
+			}
+
+			log(`Loading ML-DSA ${v === "512" ? "Dilithium3" : "Dilithium5"}…`);
+			const mldsa = v === "512" ? await loadMlDsa3() : await loadMlDsa5();
+			const kp = mldsa.keypair();
+			const publicKey = await kp.get("public_key");
+			const privateKey = await kp.get("private_key");
+			const msg = new TextEncoder().encode("hello from the browser demo");
+			const signature = await mldsa.sign(msg, privateKey);
+			const ok = await mldsa.verify(signature, msg, publicKey);
+			if (!ok) {
+				throw new Error("ML-DSA signature verification failed");
+			}
+
+			log("ML-DSA sign/verify OK.");
 			log("All checks passed.");
 			return;
 		}
@@ -90,6 +116,12 @@ runBtn.addEventListener("click", () => {
 
 algorithmEl.addEventListener("change", () => {
 	if (algorithmEl.value === "fndsa") {
+		if (variantEl.value === "768") {
+			variantEl.value = "512";
+		}
+		return;
+	}
+	if (algorithmEl.value === "mldsa") {
 		if (variantEl.value === "768") {
 			variantEl.value = "512";
 		}

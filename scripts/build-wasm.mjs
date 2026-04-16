@@ -6,10 +6,26 @@ import { fileURLToPath } from "node:url";
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const wasmDir = join(root, "wasm");
 const nativeDir = join(root, "vendor/mlkem-native");
+const falconDir = join(root, "vendor/falcon-ref");
+const mldsaDir = join(root, "vendor/mldsa-native");
 
 if (!existsSync(join(nativeDir, "mlkem", "mlkem_native.h"))) {
 	console.error(
 		"Missing mlkem-native. Clone it:\n  git clone --depth 1 https://github.com/pq-code-package/mlkem-native.git vendor/mlkem-native",
+	);
+	process.exit(1);
+}
+
+if (!existsSync(join(falconDir, "falcon.h"))) {
+	console.error(
+		"Missing Falcon reference source under vendor/falcon-ref. Re-run the vendoring step before building.",
+	);
+	process.exit(1);
+}
+
+if (!existsSync(join(mldsaDir, "mldsa", "mldsa_native.h"))) {
+	console.error(
+		"Missing mldsa-native under vendor/mldsa-native. Clone it:\n  git clone --depth 1 https://github.com/pq-code-package/mldsa-native.git vendor/mldsa-native",
 	);
 	process.exit(1);
 }
@@ -22,7 +38,13 @@ function run(cmd, args, opts = {}) {
 const hasEmcc = spawnSync("which", ["emcc"], { encoding: "utf8" }).status === 0;
 
 if (hasEmcc) {
-	run("make", ["-C", wasmDir, `MLKEM_NATIVE_DIR=${nativeDir}`]);
+	run("make", [
+		"-C",
+		wasmDir,
+		`MLKEM_NATIVE_DIR=${nativeDir}`,
+		`FALCON_REF_DIR=${falconDir}`,
+		`MLDSA_NATIVE_DIR=${mldsaDir}`,
+	]);
 } else {
 	const image = "emscripten/emsdk:3.1.51";
 	run("docker", [
@@ -32,10 +54,16 @@ if (hasEmcc) {
 		`${wasmDir}:/src`,
 		"-v",
 		`${nativeDir}:/mlkem-native:ro`,
+		"-v",
+		`${falconDir}:/falcon-ref:ro`,
+		"-v",
+		`${mldsaDir}:/mldsa-native:ro`,
 		"-w",
 		"/src",
 		image,
 		"make",
 		"MLKEM_NATIVE_DIR=/mlkem-native",
+		"FALCON_REF_DIR=/falcon-ref",
+		"MLDSA_NATIVE_DIR=/mldsa-native",
 	]);
 }

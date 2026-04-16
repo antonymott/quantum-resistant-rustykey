@@ -1,0 +1,13 @@
+mldsa-native source snapshot
+============================
+
+Source: https://github.com/pq-code-package/mldsa-native
+
+Acquisition method:
+- `git clone --depth 1 https://github.com/pq-code-package/mldsa-native.git`
+- nested `.git` metadata removed after vendoring
+
+Notes:
+- This tree is the selected maintained C upstream for ML-DSA.
+- The project README states that `mldsa-native` is a fork of the ML-DSA reference implementation.
+- License information remains in the vendored upstream files.
