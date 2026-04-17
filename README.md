@@ -2,11 +2,9 @@
 
 Fast, secure WebAssembly implementations of useful post-quantum-resistant tools both for backend (node) and frontend web.
 
-## Implementation status
+## Implementation status: Pre-production (stable for testing)
 
-- This package is in pre-production, functionally complete and stable for integration testing.
-- We recommend waiting for the v1.0.0 release - which will follow our security audit - before deploying any variant for production, healthcare or government workloads.
-
+- ***Recommendation***: Await v1.0.0 (following security audit) for production/regulated deployment.
 - includes NIST approved as well as riskier NIST 'on-ramp' variants eg SQISign
 - *signature algorithms (coming soon):*
   - *FN-DSA (Falcon-512, Falcon-1024)*
@@ -14,6 +12,11 @@ Fast, secure WebAssembly implementations of useful post-quantum-resistant tools 
   - *SQISign*
 - module-lattice-based key-encapsulation mechanism
   - **ML-KEM-512**, **ML-KEM-768**, and **ML-KEM-1024** using the same stack: [mlkem-native](https://github.com/pq-code-package/mlkem-native) built with **Emscripten**.
+
+## user-friendly live example testbed and playground
+
+- live test environment (NEW!) where users can encrypt and descrypt, using all 3 varients of KEM and a test WebAuthn implementation so users can learn how signature algorithms are used to keep logins safe
+- lattice-based key encapsulation mechanism: run tests to see if Montgomery constant tim runs are good enough for your use case. Suggest improvements, see how PQC works under the hood!
 
 ## Security assurance and verification
 
@@ -212,15 +215,6 @@ See `examples/browser-demo/README.md` for details.
 ## Project Structure
 
 ML-KEM logic comes from **mlkem-native** (C), compiled with **Emscripten** under `wasm/`, wrapped by TypeScript in `mlkem-src/`, then bundled into `src/vendor/mlkem*.js`.
-
-## Publishing
-
-The package is published from the npm package root (`dist/`). To publish a new version:
-1. make a new branch locally from main
-2. edit and test your changes
-3. pnpm changeset
-4. `pnpm lint && pnpm test && pnpm build`
-5. merge to main; CI publishes when the version changed
 
 ## Security Considerations
 
