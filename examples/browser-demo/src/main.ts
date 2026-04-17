@@ -6,6 +6,10 @@ import {
 	loadMlKem1024,
 	loadMlKem512,
 	loadMlKem768,
+	loadSqisignLvl1,
+	SQISIGN_LVL1_KAT0_MSG_HEX,
+	SQISIGN_LVL1_KAT0_PK_HEX,
+	SQISIGN_LVL1_KAT0_SIG_HEX,
 } from "quantum-resistant-rustykey";
 
 const logEl = document.querySelector("#log") as HTMLPreElement;
@@ -70,6 +74,36 @@ async function run() {
 			return;
 		}
 
+		if (algorithm === "sqisign") {
+			log("Loading SQISign level 1…");
+			log(
+				"Note: reference keygen/sign can take a long time; this demo only checks verify on a NIST KAT vector.",
+			);
+			const sq = await loadSqisignLvl1();
+			const pk = Uint8Array.from(
+				SQISIGN_LVL1_KAT0_PK_HEX
+					.match(/.{1,2}/g)!
+					.map((b: string) => Number.parseInt(b, 16)),
+			);
+			const msg = Uint8Array.from(
+				SQISIGN_LVL1_KAT0_MSG_HEX
+					.match(/.{1,2}/g)!
+					.map((b: string) => Number.parseInt(b, 16)),
+			);
+			const sig = Uint8Array.from(
+				SQISIGN_LVL1_KAT0_SIG_HEX
+					.match(/.{1,2}/g)!
+					.map((b: string) => Number.parseInt(b, 16)),
+			);
+			const ok = await sq.verify(sig, msg, pk);
+			if (!ok) {
+				throw new Error("SQISign KAT verification failed");
+			}
+			log("SQISign KAT verify OK.");
+			log("All checks passed.");
+			return;
+		}
+
 		log(`Loading ML-KEM-${v}…`);
 		const kem =
 			v === "512"
@@ -122,6 +156,12 @@ algorithmEl.addEventListener("change", () => {
 		return;
 	}
 	if (algorithmEl.value === "mldsa") {
+		if (variantEl.value === "768") {
+			variantEl.value = "512";
+		}
+		return;
+	}
+	if (algorithmEl.value === "sqisign") {
 		if (variantEl.value === "768") {
 			variantEl.value = "512";
 		}

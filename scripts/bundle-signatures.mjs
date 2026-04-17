@@ -21,6 +21,10 @@ const bundles = [
 		entry: join(root, "wasm/build/mldsa-87-module.js"),
 		outfile: join(root, "src/vendor/mldsa87.js"),
 	},
+	{
+		entry: join(root, "wasm/build/sqisign-lvl1-module.js"),
+		outfile: join(root, "src/vendor/sqisignlvl1.js"),
+	},
 ];
 
 for (const { entry, outfile } of bundles) {

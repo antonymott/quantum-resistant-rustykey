@@ -7,7 +7,12 @@ import {
 	loadMlKem512,
 	loadMlKem768,
 	loadMlKem1024,
+	loadSqisignLvl1,
+	SQISIGN_LVL1_KAT0_MSG_HEX,
+	SQISIGN_LVL1_KAT0_PK_HEX,
+	SQISIGN_LVL1_KAT0_SIG_HEX,
 } from "./index";
+import { fromHex } from "./signature-common";
 
 describe("quantum-resistant-rustykey (mlkem-wasm adapter)", () => {
 	it("round-trips encrypt/decrypt + AES-GCM message", async () => {
@@ -137,5 +142,17 @@ describe("quantum-resistant-rustykey (mlkem-wasm adapter)", () => {
 		const ok = await mldsa.verify(signature, message, publicKey);
 
 		expect(ok).toBe(true);
+	});
+
+	it("verifies SQISign level-1 against an upstream NIST KAT vector", async () => {
+		const sq = await loadSqisignLvl1();
+		const pk = fromHex(SQISIGN_LVL1_KAT0_PK_HEX);
+		const msg = fromHex(SQISIGN_LVL1_KAT0_MSG_HEX);
+		const sig = fromHex(SQISIGN_LVL1_KAT0_SIG_HEX);
+		expect(await sq.verify(sig, msg, pk)).toBe(true);
+
+		const bad = new Uint8Array(sig);
+		bad[0] ^= 1;
+		expect(await sq.verify(bad, msg, pk)).toBe(false);
 	});
 });

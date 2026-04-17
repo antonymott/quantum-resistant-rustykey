@@ -8,6 +8,7 @@ const wasmDir = join(root, "wasm");
 const nativeDir = join(root, "vendor/mlkem-native");
 const falconDir = join(root, "vendor/falcon-ref");
 const mldsaDir = join(root, "vendor/mldsa-native");
+const sqisignDir = join(root, "vendor/sqisign-native");
 
 if (!existsSync(join(nativeDir, "mlkem", "mlkem_native.h"))) {
 	console.error(
@@ -30,6 +31,13 @@ if (!existsSync(join(mldsaDir, "mldsa", "mldsa_native.h"))) {
 	process.exit(1);
 }
 
+if (!existsSync(join(sqisignDir, "CMakeLists.txt"))) {
+	console.error(
+		"Missing SQISign sources under vendor/sqisign-native. Clone it:\n  git clone --depth 1 https://github.com/SQISign/the-sqisign.git vendor/sqisign-native",
+	);
+	process.exit(1);
+}
+
 function run(cmd, args, opts = {}) {
 	const r = spawnSync(cmd, args, { stdio: "inherit", ...opts });
 	if (r.status !== 0) process.exit(r.status ?? 1);
@@ -45,6 +53,9 @@ if (hasEmcc) {
 		`FALCON_REF_DIR=${falconDir}`,
 		`MLDSA_NATIVE_DIR=${mldsaDir}`,
 	]);
+	run("bash", [join(wasmDir, "build_sqisign_lvl1.sh")], {
+		env: { ...process.env, SQISIGN_NATIVE_DIR: sqisignDir },
+	});
 } else {
 	const image = "emscripten/emsdk:3.1.51";
 	run("docker", [
@@ -65,5 +76,17 @@ if (hasEmcc) {
 		"MLKEM_NATIVE_DIR=/mlkem-native",
 		"FALCON_REF_DIR=/falcon-ref",
 		"MLDSA_NATIVE_DIR=/mldsa-native",
+	]);
+	run("docker", [
+		"run",
+		"--rm",
+		"-v",
+		`${root}:/work`,
+		"-w",
+		"/work/wasm",
+		image,
+		"bash",
+		"-lc",
+		"export SQISIGN_NATIVE_DIR=/work/vendor/sqisign-native && bash ./build_sqisign_lvl1.sh",
 	]);
 }
