@@ -13,9 +13,10 @@ Fast, secure WebAssembly implementations of useful post-quantum-resistant tools 
 - module-lattice-based key-encapsulation mechanism
   - **ML-KEM-512**, **ML-KEM-768**, and **ML-KEM-1024** using the same stack: [mlkem-native](https://github.com/pq-code-package/mlkem-native) built with **Emscripten**.
 
-## Why we support SQISign: Helping hurdle the "silent" barrier to post-quantum adoption: 1024-byte buffer limit in many existing FIDO2/WebAuthn implementations
+### NOTE: Why we support SQISign when it is 'NIST-on-ramp' only
+*TLDR; to help hurdle the "silent" barrier to post-quantum adoption: 1024-byte buffer limit in many existing FIDO2/WebAuthn implementations*
 
-### WebAuthn PQC Signature "Wall"
+#### WebAuthn PQC Signature "Wall"
 Falcon and Dilithium - but not SQISign - are "physical incompatibile" with millions of existing FIDO2/WebAuthn authenticators that rely on the CTAP2 1024-byte buffer limit.
 
 - CTAP2 protocol, which allows browsers to talk to security keys, often operates within tight memory constraints to maintain the speed and low-power requirements of embedded devices.
@@ -27,9 +28,9 @@ Falcon and Dilithium - but not SQISign - are "physical incompatibile" with milli
 #### Critical use case example
 For mission-critical applications like low-latency augmented reality remote telesurgery, where ultra-low latency and hardware-rooted trust are non-negotiable. RustyKey® who financially support this repo and the npm package, required a WASM port of SQIsign specifically because the 204-byte signatures are the only PQC option that worked within their current hardware constraints, enabling immediate quantum-resistant public key ceremonies without breaking the existing WebAuthn ecosystem.
 
-## user-friendly live example testbed and playground
+## Broad user-friendly live example testbed and playground (coming May 2026)
 
-- live test environment (coming May 2026) where general purpose users and seasoned cryptanalysts, can encrypt and descrypt and play, using all 3 varients of KEM and a test WebAuthn implementations using the signature algorithms
+- live test environment where general purpose users together with seasoned cryptanalysts, can encrypt and descrypt and play, using all 3 varients of KEM and a test WebAuthn implementations using the signature algorithms
 - lattice-based vs isogeny: run tests to check: Montgomery constant times, the surprising difference in time taken for the various steps
 - all are encouraged to suggest improvements, and help a wider audience see how PQC works under the hood and adopt it more quickly and without breaking existing infrastructure.
 
