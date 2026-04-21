@@ -50,6 +50,14 @@ Increasingly, developers favor Rust => wasm-bindgen over C => emscripten for Rus
 - Constant-Time Guarantees: web-assembly is particularly opaque. In cryptography, protection against side-channel attacks (like timing attacks) is often more critical than general-purpose memory safety. Using audited C code that is already proven to be constant-time may be a safer WASM route than a new Rust implementation that might inadvertently introduce timing leaks. We encourage realtime constant time checks in our testbed site and appreciate any feedback to improve.
 - Toolchain Maturity: Emscripten is a mature leader in the WASM ecosystem (sometimes...bloated!). For projects needing to bridge legacy or specialized C libraries with the web, emscripten provides a stable environment that can, when optimized, outperform wasm-bindgen in raw execution speed for specific linear memory access patterns.
 
+### Why we offer WASM implementations of SQISign (NIST on-ramp only) alongside established, standards-track Falcon and Dilithium?
+1. The "SIDH" vs. "SQIsign" Distinction
+- the algorithm that was "spectacularly broken" in 2022 was SIDH. The attack (the Castryck-Decru attack) exploited specific "auxiliary points" for example revealing torsion point information.
+- SQIsign is fundamentally different, and structurally resistant to this specific attack because it does not reveal torsion point information. Security relies on the Deuring correspondence — a mathematical link between supersingular elliptic curves and quaternion algebras — rather than the specific isogeny problem with auxiliary points used by SIDH.
+- To date, SQIsign remains structurally sound against the specific attacks that broke SIDH, which is why NIST accepted it onto the "on-ramp" (the Round 4/Additional Signatures track).
+2. Smaller Signature Size Advantage
+- SQISign has smaller signatures. This npm package is a WASM-based project targeting web or mobile, where signature size is a massive bottleneck for bandwidth.
+
 ### How users can independently verify
 
 From the repository root:
