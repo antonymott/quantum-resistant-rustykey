@@ -16,8 +16,8 @@ Fast, secure WebAssembly implementations of useful post-quantum-resistant tools 
 ### NOTE: Why we support SQISign when it is 'NIST-on-ramp' only
 *TLDR; to help hurdle the "silent" barrier to post-quantum adoption: 1024-byte buffer limit in many existing FIDO2/WebAuthn implementations*
 
-#### WebAuthn PQC Signature "Wall"
-Falcon and Dilithium - but not SQISign - are "physical incompatibile" with millions of existing FIDO2/WebAuthn authenticators that rely on the CTAP2 1024-byte buffer limit.
+#### WebAuthn PQC Signature size constraints
+Dilithium variants, and Falcon-1024 are physical incompatibile with millions of existing FIDO2/WebAuthn authenticators that rely on the CTAP2 1024-byte buffer limit.
 
 - CTAP2 protocol, which allows browsers to talk to security keys, often operates within tight memory constraints to maintain the speed and low-power requirements of embedded devices.
 
