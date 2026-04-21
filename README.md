@@ -251,4 +251,4 @@ This project was generously supported by:
 - getting annoyed? First try being kind and courteous: someone may simply have had a bad day.
 - people have differences of opinion, usually every design or implementation choice carries a trade-off and numerous costs. There is seldom a right answer.
 - go light on unstructured critique, encourage others!
-- if you feel you have been or are being harassed or made uncomfortable by a community member, contact BuzzyBee our friendly multi-LLM on the chat widget on our testbed site
+- if you feel you have been or are being harassed or made uncomfortable by a community member, contact BuzzyBee® our friendly multi-LLM on the chat widget on our testbed site

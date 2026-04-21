@@ -1,6 +1,6 @@
 {
   "name": "quantum-resistant-rustykey",
-  "version": "0.6.5",
+  "version": "0.7.0",
   "description": "WebAssembly post-quantum-resistant tools for web",
   "author": "Antony R Mott <a@auditcanary.com> (https://rustykey.app)",
   "license": "ISC",

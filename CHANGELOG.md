@@ -1,5 +1,15 @@
 # quantum-resistant-rustykey
 
+## 0.7.0
+
+### Minor Changes
+
+- 5e7ac10: Added other three algorithms
+
+### Patch Changes
+
+- update readme include SQISign
+
 ## 0.6.5
 
 ### Patch Changes
