@@ -2,7 +2,7 @@
 
 Fast, secure WebAssembly implementations of useful post-quantum-resistant tools both for backend (node) and frontend web.
 
-[![npm version](https://shields.io)](https://npmjs.com)
+[![npm version](https://img.shields.io/npm/v/quantum-resistant-rustykey)](https://npmjs.com)
 
 ```bash
 npm i quantum-resistant-rustykey
