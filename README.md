@@ -6,7 +6,7 @@ Fast, secure WebAssembly implementations of useful post-quantum-resistant tools 
 
 - ***Recommendation***: Await v1.0.0 (following security audit) for production/regulated deployment.
 - includes NIST approved as well as riskier NIST 'on-ramp' variants eg SQISign
-- *signature algorithms (coming soon):*
+- *signature algorithms:*
   - *FN-DSA (Falcon-512, Falcon-1024)*
   - *ML-DSA (Dilithium variants)*
   - *SQISign*
