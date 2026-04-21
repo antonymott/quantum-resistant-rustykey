@@ -6,6 +6,8 @@ Fast, secure WebAssembly implementations of useful post-quantum-resistant tools 
 [![Weekly Downloads](https://img.shields.io/npm/dw/quantum-resistant-rustykey)](https://npmjs.com)
 ![Node v25.9.0](https://img.shields.io/badge/node-v25.9.0-blue.svg)
 [![Dependency Status](https://shields.io)](https://shields.io/badges/quantum-resistant-rustykey)
+[![Dev Dependency Status](https://shields.io)](https://shields.io/badges/quantum-resistant-rustykey)
+
 
 
 
