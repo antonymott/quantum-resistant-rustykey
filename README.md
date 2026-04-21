@@ -8,10 +8,6 @@ Fast, secure WebAssembly implementations of useful post-quantum-resistant tools 
 [![Dependency Status](https://shields.io)](https://shields.io/badges/quantum-resistant-rustykey)
 [![Dev Dependency Status](https://shields.io)](https://shields.io/badges/quantum-resistant-rustykey)
 
-
-
-
-
 ```bash
 npm i quantum-resistant-rustykey
 ```
