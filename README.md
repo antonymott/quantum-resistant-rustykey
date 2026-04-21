@@ -44,6 +44,12 @@ The three parameter sets (512/768/1024) use the same implementation family and d
 - This package builds the same source for all three variants by changing only `MLK_CONFIG_PARAMETER_SET` in `wasm/Makefile`.
 - Variant sizes/parameters are defined upstream in `mlkem/mlkem_native.h`.
 
+### Why we mix C => emscripten with Rust => wasm-bindgen for web-assembly module creation
+Increasingly, developers favor Rust => wasm-bindgen over C => emscripten for Rust's superior compile-time memory safety...and leaning on Rust is implied in our brand! RustyKey® current dual approach is a way to balance performance, security-vetted logic, and web compatibility. Some technical factors may make C => emscripten approach acceptable and, in some cases, preferable for post-quantum cryptography:
+- upstream Reliability: Many NIST-standardized PQC algorithms (like ML-KEM) have highly optimized, audited, and "constant-time" reference implementations written in C. Using C => Emscripten allows RustyKey® to port these vetted "upstream" sources directly, reducing the risk of introducing new implementation bugs during a full rewrite into Rust.
+- Constant-Time Guarantees: web-assembly is particularly opaque. In cryptography, protection against side-channel attacks (like timing attacks) is often more critical than general-purpose memory safety. Using audited C code that is already proven to be constant-time may be a safer WASM route than a new Rust implementation that might inadvertently introduce timing leaks. We encourage realtime constant time checks in our testbed site and appreciate any feedback to improve.
+- Toolchain Maturity: Emscripten is a mature leader in the WASM ecosystem (sometimes...bloated!). For projects needing to bridge legacy or specialized C libraries with the web, emscripten provides a stable environment that can, when optimized, outperform wasm-bindgen in raw execution speed for specific linear memory access patterns.
+
 ### How users can independently verify
 
 From the repository root:
