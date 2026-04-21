@@ -1,10 +1,19 @@
 import {
+	loadFnDsa1024,
+	loadFnDsa512,
+	loadMlDsa3,
+	loadMlDsa5,
 	loadMlKem1024,
 	loadMlKem512,
 	loadMlKem768,
+	loadSqisignLvl1,
+	SQISIGN_LVL1_KAT0_MSG_HEX,
+	SQISIGN_LVL1_KAT0_PK_HEX,
+	SQISIGN_LVL1_KAT0_SIG_HEX,
 } from "quantum-resistant-rustykey";
 
 const logEl = document.querySelector("#log") as HTMLPreElement;
+const algorithmEl = document.querySelector("#algorithm") as HTMLSelectElement;
 const variantEl = document.querySelector("#variant") as HTMLSelectElement;
 const runBtn = document.querySelector("#run") as HTMLButtonElement;
 
@@ -15,10 +24,87 @@ function log(msg: string) {
 async function run() {
 	logEl.textContent = "";
 	runBtn.disabled = true;
+	const algorithm = algorithmEl.value;
 	const v = variantEl.value;
-	log(`Loading ML-KEM-${v}…`);
 
 	try {
+		if (algorithm === "fndsa") {
+			if (v !== "512" && v !== "1024") {
+				throw new Error("FN-DSA supports only Falcon-512 and Falcon-1024");
+			}
+
+			log(`Loading FN-DSA Falcon-${v}…`);
+			const fndsa = v === "512" ? await loadFnDsa512() : await loadFnDsa1024();
+			const kp = fndsa.keypair();
+			const publicKey = await kp.get("public_key");
+			const privateKey = await kp.get("private_key");
+			const msg = new TextEncoder().encode("hello from the browser demo");
+			const signature = await fndsa.sign(msg, privateKey);
+			const ok = await fndsa.verify(signature, msg, publicKey);
+			if (!ok) {
+				throw new Error("signature verification failed");
+			}
+
+			log("FN-DSA sign/verify OK.");
+			log("All checks passed.");
+			return;
+		}
+
+		if (algorithm === "mldsa") {
+			if (v !== "512" && v !== "1024") {
+				throw new Error(
+					"ML-DSA demo maps 512 -> Dilithium3 and 1024 -> Dilithium5",
+				);
+			}
+
+			log(`Loading ML-DSA ${v === "512" ? "Dilithium3" : "Dilithium5"}…`);
+			const mldsa = v === "512" ? await loadMlDsa3() : await loadMlDsa5();
+			const kp = mldsa.keypair();
+			const publicKey = await kp.get("public_key");
+			const privateKey = await kp.get("private_key");
+			const msg = new TextEncoder().encode("hello from the browser demo");
+			const signature = await mldsa.sign(msg, privateKey);
+			const ok = await mldsa.verify(signature, msg, publicKey);
+			if (!ok) {
+				throw new Error("ML-DSA signature verification failed");
+			}
+
+			log("ML-DSA sign/verify OK.");
+			log("All checks passed.");
+			return;
+		}
+
+		if (algorithm === "sqisign") {
+			log("Loading SQISign level 1…");
+			log(
+				"Note: reference keygen/sign can take a long time; this demo only checks verify on a NIST KAT vector.",
+			);
+			const sq = await loadSqisignLvl1();
+			const pk = Uint8Array.from(
+				SQISIGN_LVL1_KAT0_PK_HEX
+					.match(/.{1,2}/g)!
+					.map((b: string) => Number.parseInt(b, 16)),
+			);
+			const msg = Uint8Array.from(
+				SQISIGN_LVL1_KAT0_MSG_HEX
+					.match(/.{1,2}/g)!
+					.map((b: string) => Number.parseInt(b, 16)),
+			);
+			const sig = Uint8Array.from(
+				SQISIGN_LVL1_KAT0_SIG_HEX
+					.match(/.{1,2}/g)!
+					.map((b: string) => Number.parseInt(b, 16)),
+			);
+			const ok = await sq.verify(sig, msg, pk);
+			if (!ok) {
+				throw new Error("SQISign KAT verification failed");
+			}
+			log("SQISign KAT verify OK.");
+			log("All checks passed.");
+			return;
+		}
+
+		log(`Loading ML-KEM-${v}…`);
 		const kem =
 			v === "512"
 				? await loadMlKem512()
@@ -60,4 +146,29 @@ async function run() {
 
 runBtn.addEventListener("click", () => {
 	void run();
+});
+
+algorithmEl.addEventListener("change", () => {
+	if (algorithmEl.value === "fndsa") {
+		if (variantEl.value === "768") {
+			variantEl.value = "512";
+		}
+		return;
+	}
+	if (algorithmEl.value === "mldsa") {
+		if (variantEl.value === "768") {
+			variantEl.value = "512";
+		}
+		return;
+	}
+	if (algorithmEl.value === "sqisign") {
+		if (variantEl.value === "768") {
+			variantEl.value = "512";
+		}
+		return;
+	}
+
+	if (variantEl.value !== "512" && variantEl.value !== "768" && variantEl.value !== "1024") {
+		variantEl.value = "768";
+	}
 });

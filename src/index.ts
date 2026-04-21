@@ -1,7 +1,17 @@
-import type { EncryptResult, IMlKem, KeyPair, MaybePromise } from "./types";
+import type { EncryptResult, IMlKem, KeyPair, MaybePromise } from "./types.js";
 import mlkem768 from "./vendor/mlkem.js";
 import mlkem512 from "./vendor/mlkem512.js";
 import mlkem1024 from "./vendor/mlkem1024.js";
+
+export { loadFnDsa512, loadFnDsa1024 } from "./fndsa.js";
+export { loadMlDsa3, loadMlDsa5 } from "./mldsa.js";
+export { loadSqisignLvl1 } from "./sqisign.js";
+export {
+	SQISIGN_LVL1_KAT0_MSG_HEX,
+	SQISIGN_LVL1_KAT0_PK_HEX,
+	SQISIGN_LVL1_KAT0_SIG_HEX,
+	SQISIGN_LVL1_KAT0_SM_HEX,
+} from "./sqisign-kat-lvl1.js";
 
 /** Minimal surface used by this package (mlkem-wasm–style API). */
 type MlKemImpl = {
@@ -114,7 +124,7 @@ class MlKemWrapper implements IMlKem {
 		]);
 
 		return {
-			get: (key) =>
+			get: (key: "public_key" | "private_key") =>
 				keyPairPromise.then((kp) =>
 					key === "public_key" ? kp.publicKey : kp.privateKey,
 				),
@@ -128,7 +138,7 @@ class MlKemWrapper implements IMlKem {
 		);
 
 		return {
-			get: (key) => {
+			get: (key: "cyphertext" | "secret") => {
 				if (key === "cyphertext") return encPromise.then((r) => r.ciphertext);
 				if (key === "secret") return encPromise.then((r) => r.sharedKey);
 				throw new Error(`Unknown encrypt result field: ${String(key)}`);

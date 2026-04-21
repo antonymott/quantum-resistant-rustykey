@@ -7,5 +7,6 @@ dist
 node_modules
 pycparser
 wasm/build
+wasm/build-sqisign-cmake
 vendor/mlkem-native
 npm-publishing-notes.md

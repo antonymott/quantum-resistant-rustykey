@@ -1,0 +1,30 @@
+Falcon reference source snapshot
+================================
+
+Source: https://falcon-sign.info/impl/
+Files vendored from the official Falcon reference implementation pages.
+
+Selected version:
+- README.txt reports version: 2020-09-30
+
+Vendored files:
+- Makefile
+- README.txt
+- config.h
+- falcon.h
+- fpr.h
+- inner.h
+- codec.c
+- common.c
+- falcon.c
+- fft.c
+- fpr.c
+- keygen.c
+- rng.c
+- shake.c
+- sign.c
+- vrfy.c
+
+Notes:
+- These files were extracted from the official HTML source browser and converted back to plain source text for local builds.
+- License text is included in the vendored source headers and README.

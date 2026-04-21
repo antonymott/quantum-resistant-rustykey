@@ -1,0 +1,20 @@
+SQISign (the-sqisign) source snapshot
+=====================================
+
+Source: https://github.com/SQISign/the-sqisign
+
+Acquisition method:
+- `git clone --depth 1 https://github.com/SQISign/the-sqisign.git`
+- `KAT/` directory omitted from this tree (large fixtures; vectors for tests are inlined from upstream `KAT/PQCsignKAT_353_SQIsign_lvl1.rsp`).
+- `.git` metadata removed after vendoring
+
+Pruning (this repo):
+- Removed upstream `apps/`, `test/`, `scripts/`, and doc-only files (`README.md`, `DEVELOPERS.md`, `Doxyfile*`) — not needed to configure/build the static libraries used for WASM.
+- Root `CMakeLists.txt` is patched to skip `add_subdirectory(apps)` and `add_subdirectory(test)`.
+
+If `wasm/build-sqisign-cmake` was created by Docker as root and your user cannot delete it, remove it with:
+`docker run --rm -v "<repo>:/work" emscripten/emsdk:3.1.51 rm -rf /work/wasm/build-sqisign-cmake`
+
+Build notes:
+- This package compiles **SQIsign level 1** with `SQISIGN_BUILD_TYPE=ref`, `GMP_LIBRARY=MINI` (bundled mini-gmp), and the **test** RNG path (`RANDOMBYTES_C` / CTR-DRBG) so signing and key generation are seeded from JavaScript (`randombytes_init`) instead of relying on OS entropy inside WASM.
+- License and third-party notices remain in the vendored upstream files (`LICENSE`, `NOTICE`).

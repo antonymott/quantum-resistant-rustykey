@@ -41,18 +41,23 @@
     "lint:fix": "biome check --write .",
     "build:wasm": "node scripts/build-wasm.mjs",
     "bundle:mlkem": "node scripts/bundle-mlkem.mjs",
-    "build:vendor": "pnpm build:wasm && pnpm bundle:mlkem",
-    "build": "tsdown && node scripts/copy-assets.mjs",
-    "test": "vitest run",
+    "bundle:signatures": "node scripts/bundle-signatures.mjs",
+    "build:vendor": "pnpm build:wasm && pnpm bundle:mlkem && pnpm bundle:signatures",
+    "build": "pnpm build:vendor && tsdown",
+    "test": "pnpm build:vendor && vitest run",
     "release": "changeset publish",
     "example:browser": "pnpm --filter browser-demo dev"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.11",
     "@changesets/cli": "2.30.0",
+    "@types/node": "25.6.0",
     "esbuild": "0.28.0",
     "tsdown": "0.21.8",
     "typescript": "6.0.2",
     "vitest": "4.1.4"
+  },
+  "dependencies": {
+    "@noble/post-quantum": "0.6.1"
   }
 }
