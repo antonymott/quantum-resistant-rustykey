@@ -303,3 +303,18 @@ This project was generously supported by:
 - people have differences of opinion, usually every design or implementation choice carries a trade-off and numerous costs. There is seldom a right answer.
 - go light on unstructured critique, encourage others!
 - if you feel you have been or are being harassed or made uncomfortable by a community member, contact BuzzyBee® our friendly multi-LLM on the chat widget on our testbed site
+
+## Appendix (WIP) testbed 'coming soon' features
+
+Below our some examples of stats and interactivity we plan to add to the testbed depending on user-interest that will help users understand the trade-offs between lattice-based (ML-KEM/DSA) and isogeny-based (SQISign) crypto:
+
+- Memory Peak (Heap Usage): WASM runs in a linear memory space. Tracking performance.memory.usedJSHeapSize (in supported browsers) or monitoring the WASM instance’s memory growth is vital, especially for ML-DSA (Dilithium), which can be memory-intensive.
+
+- Serialized Payload Size: Explicitly display the "Over-the-wire" size for public keys and signatures. Seeing a 204-byte SQISign signature next to a 2,420-byte Dilithium-2 signature makes the WebAuthn buffer issue immediately obvious.
+
+- WASM Instantiation Time: Measure how long it takes to compile and initialize the module. This is a "hidden" latency cost in web apps that users often overlook.
+
+- Interactive "Live Insight" Buttons
+  - "Simulate CTAP2 Limit": A toggle that "clips" the buffer at 1024 bytes. If the user tries to run Dilithium, it throws a visual error, while SQISign passes—demonstrating that "silent barrier" they mentioned
+  - "Throttle CPU": An option to simulate mobile/embedded performance (standard in Chrome DevTools, but great as a one-click button). This highlights how SQISign is great for size but potentially slower on verification time compared to Falcon or Dilithium.
+  - "Batch Verification Run": A button to run 100 signatures in a loop. This generates a jitter chart to show if the Montgomery constant-time implementation stays flat or fluctuates under load
