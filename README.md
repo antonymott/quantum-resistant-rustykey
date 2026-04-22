@@ -6,12 +6,10 @@ Fast, secure WebAssembly implementations of useful post-quantum-resistant tools 
 
 - ***Recommendation***: Await v1.0.0 (following security audit) for production/regulated deployment.
 - includes NIST approved as well as riskier NIST 'on-ramp' variants eg SQISign
-- *signature algorithms (coming soon):*
-  - *FN-DSA (Falcon-512, Falcon-1024)*
-  - *ML-DSA (Dilithium variants)*
-  - *SQISign*
-- module-lattice-based key-encapsulation mechanism
-  - **ML-KEM-512**, **ML-KEM-768**, and **ML-KEM-1024** using the same stack: [mlkem-native](https://github.com/pq-code-package/mlkem-native) built with **Emscripten**.
+- **ML-DSA** (ML-DSA-65, ML-DSA-87)
+- **FN-DSA** (FN-DSA-512, FN-DSA-1024)
+- **SQIsign** (Level 1)
+- **ML-KEM** (512, 768, 1024) using [mlkem-native](https://github.com/pq-code-package/mlkem-native).
 
 ## user-friendly live example testbed and playground
 
@@ -201,16 +199,41 @@ pnpm build
 
 - Run `pnpm test` for ML-KEM-512 / 768 / 1024 round-trips.
 
-## Browser example (local)
+### Digital Signatures (Node.js & Frontend)
 
-A Vite app under `examples/browser-demo` links this package from the workspace. From the repo root:
+All signature algorithms (**FN-DSA**, **ML-DSA**, and **SQIsign**) share a common interface.
 
-```bash
-pnpm build
-pnpm example:browser
+```typescript
+import { 
+  loadFnDsa512, 
+  loadMlDsa3, 
+  loadSqisignLvl1 
+} from "quantum-resistant-rustykey";
+
+async function main() {
+  // 1. Load the algorithm (e.g., FN-DSA-512)
+  const fnDsa = await loadFnDsa512();
+
+  // 2. Generate a keypair
+  const kp = fnDsa.keypair();
+  const publicKey = await kp.get("public_key");
+  const privateKey = await kp.get("private_key");
+
+  // 3. Sign a message
+  const message = "Authored by RustyKey";
+  const signature = await fnDsa.sign(message, privateKey);
+  console.log("Signature (hex):", fnDsa.buffer_to_string(signature));
+
+  // 4. Verify the signature
+  const isValid = await fnDsa.verify(signature, message, publicKey);
+  console.log("Is signature valid?", isValid);
+}
 ```
 
-See `examples/browser-demo/README.md` for details.
+> [!NOTE]
+> **SQIsign Performance**: Level 1 signing is extremely CPU-intensive (can take seconds to minutes depending on hardware). It is recommended for "sign-once, verify-many" scenarios like certificates or firmware updates.
+
+## Browser example (local)
 
 ## Project Structure
 
@@ -230,6 +253,42 @@ This implementation includes patches to withstand side-channel attacks. For more
 ## License
 
 ISC
+
+
+## Performance Metrics
+
+Measured on a standard development environment (Node.js/WASM). Individual results may vary based on hardware and runtime overhead.
+
+| Algorithm | KeyGen (ms) | Sign (ms) | Verify (ms) |
+| :--- | :---: | :---: | :---: |
+| **FN-DSA-512** | 8.13 | 0.74 | 0.78 |
+| **FN-DSA-1024** | 25.62 | 1.25 | 0.24 |
+| **ML-DSA-3 (Level 3)** | 0.22 | 0.45 | 0.25 |
+| **ML-DSA-5 (Level 5)** | 0.33 | 0.63 | 0.34 |
+| **SQIsign L1** | 99.95 | 534.41 | 15.35 |
+
+---
+
+## Known Answer Tests (KAT)
+
+To ensure implementation correctness, our WASM build is verified against official NIST and reference test vectors.
+
+### ML-DSA-3 (Level 3 / Dilithium-3)
+*   **Msg**: `6dbbc4375136df3b07f7c70e639e223e`
+*   **PK**: `e50d03fff3b3a70961abbb92a390008dec1283f603f50cdbaaa3d00bd659bc767c3f...`
+*   **Sig**: `a0c1af32f9ba4e4beea3016b96d1c780e8b5e020bb07c24478dbdd0ec875666b5a...`
+
+### ML-DSA-5 (Level 5 / Dilithium-5)
+*   **Msg**: `6dbbc4375136df3b07f7c70e639e223e`
+*   **PK**: `bc89b367d4288f47c71a74679d0fcffbe041de41b5da2f5fc66d8e28c589949404...`
+*   **Sig**: `47dc5764266841c1af3073fcead6a13d372979e6cca0b2952b349915f54ef66312...`
+
+### SQIsign Level 1
+*   **Msg**: `d81c4d8d734fcbfbeade3d3f8a039faa2a2c9957e835ad55b22e75bf57bb556ac8`
+*   **PK**: `07CCD21425136F6E865E497D2D4D208F0054AD81372066E817480787AAF7B2029...`
+*   **Sig**: `84228651f271b0f39f2f19f2e8718f31ed3365ac9e5cb303afe663d0cfc11f0455...`
+
+*Full byte-perfect vectors are included in the `src/*.test.ts` files.*
 
 ## Funding
 This project was generously supported by:

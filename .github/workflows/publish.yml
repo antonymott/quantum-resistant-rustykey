@@ -31,9 +31,9 @@ jobs:
     steps:
       # ✅ ALWAYS RUN: Checkout
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 1 # Shallow clone for faster checkout
+          fetch-depth: 0 # Full history needed for git describe --tags
 
       # ✅ ALWAYS RUN: Install dependencies
       - name: Setup pnpm
@@ -52,6 +52,13 @@ jobs:
       # ✅ ALWAYS RUN: Install dependencies (NOW with cache!)
       - name: Install dependencies
         run: pnpm install
+
+      # ✅ ALWAYS RUN: Clone vendor/mlkem-native (gitignored, required by build)
+      - name: Clone mlkem-native vendor source
+        run: |
+          if [ ! -d vendor/mlkem-native ]; then
+            git clone --depth 1 https://github.com/pq-code-package/mlkem-native.git vendor/mlkem-native
+          fi
           
       # - name: Linting typescript
       #   run: pnpm lint
