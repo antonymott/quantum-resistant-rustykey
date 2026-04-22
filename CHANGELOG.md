@@ -1,5 +1,69 @@
 # quantum-resistant-rustykey
 
+## 0.7.9
+
+### Patch Changes
+
+- chore
+
+## 0.7.8
+
+### Patch Changes
+
+- chore
+
+## 0.7.7
+
+### Patch Changes
+
+- chore
+
+## 0.7.6
+
+### Patch Changes
+
+- chore
+
+## 0.7.5
+
+### Patch Changes
+
+- chore
+
+## 0.7.4
+
+### Patch Changes
+
+- chore
+
+## 0.7.3
+
+### Patch Changes
+
+- chore
+
+## 0.7.2
+
+### Patch Changes
+
+- chore
+
+## 0.7.1
+
+### Patch Changes
+
+- chore
+
+## 0.7.0
+
+### Minor Changes
+
+- 5e7ac10: Added other three algorithms
+
+### Patch Changes
+
+- update readme include SQISign
+
 ## 0.6.5
 
 ### Patch Changes

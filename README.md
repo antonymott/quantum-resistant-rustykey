@@ -2,6 +2,14 @@
 
 Fast, secure WebAssembly implementations of useful post-quantum-resistant tools both for backend (node) and frontend web.
 
+[![npm version](https://img.shields.io/npm/v/quantum-resistant-rustykey)](https://npmjs.com)
+[![Weekly Downloads](https://img.shields.io/npm/dw/quantum-resistant-rustykey)](https://npmjs.com)
+![Node v25.9.0](https://img.shields.io/badge/node-v25.9.0-blue.svg)
+
+```bash
+npm i quantum-resistant-rustykey
+```
+
 ## Implementation status: Pre-production (stable for testing)
 
 - ***Recommendation***: Await v1.0.0 (following security audit) for production/regulated deployment.
@@ -11,10 +19,26 @@ Fast, secure WebAssembly implementations of useful post-quantum-resistant tools 
 - **SQIsign** (Level 1)
 - **ML-KEM** (512, 768, 1024) using [mlkem-native](https://github.com/pq-code-package/mlkem-native).
 
-## user-friendly live example testbed and playground
+### NOTE: Why we support SQISign when it is 'NIST-on-ramp' only
+*TLDR; to help hurdle the "silent" barrier to post-quantum adoption: 1024-byte buffer limit in many existing FIDO2/WebAuthn implementations*
 
-- live test environment (NEW!) where users can encrypt and descrypt, using all 3 varients of KEM and a test WebAuthn implementation so users can learn how signature algorithms are used to keep logins safe
-- lattice-based key encapsulation mechanism: run tests to see if Montgomery constant tim runs are good enough for your use case. Suggest improvements, see how PQC works under the hood!
+#### WebAuthn PQC Signature size constraints
+Dilithium variants, and Falcon-1024 are physical incompatibile with millions of existing FIDO2/WebAuthn authenticators that rely on the CTAP2 1024-byte buffer limit.
+
+- CTAP2 protocol, which allows browsers to talk to security keys, often operates within tight memory constraints to maintain the speed and low-power requirements of embedded devices.
+
+- Lattice-based mismatch: Dilithium-2 signatures (approx. 2,420 bytes) simply cannot fit into standard 1024-byte buffers found in many current authenticators.
+
+- At roughly 204 bytes, SQIsign is currently the only candidate that offers NIST-level (more accurately NIST-on-ramp-level) security safely within the 1024-byte limit alongside its necessary metadata.
+
+#### Critical use case example
+For mission-critical applications like low-latency augmented reality remote telesurgery, where ultra-low latency and hardware-rooted trust are non-negotiable. RustyKey® who financially support this repo and the npm package, required a WASM port of SQIsign specifically because the 204-byte signatures are the only PQC option that worked within their current hardware constraints, enabling immediate quantum-resistant public key ceremonies without breaking the existing WebAuthn ecosystem.
+
+## Broad user-friendly live example testbed and playground (coming May 2026)
+
+- live test environment where general purpose users together with seasoned cryptanalysts, can encrypt and descrypt and play, using all 3 varients of KEM and a test WebAuthn implementations using the signature algorithms
+- lattice-based vs isogeny: run tests to check: Montgomery constant times, the surprising difference in time taken for the various steps
+- all are encouraged to suggest improvements, and help a wider audience see how PQC works under the hood and adopt it more quickly and without breaking existing infrastructure.
 
 ## Security assurance and verification
 
@@ -42,7 +66,31 @@ The three parameter sets (512/768/1024) use the same implementation family and d
 - This package builds the same source for all three variants by changing only `MLK_CONFIG_PARAMETER_SET` in `wasm/Makefile`.
 - Variant sizes/parameters are defined upstream in `mlkem/mlkem_native.h`.
 
-### How users can independently verify
+### Why we mix C => emscripten with Rust => wasm-bindgen for web-assembly module creation
+
+Increasingly, developers favor Rust => wasm-bindgen over C => emscripten for Rust's superior compile-time memory safety...and leaning on Rust is implied in our brand! RustyKey® current dual approach is a way to balance performance, security-vetted logic, and web compatibility. Some technical factors may make C => emscripten approach acceptable and, in some cases, preferable for post-quantum cryptography:
+
+- upstream Reliability: Many NIST-standardized PQC algorithms (like ML-KEM) have highly optimized, audited, and "constant-time" reference implementations written in C. Using C => Emscripten allows RustyKey® to port these vetted "upstream" sources directly, reducing the risk of introducing new implementation bugs during a full rewrite into Rust.
+
+- Constant-Time Guarantees: web-assembly is particularly opaque. In cryptography, protection against side-channel attacks (like timing attacks) is often more critical than general-purpose memory safety. Using audited C code that is already proven to be constant-time may be a safer WASM route than a new Rust implementation that might inadvertently introduce timing leaks. We encourage realtime constant time checks in our testbed site and appreciate any feedback to improve.
+
+- Toolchain Maturity: Emscripten is a mature leader in the WASM ecosystem (sometimes...bloated!). For projects needing to bridge legacy or specialized C libraries with the web, emscripten provides a stable environment that can, when optimized, outperform wasm-bindgen in raw execution speed for specific linear memory access patterns.
+
+
+### Why we offer WASM implementations of SQISign (NIST on-ramp only) alongside established, standards-track Falcon and Dilithium?
+
+### The "SIDH" vs. "SQIsign" Distinction
+- the algorithm that was spectacularly broken in 2022 was SIDH. The attack (the Castryck-Decru attack) exploited specific "auxiliary points", for example revealing torsion point information.
+
+- SQIsign is fundamentally different from SIDH, and likely structurally resistant to this specific attack because it does not appear to reveal torsion point information. Instead, SQIsign security relies on the Deuring correspondence — a mathematical link between supersingular elliptic curves and quaternion algebras — rather than the specific isogeny problem with auxiliary points used by SIDH.
+
+- To date (mid-2026), SQIsign remains structurally sound against the specific attacks that broke SIDH, which is why NIST accepted SQIsign onto the "on-ramp" (the Round 4/Additional Signatures track).
+
+### Smaller Signature Size Advantage
+- SQISign has smaller signatures: Short Quaternion Isogeny Signatures. This repo and associated npm package is primarily a WASM-based project targeting web or mobile, where signature size is a massive bottleneck for bandwidth.
+
+
+### How users can independently verify all algorithms and variants
 
 From the repository root:
 
@@ -291,6 +339,7 @@ To ensure implementation correctness, our WASM build is verified against officia
 *Full byte-perfect vectors are included in the `src/*.test.ts` files.*
 
 ## Funding
+
 This project was generously supported by:
 - University of Quantum Science
 - RustyKey®
@@ -303,11 +352,28 @@ This project was generously supported by:
 </div>
 
 ## How we work (aka Conduct)
+
 **"You are very welcome to our house: It must appear in other ways than words!" - W. Shakespeare**
+
 - do you think of yourself as total n00b...or seasoned and cynical Cryptologic Scientist. WELCOME one and all!
 - consider helping us build a friendly, safe and welcoming environment for all, regardless of level of experience, gender identity and expression, sexual orientation, disability, personal appearance, body size, race, ethnicity, age, religion, nationality, or other similar characteristic.
 - please avoid aliases or nicknames that might detract from a friendly, safe and welcoming environment.
 - getting annoyed? First try being kind and courteous: someone may simply have had a bad day.
 - people have differences of opinion, usually every design or implementation choice carries a trade-off and numerous costs. There is seldom a right answer.
 - go light on unstructured critique, encourage others!
-- if you feel you have been or are being harassed or made uncomfortable by a community member, contact BuzzyBee our friendly multi-LLM on the chat widget on our testbed site
+- if you feel you have been or are being harassed or made uncomfortable by a community member, contact BuzzyBee® our friendly multi-LLM on the chat widget on our testbed site
+
+## Appendix (WIP) testbed 'coming soon' features
+
+Below our some examples of stats and interactivity we plan to add to the testbed depending on user-interest that will help users understand the trade-offs between lattice-based (ML-KEM/DSA) and isogeny-based (SQISign) crypto:
+
+- Memory Peak (Heap Usage): WASM runs in a linear memory space. Tracking performance.memory.usedJSHeapSize (in supported browsers) or monitoring the WASM instance’s memory growth is vital, especially for ML-DSA (Dilithium), which can be memory-intensive.
+
+- Serialized Payload Size: Explicitly display the "Over-the-wire" size for public keys and signatures. Seeing a 204-byte SQISign signature next to a 2,420-byte Dilithium-2 signature makes the WebAuthn buffer issue immediately obvious.
+
+- WASM Instantiation Time: Measure how long it takes to compile and initialize the module. This is a "hidden" latency cost in web apps that users often overlook.
+
+- Interactive "Live Insight" Buttons
+  - "Simulate CTAP2 Limit": A toggle that "clips" the buffer at 1024 bytes. If the user tries to run Dilithium, it throws a visual error, while SQISign passes—demonstrating that "silent barrier" they mentioned
+  - "Throttle CPU": An option to simulate mobile/embedded performance (standard in Chrome DevTools, but great as a one-click button). This highlights how SQISign is great for size but potentially slower on verification time compared to Falcon or Dilithium.
+  - "Batch Verification Run": A button to run 100 signatures in a loop. This generates a jitter chart to show if the Montgomery constant-time implementation stays flat or fluctuates under load
