@@ -111,7 +111,7 @@ This document registers algorithm identifiers and key type parameters for SQIsig
 
 Post-quantum cryptography readiness is critical for constrained devices. As of 2026, while FIDO2/WebAuthn supports various COSE algorithms, hardware authenticators (like YubiKeys) and platform authenticators (like TPMs) have strict memory/storage constraints, effectively limiting public keys to 1024 bytes or less, hindering the adoption of large-key post-quantum algorithms.
 
-### Urgent Need for Smaller PQC Signatures
+### Pressing Need for Smaller PQC Signatures
 
 FN-DSA (Falcon) and ML-DSA (Dilithium) have larger signatures that may not fit in constrained environments. 
 
@@ -197,6 +197,22 @@ This document uses the following terms:
 - **CBOR**: Concise Binary Object Representation {{RFC7049}}
 - **ECDH**: Elliptic Curve Diffie-Hellman
 - **IANA**: Internet Assigned Numbers Authority
+
+# Resistance to "Torsion Point" attack
+
+## SIKE Vulnerability (The "Torsion Point" Attack) of 2022
+
+SIKE (Supersingular Isogeny Key Encapsulation) was a key exchange, more specifically, a Key Encapsulation Mechanism (KEM). In the SIKE protocol, users had to share more than just the target elliptic curve. To make the math work for key exchange, they shared the images of specific points (called torsion points) under the secret isogeny.
+- The Info: If the secret isogeny is 𝜙, SIKE gave away 𝜙(𝑃) and 𝜙(𝑄) for specific basis points 𝑃 and 𝑄.
+- The Break: In 2022, Castryck and Decru showed that this auxiliary information allowed an attacker to "glue" the elliptic curves together into a higher-dimensional surface (an Abelian surface). In this higher dimension, the secret isogeny became a path that could be computed efficiently using the "Kani’s Lemma" approach.
+- The Oversight: For years, cryptanalysts thought this extra info was harmless, but had missed the math to break it had existed in pure geometry papers since the late 1990s. No one had applied it to cryptography yet.
+
+## Why SQISign appears unaffected by the SIKE Vulnerability
+
+SQISign is built differently. It is a digital signature scheme, not a key exchange.
+- No Torsion Points: In SQISign, the prover (signer) does not need to provide the images of torsion points to the verifier. The verifier only sees the starting curve 𝐸₀ and the final curve 𝐸ₐ.
+- The "Pure" Isogeny Problem: Because that auxiliary info is absent, the specific attack that broke SIKE has no "hook" to grab onto. An attacker is left with the Hard Isogeny Problem: finding a path between two curves in a graph that looks like a tangled ball of yarn.
+- The Quaternion Shield: SQISign relies on the Deuring Correspondence. Even if you find a vulnerability in the curve geometry, you still have to contend with the Endomorphism Ring Problem in the quaternion algebra, which is a completely different mathematical domain.
 
 # SQIsign Algorithm Overview
 
@@ -604,7 +620,7 @@ IANA is requested to register the following entries in the "JSON Web Key Paramet
 
 The authors would like to thank:
 
-- The SQIsign design team (De Feo, Kohel, Leroux, Petit, Wesolowski) for their groundbreaking work on isogeny-based signatures
+- The SQIsign design team for groundbreaking work on isogeny-based signatures
 - The NIST PQC team for managing the standardization process
 - The COSE and JOSE working groups for guidance on integration
 - The IRTF Crypto Forum Research Group for ongoing cryptanalytic review
