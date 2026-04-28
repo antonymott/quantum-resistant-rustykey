@@ -21,6 +21,7 @@ npm i quantum-resistant-rustykey
 
 ### NOTE: Why we support SQISign when it is 'NIST-on-ramp' only
 *TLDR; to help hurdle the "silent" barrier to post-quantum adoption: 1024-byte buffer limit in many existing FIDO2/WebAuthn implementations*
+- please see our IETF standards track draft for inclusion of SQISign [cose-sqisign](https://www.ietf.org/archive/id/draft-mott-cose-sqisign-00.html)
 
 #### WebAuthn PQC Signature size constraints
 Dilithium variants, and Falcon-1024 are physical incompatibile with millions of existing FIDO2/WebAuthn authenticators that rely on the CTAP2 1024-byte buffer limit.
