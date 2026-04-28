@@ -1,5 +1,15 @@
 # quantum-resistant-rustykey
 
+## 0.8.0
+
+### Minor Changes
+
+- bfa11fd: Readme updated
+
+### Patch Changes
+
+- added ietf drafts folder
+
 ## 0.7.9
 
 ### Patch Changes
