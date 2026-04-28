@@ -7,9 +7,17 @@ import {
 	loadMlKem512,
 	loadMlKem768,
 	loadSqisignLvl1,
+	loadSqisignLvl3,
+	loadSqisignLvl5,
 	SQISIGN_LVL1_KAT0_MSG_HEX,
 	SQISIGN_LVL1_KAT0_PK_HEX,
 	SQISIGN_LVL1_KAT0_SIG_HEX,
+	SQISIGN_LVL3_KAT0_MSG_HEX,
+	SQISIGN_LVL3_KAT0_PK_HEX,
+	SQISIGN_LVL3_KAT0_SIG_HEX,
+	SQISIGN_LVL5_KAT0_MSG_HEX,
+	SQISIGN_LVL5_KAT0_PK_HEX,
+	SQISIGN_LVL5_KAT0_SIG_HEX,
 } from "quantum-resistant-rustykey";
 
 const logEl = document.querySelector("#log") as HTMLPreElement;
@@ -19,6 +27,44 @@ const runBtn = document.querySelector("#run") as HTMLButtonElement;
 
 function log(msg: string) {
 	logEl.textContent = `${logEl.textContent ?? ""}${msg}\n`;
+}
+
+function parseHex(hex: string): Uint8Array {
+	return Uint8Array.from(
+		hex.match(/.{1,2}/g)!.map((b: string) => Number.parseInt(b, 16)),
+	);
+}
+
+function setVariantOptions(algorithm: string) {
+	const optionsByAlgorithm: Record<string, Array<{ value: string; label: string }>> = {
+		mlkem: [
+			{ value: "768", label: "768" },
+			{ value: "512", label: "512" },
+			{ value: "1024", label: "1024" },
+		],
+		fndsa: [
+			{ value: "512", label: "512 (Falcon-512)" },
+			{ value: "1024", label: "1024 (Falcon-1024)" },
+		],
+		mldsa: [
+			{ value: "512", label: "512 (Dilithium3)" },
+			{ value: "1024", label: "1024 (Dilithium5)" },
+		],
+		sqisign: [
+			{ value: "1", label: "I (Level 1)" },
+			{ value: "3", label: "III (Level 3)" },
+			{ value: "5", label: "V (Level 5)" },
+		],
+	};
+
+	const options = optionsByAlgorithm[algorithm] ?? optionsByAlgorithm.mlkem;
+	variantEl.replaceChildren();
+	for (const option of options) {
+		const el = document.createElement("option");
+		el.value = option.value;
+		el.textContent = option.label;
+		variantEl.appendChild(el);
+	}
 }
 
 async function run() {
@@ -75,31 +121,43 @@ async function run() {
 		}
 
 		if (algorithm === "sqisign") {
-			log("Loading SQISign level 1…");
+			const config =
+				v === "3"
+					? {
+							name: "SQISign III (lvl3)",
+							load: loadSqisignLvl3,
+							pk: SQISIGN_LVL3_KAT0_PK_HEX,
+							msg: SQISIGN_LVL3_KAT0_MSG_HEX,
+							sig: SQISIGN_LVL3_KAT0_SIG_HEX,
+						}
+					: v === "5"
+						? {
+								name: "SQISign V (lvl5)",
+								load: loadSqisignLvl5,
+								pk: SQISIGN_LVL5_KAT0_PK_HEX,
+								msg: SQISIGN_LVL5_KAT0_MSG_HEX,
+								sig: SQISIGN_LVL5_KAT0_SIG_HEX,
+							}
+						: {
+								name: "SQISign I (lvl1)",
+								load: loadSqisignLvl1,
+								pk: SQISIGN_LVL1_KAT0_PK_HEX,
+								msg: SQISIGN_LVL1_KAT0_MSG_HEX,
+								sig: SQISIGN_LVL1_KAT0_SIG_HEX,
+							};
+			log(`Loading ${config.name}…`);
 			log(
 				"Note: reference keygen/sign can take a long time; this demo only checks verify on a NIST KAT vector.",
 			);
-			const sq = await loadSqisignLvl1();
-			const pk = Uint8Array.from(
-				SQISIGN_LVL1_KAT0_PK_HEX
-					.match(/.{1,2}/g)!
-					.map((b: string) => Number.parseInt(b, 16)),
-			);
-			const msg = Uint8Array.from(
-				SQISIGN_LVL1_KAT0_MSG_HEX
-					.match(/.{1,2}/g)!
-					.map((b: string) => Number.parseInt(b, 16)),
-			);
-			const sig = Uint8Array.from(
-				SQISIGN_LVL1_KAT0_SIG_HEX
-					.match(/.{1,2}/g)!
-					.map((b: string) => Number.parseInt(b, 16)),
-			);
+			const sq = await config.load();
+			const pk = parseHex(config.pk);
+			const msg = parseHex(config.msg);
+			const sig = parseHex(config.sig);
 			const ok = await sq.verify(sig, msg, pk);
 			if (!ok) {
-				throw new Error("SQISign KAT verification failed");
+				throw new Error(`${config.name} KAT verification failed`);
 			}
-			log("SQISign KAT verify OK.");
+			log(`${config.name} KAT verify OK.`);
 			log("All checks passed.");
 			return;
 		}
@@ -149,26 +207,7 @@ runBtn.addEventListener("click", () => {
 });
 
 algorithmEl.addEventListener("change", () => {
-	if (algorithmEl.value === "fndsa") {
-		if (variantEl.value === "768") {
-			variantEl.value = "512";
-		}
-		return;
-	}
-	if (algorithmEl.value === "mldsa") {
-		if (variantEl.value === "768") {
-			variantEl.value = "512";
-		}
-		return;
-	}
-	if (algorithmEl.value === "sqisign") {
-		if (variantEl.value === "768") {
-			variantEl.value = "512";
-		}
-		return;
-	}
-
-	if (variantEl.value !== "512" && variantEl.value !== "768" && variantEl.value !== "1024") {
-		variantEl.value = "768";
-	}
+	setVariantOptions(algorithmEl.value);
 });
+
+setVariantOptions(algorithmEl.value);

@@ -25,6 +25,14 @@ const bundles = [
 		entry: join(root, "wasm/build/sqisign-lvl1-module.js"),
 		outfile: join(root, "src/vendor/sqisignlvl1.js"),
 	},
+	{
+		entry: join(root, "wasm/build/sqisign-lvl3-module.js"),
+		outfile: join(root, "src/vendor/sqisignlvl3.js"),
+	},
+	{
+		entry: join(root, "wasm/build/sqisign-lvl5-module.js"),
+		outfile: join(root, "src/vendor/sqisignlvl5.js"),
+	},
 ];
 
 for (const { entry, outfile } of bundles) {

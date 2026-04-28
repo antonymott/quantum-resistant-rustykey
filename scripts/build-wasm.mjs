@@ -56,6 +56,12 @@ if (hasEmcc) {
 	run("bash", [join(wasmDir, "build_sqisign_lvl1.sh")], {
 		env: { ...process.env, SQISIGN_NATIVE_DIR: sqisignDir },
 	});
+	run("bash", [join(wasmDir, "build_sqisign_lvl3.sh")], {
+		env: { ...process.env, SQISIGN_NATIVE_DIR: sqisignDir },
+	});
+	run("bash", [join(wasmDir, "build_sqisign_lvl5.sh")], {
+		env: { ...process.env, SQISIGN_NATIVE_DIR: sqisignDir },
+	});
 } else {
 	const image = "emscripten/emsdk:3.1.51";
 	run("docker", [
@@ -88,5 +94,29 @@ if (hasEmcc) {
 		"bash",
 		"-lc",
 		"export SQISIGN_NATIVE_DIR=/work/vendor/sqisign-native && bash ./build_sqisign_lvl1.sh",
+	]);
+	run("docker", [
+		"run",
+		"--rm",
+		"-v",
+		`${root}:/work`,
+		"-w",
+		"/work/wasm",
+		image,
+		"bash",
+		"-lc",
+		"export SQISIGN_NATIVE_DIR=/work/vendor/sqisign-native && bash ./build_sqisign_lvl3.sh",
+	]);
+	run("docker", [
+		"run",
+		"--rm",
+		"-v",
+		`${root}:/work`,
+		"-w",
+		"/work/wasm",
+		image,
+		"bash",
+		"-lc",
+		"export SQISIGN_NATIVE_DIR=/work/vendor/sqisign-native && bash ./build_sqisign_lvl5.sh",
 	]);
 }

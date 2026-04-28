@@ -8,9 +8,17 @@ import {
 	loadMlKem768,
 	loadMlKem1024,
 	loadSqisignLvl1,
+	loadSqisignLvl3,
+	loadSqisignLvl5,
 	SQISIGN_LVL1_KAT0_MSG_HEX,
 	SQISIGN_LVL1_KAT0_PK_HEX,
 	SQISIGN_LVL1_KAT0_SIG_HEX,
+	SQISIGN_LVL3_KAT0_MSG_HEX,
+	SQISIGN_LVL3_KAT0_PK_HEX,
+	SQISIGN_LVL3_KAT0_SIG_HEX,
+	SQISIGN_LVL5_KAT0_MSG_HEX,
+	SQISIGN_LVL5_KAT0_PK_HEX,
+	SQISIGN_LVL5_KAT0_SIG_HEX,
 } from "./index";
 import { fromHex } from "./signature-common";
 
@@ -149,6 +157,30 @@ describe("quantum-resistant-rustykey (mlkem-wasm adapter)", () => {
 		const pk = fromHex(SQISIGN_LVL1_KAT0_PK_HEX);
 		const msg = fromHex(SQISIGN_LVL1_KAT0_MSG_HEX);
 		const sig = fromHex(SQISIGN_LVL1_KAT0_SIG_HEX);
+		expect(await sq.verify(sig, msg, pk)).toBe(true);
+
+		const bad = new Uint8Array(sig);
+		bad[0] ^= 1;
+		expect(await sq.verify(bad, msg, pk)).toBe(false);
+	});
+
+	it("verifies SQISign level-3 against an upstream NIST KAT vector", async () => {
+		const sq = await loadSqisignLvl3();
+		const pk = fromHex(SQISIGN_LVL3_KAT0_PK_HEX);
+		const msg = fromHex(SQISIGN_LVL3_KAT0_MSG_HEX);
+		const sig = fromHex(SQISIGN_LVL3_KAT0_SIG_HEX);
+		expect(await sq.verify(sig, msg, pk)).toBe(true);
+
+		const bad = new Uint8Array(sig);
+		bad[0] ^= 1;
+		expect(await sq.verify(bad, msg, pk)).toBe(false);
+	});
+
+	it("verifies SQISign level-5 against an upstream NIST KAT vector", async () => {
+		const sq = await loadSqisignLvl5();
+		const pk = fromHex(SQISIGN_LVL5_KAT0_PK_HEX);
+		const msg = fromHex(SQISIGN_LVL5_KAT0_MSG_HEX);
+		const sig = fromHex(SQISIGN_LVL5_KAT0_SIG_HEX);
 		expect(await sq.verify(sig, msg, pk)).toBe(true);
 
 		const bad = new Uint8Array(sig);

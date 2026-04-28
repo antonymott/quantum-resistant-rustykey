@@ -5,12 +5,20 @@ import mlkem1024 from "./vendor/mlkem1024.js";
 
 export { loadFnDsa512, loadFnDsa1024 } from "./fndsa.js";
 export { loadMlDsa3, loadMlDsa5 } from "./mldsa.js";
-export { loadSqisignLvl1 } from "./sqisign.js";
+export { loadSqisignLvl1, loadSqisignLvl3, loadSqisignLvl5 } from "./sqisign.js";
 export {
 	SQISIGN_LVL1_KAT0_MSG_HEX,
 	SQISIGN_LVL1_KAT0_PK_HEX,
 	SQISIGN_LVL1_KAT0_SIG_HEX,
 	SQISIGN_LVL1_KAT0_SM_HEX,
+	SQISIGN_LVL3_KAT0_MSG_HEX,
+	SQISIGN_LVL3_KAT0_PK_HEX,
+	SQISIGN_LVL3_KAT0_SIG_HEX,
+	SQISIGN_LVL3_KAT0_SM_HEX,
+	SQISIGN_LVL5_KAT0_MSG_HEX,
+	SQISIGN_LVL5_KAT0_PK_HEX,
+	SQISIGN_LVL5_KAT0_SIG_HEX,
+	SQISIGN_LVL5_KAT0_SM_HEX,
 } from "./sqisign-kat-lvl1.js";
 
 /** Minimal surface used by this package (mlkem-wasm–style API). */

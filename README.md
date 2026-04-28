@@ -16,7 +16,7 @@ npm i quantum-resistant-rustykey
 - includes NIST approved as well as riskier NIST 'on-ramp' variants eg SQISign
 - **ML-DSA** (ML-DSA-65, ML-DSA-87)
 - **FN-DSA** (FN-DSA-512, FN-DSA-1024)
-- **SQIsign** (Level 1)
+- **SQIsign** (Level 1, Level 3, Level 5)
 - **ML-KEM** (512, 768, 1024) using [mlkem-native](https://github.com/pq-code-package/mlkem-native).
 
 ### NOTE: Why we support SQISign when it is 'NIST-on-ramp' only
@@ -197,6 +197,78 @@ async function run() {
 run().catch((err) => {
   console.error(err);
   output.textContent = "failed";
+});
+```
+
+## Signatures
+
+All signature variants expose the same API (`keypair()`, `sign()`, `verify()`, `buffer_to_string()`).
+
+### Node.js / backend (SQISign I, SQISign V, FN-DSA-512)
+
+```typescript
+import {
+  loadSqisignLvl1,
+  loadSqisignLvl5,
+  loadFnDsa512,
+} from "quantum-resistant-rustykey";
+
+async function demo() {
+  const message = new TextEncoder().encode("RustyKey signature test");
+
+  const variants = [
+    ["SQIsign-I", await loadSqisignLvl1()],
+    ["SQIsign-V", await loadSqisignLvl5()],
+    ["FN-DSA-512", await loadFnDsa512()],
+  ] as const;
+
+  for (const [name, signer] of variants) {
+    const kp = signer.keypair();
+    const pk = await kp.get("public_key");
+    const sk = await kp.get("private_key");
+    const sig = await signer.sign(message, sk);
+    const ok = await signer.verify(sig, message, pk);
+    console.log(`${name}:`, ok ? "OK" : "FAIL");
+  }
+}
+
+demo().catch(console.error);
+```
+
+### Browser / frontend (SQISign I, SQISign V, FN-DSA-512)
+
+```typescript
+import {
+  loadSqisignLvl1,
+  loadSqisignLvl5,
+  loadFnDsa512,
+} from "quantum-resistant-rustykey";
+
+const out = document.querySelector("#output") as HTMLPreElement;
+
+async function runSignatures() {
+  const message = new TextEncoder().encode("hello from browser signatures");
+  const variants = [
+    ["SQIsign-I", await loadSqisignLvl1()],
+    ["SQIsign-V", await loadSqisignLvl5()],
+    ["FN-DSA-512", await loadFnDsa512()],
+  ] as const;
+
+  const lines: string[] = [];
+  for (const [name, signer] of variants) {
+    const kp = signer.keypair();
+    const pk = await kp.get("public_key");
+    const sk = await kp.get("private_key");
+    const sig = await signer.sign(message, sk);
+    const ok = await signer.verify(sig, message, pk);
+    lines.push(`${name}: ${ok ? "verify OK" : "verify FAILED"}`);
+  }
+  out.textContent = lines.join("\n");
+}
+
+runSignatures().catch((err) => {
+  console.error(err);
+  out.textContent = "signature demo failed";
 });
 ```
 

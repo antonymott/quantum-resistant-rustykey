@@ -24,6 +24,7 @@ export type KemVariant = "k1024" | "k768" | "k512";
 
 export type FnDsaVariant = "falcon512" | "falcon1024";
 export type MlDsaVariant = "dilithium3" | "dilithium5";
+export type SqisignVariant = "lvl1" | "lvl3" | "lvl5";
 
 export interface IFnDsa {
 	keypair(): KeyPair;
