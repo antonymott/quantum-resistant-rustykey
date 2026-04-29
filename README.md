@@ -68,6 +68,8 @@ The three parameter sets (512/768/1024) use the same implementation family and d
 
 ### Why we mix C => emscripten with Rust => wasm-bindgen for web-assembly module creation
 
+Current status in this repository: the shipped cryptographic WASM modules are built via Emscripten from vetted C/C++ upstream code, while Rust/TypeScript is primarily used for package-level ergonomics and integration layers.
+
 Increasingly, developers favor Rust => wasm-bindgen over C => emscripten for Rust's superior compile-time memory safety...and leaning on Rust is implied in our brand! RustyKey® current dual approach is a way to balance performance, security-vetted logic, and web compatibility. Some technical factors may make C => emscripten approach acceptable and, in some cases, preferable for post-quantum cryptography:
 
 - upstream Reliability: Many NIST-standardized PQC algorithms (like ML-KEM) have highly optimized, audited, and "constant-time" reference implementations written in C. Using C => Emscripten allows RustyKey® to port these vetted "upstream" sources directly, reducing the risk of introducing new implementation bugs during a full rewrite into Rust.
@@ -75,6 +77,14 @@ Increasingly, developers favor Rust => wasm-bindgen over C => emscripten for Rus
 - Constant-Time Guarantees: web-assembly is particularly opaque. In cryptography, protection against side-channel attacks (like timing attacks) is often more critical than general-purpose memory safety. Using audited C code that is already proven to be constant-time may be a safer WASM route than a new Rust implementation that might inadvertently introduce timing leaks. We encourage realtime constant time checks in our testbed site and appreciate any feedback to improve.
 
 - Toolchain Maturity: Emscripten is a mature leader in the WASM ecosystem (sometimes...bloated!). For projects needing to bridge legacy or specialized C libraries with the web, emscripten provides a stable environment that can, when optimized, outperform wasm-bindgen in raw execution speed for specific linear memory access patterns.
+
+- Verification Portability: security claims often live with the upstream C implementation (proof scripts, constant-time analyses, side-channel patches). Keeping that code path in WASM preserves traceability between "what was reviewed" and "what is shipped."
+
+- Rust Still Adds Value Around the Core: Rust/TypeScript remain excellent for orchestration layers (API ergonomics, input validation, lifecycle safety, integration code). In practice this means "safe glue + vetted primitive core" rather than forcing a full cryptographic rewrite too early.
+
+- Practical Side-Channel Discipline in Rust is non-trivial: Rust memory safety does not automatically guarantee constant-time behavior. Extra care is still required around branching, indexing, optimizer behavior, allocations, and panic paths, especially when targeting wasm32.
+
+- Long-term Strategy: once a Rust implementation reaches parity in test vectors, profiling, and side-channel review, migrating selected modules can reduce FFI complexity. Until then, Emscripten can be the lower-risk route for production-adjacent cryptographic primitives.
 
 
 ### Why we offer WASM implementations of SQISign (NIST on-ramp only) alongside established, standards-track Falcon and Dilithium?
