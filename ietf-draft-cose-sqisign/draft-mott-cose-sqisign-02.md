@@ -5,7 +5,7 @@ title: |
   Registrations for SQIsign
 abbrev: cose-sqisign
 category: std
-docName: draft-mott-cose-sqisign-01
+docName: draft-mott-cose-sqisign-02
 submissiontype: IETF
 number:
 consensus: true
@@ -97,9 +97,9 @@ This document specifies the algorithm encodings and representations for the SQIs
 
 SQIsign is an isogeny-based post-quantum signature scheme that provides the most compact signature and public key sizes of any candidate in the NIST Post-Quantum Cryptography (PQC) standardization and on-ramp-to-standardization processes.
 
-The standardization of SQIsign is critical to addressing immediate infrastructure bottlenecks, specifically the FIDO2 CTAP2 specification used by an estimated 6.25 billion in-service devices and browser installations. CTAP2 enforces a 1024-byte default limit for external key communication. Most standardized post-quantum signatures exceed this limit, so cannot easily be deployed in these ecosystems without prohibitive protocol renegotiation, complex message fragmentation or hardware replacement. SQIsign-L1 signatures are small enough to enable delivery over highly constrained networks like 802.15.4 with minimal fragmentation.
+The standardization of SQIsign will be helpful to address current infrastructure bottlenecks, specifically the FIDO2 CTAP2 specification used by billions of in-service devices and browser installations. Depending on authenticator implementation, transport (USB/NFC/BLE) and message fragmentation support. Some deployments of CTAP2-based authenticators enforce limits near 1024 bytes for external key communication, and some standardized post-quantum signature schemes increase message sizes and may stress constrained authenticators or transports. As a result CBOR-encoded messages may hit limits in some authenticators. SQIsign-L1, L2 and L5 signatures are small enough to enable delivery over constrained networks like 802.15.4 and may be more suitable for constrained networks due to smaller signature sizes.
 
-This document clarifies that SQIsign's security relies on the general supersingular isogeny problem and is fundamentally unaffected by the torsion-point attacks that deprecated the SIDH/SIKE key exchange. By establishing stable COSE and JOSE identifiers, this document ensures the interoperability required for the seamless integration of post-quantum security into high-density, bandwidth-constrained, and legacy-compatible hardware environments.
+This document clarifies that SQIsign does not expose the auxiliary torsion-point information exploited in the SIDH/SIKE attacks. Consequently, the specific attack techniques of Castryck–Decru do not directly apply. However, the scheme remains subject to ongoing cryptanalysis of isogeny-based constructions. By establishing stable COSE and JOSE identifiers, this document ensures the interoperability required for the seamless integration of post-quantum security into high-density, bandwidth-constrained, and legacy-compatible hardware environments.
 
 --- middle
 
@@ -109,9 +109,9 @@ This document registers algorithm identifiers and key type parameters for SQIsig
 
 ## Background and Motivation
 
-Post-quantum cryptography readiness is critical for constrained devices. As of 2026, while FIDO2/WebAuthn supports various COSE algorithms, hardware authenticators (like YubiKeys) and platform authenticators (like TPMs) have strict memory/storage constraints, effectively limiting public keys to 1024 bytes or less, hindering the adoption of large-key post-quantum algorithms.
+Post-quantum cryptography readiness is critical for constrained devices. As of 2026, while FIDO2/WebAuthn supports various COSE algorithms, some hardware authenticators and platform authenticators (like TPMs) have strict memory/storage constraints, effectively limiting public keys to 1024 bytes or less, hindering the adoption of large-key post-quantum algorithms.
 
-### Urgent Need for Smaller PQC Signatures
+### Pressing Need for Smaller PQC Signatures
 
 FN-DSA (Falcon) and ML-DSA (Dilithium) have larger signatures that may not fit in constrained environments. 
 
@@ -122,6 +122,8 @@ Falcon (NIST secondary) uses NTRU lattices to achieve very small signatures and 
 SQIsign {{SQIsign-Spec}} {{SQIsign-Analysis}} is a non-lattice, isogeny-based scheme that offers the smallest signature sizes but suffers from significantly slower signature generation where even vI may take seconds to minutes, or longer with WASM implementations for browsers of particular relevance to signatures required for WebAuthn PassKeys {{WebAuthn-PQC-Signature-size-constraints}}. SQIsign is an isogeny-based digital signature scheme participating in NIST's Round 2 Additional Digital Signature Schemes, not yet a NIST standard {{NIST-Finalized-Standards}}.
 
 Speed: SQIsign is significantly slower at signing (roughly 100x to 1000x) compared to ML-DSA, though the math is changing fast and variants improve this.
+
+Table 1 compares representative parameter sets; note that these schemes are at different stages of standardization and evaluation.
 
 | Algorithm | Public Key Size | Signature Size | PK + Sig Fits < 1024?|
 |-----------|-----------------|----------------|----------------------|
@@ -141,9 +143,7 @@ The total addressable market for SQIsign in constrained devices is estimated at 
 #### Device Category Breakdown
 
 ##### Legacy Hardware Security Keys: ~120 - 150 million
-- YubiKeys in Service: Based on Yubico’s historical growth and preliminary 2026 financial estimates, there are approximately
-80 million legacy YubiKeys in active circulation (Series 5 and older). While firmware 5.7+ introduced some PQC readiness,
-older keys cannot be updated to increase buffer sizes - Other Vendors: Competitors (Google Titan, Feitian, Thales) contribute another 40–50 million active legacy keys
+- Security keys in Service: ~120 - 150 million legacy keys in active circulation (Series 5 and older). Some firmware introduced PQC readiness. Some older keys cannot be updated to increase buffer sizes.
 
 ##### Constrained TPMs and Platform Modules: ~1.1 billion
 Trusted Platform Modules (TPMs) are integrated into PCs and servers, but their WebAuthn implementation often inherits protocol-level constraints. Estimated ~2.5 billion active chips worldwide. Constrained Subset: We estimate ~1.1 billion of these are in older Windows 10/11 or Linux machines where the OS "virtual authenticator" or TPM driver still enforces the 1024-byte message default to maintain backward compatibility with external CTAP1/2 tools.
@@ -153,9 +153,9 @@ This category refers to the "User-Agent" layer that mediates between the web and
 Global Browser Agents: There are over 5 billion active browser instances across mobile and desktop (Chrome, Safari, Edge, Firefox). Legacy Protocols: Even on modern hardware, browsers often use the FIDO2 CTAP2 specification which, unless explicitly negotiated for larger messages, maintains a 1024-byte default for external key communication.
 
 ##### Critical Infrastructure: ~300 Million includes Energy (electric, nuclear, oil, gas), Water & Wastewater, Transportation Systems, Communications, Government, Emergency Services, Healthcare and Financial Services
-Industrial/Government: Agencies like the U.S. Department of Defense rely on high-security FIPS-certified keys that are notoriously slow to upgrade. We estimate ~50 million "frozen" government keys. IoT Security: Of the 21.9 billion connected IoT devices in 2026, only a fraction use WebAuthn. However, for those that do (smart locks, secure gateways), approximately 250 million are estimated to use older, non-upgradable secure elements limited to 1024-byte payloads. Recent government-level initiatives highlight the necessity to "...effectively deprecate the use of RSA, Diffie-Hellman (DH), and elliptic curve cryptography (ECDH and ECDSA) when mandated." {{CNSA-2}}, Page 4.
+Industrial/Government: Agencies like the U.S. Department of Defense rely on high-security FIPS-certified keys that are notoriously slow to upgrade. We estimate ~50 million "frozen" government keys. IoT Security: Of the ~21 billion connected IoT devices in 2026, only a fraction use WebAuthn. However, for those that do (smart locks, secure gateways), approximately 250 million are estimated to use older, non-upgradable secure elements limited to 1024-byte payloads. Recent government-level initiatives highlight the necessity to "...effectively deprecate the use of RSA, Diffie-Hellman (DH), and elliptic curve cryptography (ECDH and ECDSA) when mandated." {{CNSA-2}}, Page 4.
 
-### Urgency: Limit or Stop 'Harvest now; decrypt later' Attacks
+### Pressing need: Limit or Stop 'Harvest now; decrypt later' Attacks
 Adversaries are collecting encrypted data today to decrypt when quantum computers become available. The transition to post-quantum cryptography (PQC) is critical for ensuring long-term security of digital communications against adversaries equipped with large-scale quantum computers. The National Institute of Standards and Technology (NIST) has been leading standardization efforts, having selected initial PQC algorithms and continuing to evaluate additional candidates.
 
 CBOR Object Signing and Encryption (COSE) {{RFC9052}} is specifically designed for constrained node networks and IoT environments where bandwidth, storage, and computational resources are limited. The compact nature of SQIsign makes it an ideal candidate for COSE deployments.
@@ -198,6 +198,24 @@ This document uses the following terms:
 - **ECDH**: Elliptic Curve Diffie-Hellman
 - **IANA**: Internet Assigned Numbers Authority
 
+# Resistance to "Torsion Point" attack
+
+## SIKE Vulnerability (The "Torsion Point" Attack) of 2022
+
+SIKE (Supersingular Isogeny Key Encapsulation) was a key exchange, more specifically, a Key Encapsulation Mechanism (KEM). In the SIKE protocol, users had to share more than just the target elliptic curve. To make the math work for key exchange, they shared the images of specific points (called torsion points) under the secret isogeny.
+
+- The Info: If the secret isogeny is 𝜙, SIKE gave away 𝜙(𝑃) and 𝜙(𝑄) for specific basis points 𝑃 and 𝑄.
+
+- The Break: In 2022, Castryck and Decru showed that this auxiliary information allowed an attacker to allowed an attacker to construct a higher-dimensional abelian variety linking the public data. In this setting, the secret isogeny can be recovered efficiently using techniques based on Kani’s results on isogenies between products of elliptic curves.
+
+- The Oversight: For years, cryptanalysts thought this extra info was harmless. Related techniques existed in the algebraic geometry literature but had not previously been applied in this cryptographic context.
+
+## Why SQISign appears unaffected by the SIKE Vulnerability
+
+SQIsign is a signature scheme in which the prover demonstrates knowledge of an isogeny through a zero-knowledge protocol. Unlike SIDH/SIKE, it does not publish images of torsion basis points under secret isogenies.
+The Castryck–Decru attack relies critically on this auxiliary torsion-point information to construct additional structure (e.g., via abelian surfaces) that enables efficient recovery of the secret isogeny.
+Because SQIsign does not provide such auxiliary data, these techniques do not directly apply. Attacks would instead need to solve instances of the isogeny path problem or related problems in the endomorphism ring, for which no comparable shortcut is currently known.
+
 # SQIsign Algorithm Overview
 
 ## Cryptographic Foundation
@@ -225,7 +243,7 @@ SQIsign is defined with three parameter sets corresponding to NIST security leve
 - **Signing**: Computationally intensive (slower than lattice schemes)
 - **Verification**: Moderate computational cost
 - **Key Generation**: Intensive computation required
-- **Size**: Exceptional efficiency (10 - 20x smaller than lattice alternatives)
+- **Size**: Exceptional efficiency: substantially smaller than many lattice-based alternatives at comparable security levels
 
 **Recommended Use Cases:**
 - Sign-once, verify-many scenarios (firmware, certificates)
@@ -492,7 +510,7 @@ As of this writing, SQIsign is undergoing active cryptanalytic review:
 
 - **NIST Round 2 evaluation**: {{NIST-Finalized-Standards}}
 - **Academic research**: Ongoing analysis of isogeny-based cryptography
-- **Known attacks**: No practical breaks of the security assumptions
+- **Known attacks**: No attacks are currently known that recover private keys for the standardized parameter sets within their claimed security levels. However, the scheme and its underlying assumptions remain under active study.
 
 **Implementers are advised**:
 - Monitor NIST announcements and updates
@@ -604,10 +622,16 @@ IANA is requested to register the following entries in the "JSON Web Key Paramet
 
 The authors would like to thank:
 
-- The SQIsign design team (De Feo, Kohel, Leroux, Petit, Wesolowski) for their groundbreaking work on isogeny-based signatures
+- Luca DeFeo for reviewing draft-00 and providing valuable feedback. Any remaining errors are solely the responsibility of the authors.
+
+- The SQIsign design team for groundbreaking work on isogeny-based signatures
+
 - The NIST PQC team for managing the standardization process
+
 - The COSE and JOSE working groups for guidance on integration
+
 - The IRTF Crypto Forum Research Group for ongoing cryptanalytic review
+
 - Early implementers who provide valuable feedback
 
 This work builds upon the template established by {{I-D.ietf-cose-falcon}} and similar PQC integration efforts.
@@ -757,11 +781,10 @@ This approach:
 
 \[RFC Editor Note:** Please remove this section before publication\]
 
-## draft-mott-cose-sqisign-01
+## draft-mott-cose-sqisign-02
 
-- updated version
-- Algorithm registrations for SQIsign-L1, L3, L5
-- COSE and JOSE integration specifications
-- Security considerations for constrained devices
-
+- Incorporated technical corrections and feedback from Luca De Feo on draft-00
+- Updated the Abstract and Introduction to utilize more neutral, objective language
+- Removed vendor-specific branding in favor of generic cryptographic terminology
+- fixed various formatting issues
 ---
