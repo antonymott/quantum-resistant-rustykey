@@ -1,5 +1,11 @@
 # quantum-resistant-rustykey
 
+## 0.9.0
+
+### Minor Changes
+
+- Remove unnecessary wasm files and updated README.
+
 ## 0.8.2
 
 ### Patch Changes

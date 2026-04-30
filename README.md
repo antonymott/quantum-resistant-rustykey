@@ -374,12 +374,7 @@ ML-KEM logic comes from **mlkem-native** (C), compiled with **Emscripten** under
 
 This implementation includes patches to withstand side-channel attacks. For more information about the security improvements, see: [RaspberryPi recovers secret keys from NIST winner implementation...within minutes](https://kannwischer.eu/papers/2024_kyberslash_preprint20240628.pdf)
 
-## Contributing
 
-- Please make pull requests tested to work on Bun and previous Node.js versions
-- Follow the existing code style and testing practices
-- Include tests for new features
-- Update documentation as needed
 
 ## License
 
@@ -434,17 +429,7 @@ This project was generously supported by:
   <img src="./logo-buzzybee.ai.png" width="60" alt="BuzzyBee Logo" />
 </div>
 
-## How we work (aka Conduct)
 
-**"You are very welcome to our house: It must appear in other ways than words!" - W. Shakespeare**
-
-- do you think of yourself as total n00b...or seasoned and cynical Cryptologic Scientist. WELCOME one and all!
-- consider helping us build a friendly, safe and welcoming environment for all, regardless of level of experience, gender identity and expression, sexual orientation, disability, personal appearance, body size, race, ethnicity, age, religion, nationality, or other similar characteristic.
-- please avoid aliases or nicknames that might detract from a friendly, safe and welcoming environment.
-- getting annoyed? First try being kind and courteous: someone may simply have had a bad day.
-- people have differences of opinion, usually every design or implementation choice carries a trade-off and numerous costs. There is seldom a right answer.
-- go light on unstructured critique, encourage others!
-- if you feel you have been or are being harassed or made uncomfortable by a community member, contact BuzzyBee® our friendly multi-LLM on the chat widget on our testbed site
 
 ## Appendix (WIP) testbed 'coming soon' features
 
