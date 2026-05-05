@@ -45,7 +45,9 @@
     "build:vendor": "pnpm build:wasm && pnpm bundle:mlkem && pnpm bundle:signatures",
     "build": "pnpm build:vendor && tsdown",
     "test": "pnpm build:vendor && vitest run",
-    "release": "changeset publish",
+    "prepack": "pnpm build",
+    "prepublishOnly": "pnpm build",
+    "release": "pnpm build && changeset publish",
     "example:browser": "pnpm --filter browser-demo dev"
   },
   "devDependencies": {
