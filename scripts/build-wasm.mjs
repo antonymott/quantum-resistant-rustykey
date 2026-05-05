@@ -60,13 +60,14 @@ ensureGitRepo(
 const hasEmcc = spawnSync("which", ["emcc"], { encoding: "utf8" }).status === 0;
 
 if (hasEmcc) {
-	run("make", [
-		"-C",
-		wasmDir,
-		`MLKEM_NATIVE_DIR=${nativeDir}`,
-		`FALCON_REF_DIR=${falconDir}`,
-		`MLDSA_NATIVE_DIR=${mldsaDir}`,
-	]);
+	run("make", ["-C", wasmDir], {
+		env: {
+			...process.env,
+			MLKEM_NATIVE_DIR: nativeDir,
+			FALCON_REF_DIR: falconDir,
+			MLDSA_NATIVE_DIR: mldsaDir,
+		},
+	});
 	run("bash", [join(wasmDir, "build_sqisign_lvl1.sh")], {
 		env: { ...process.env, SQISIGN_NATIVE_DIR: sqisignDir },
 	});
@@ -92,10 +93,9 @@ if (hasEmcc) {
 		"-w",
 		"/src",
 		image,
-		"make",
-		"MLKEM_NATIVE_DIR=/mlkem-native",
-		"FALCON_REF_DIR=/falcon-ref",
-		"MLDSA_NATIVE_DIR=/mldsa-native",
+		"bash",
+		"-lc",
+		"export MLKEM_NATIVE_DIR=/mlkem-native FALCON_REF_DIR=/falcon-ref MLDSA_NATIVE_DIR=/mldsa-native && make",
 	]);
 	run("docker", [
 		"run",
