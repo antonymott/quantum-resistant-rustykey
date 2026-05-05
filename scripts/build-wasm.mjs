@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -9,13 +9,32 @@ const nativeDir = join(root, "vendor/mlkem-native");
 const falconDir = join(root, "vendor/falcon-ref");
 const mldsaDir = join(root, "vendor/mldsa-native");
 const sqisignDir = join(root, "vendor/sqisign-native");
+const vendorDir = join(root, "vendor");
 
-if (!existsSync(join(nativeDir, "mlkem", "mlkem_native.h"))) {
-	console.error(
-		"Missing mlkem-native. Clone it:\n  git clone --depth 1 https://github.com/pq-code-package/mlkem-native.git vendor/mlkem-native",
-	);
-	process.exit(1);
+function run(cmd, args, opts = {}) {
+	const r = spawnSync(cmd, args, { stdio: "inherit", ...opts });
+	if (r.status !== 0) process.exit(r.status ?? 1);
 }
+
+function ensureGitRepo(path, probeFile, repoUrl, label) {
+	if (existsSync(join(path, probeFile))) return;
+	mkdirSync(vendorDir, { recursive: true });
+	console.log(`Missing ${label}. Cloning ${repoUrl} ...`);
+	const cloneResult = spawnSync("git", ["clone", "--depth", "1", repoUrl, path], {
+		stdio: "inherit",
+	});
+	if (cloneResult.status !== 0 || !existsSync(join(path, probeFile))) {
+		console.error(`Failed to prepare ${label} at ${path}`);
+		process.exit(cloneResult.status ?? 1);
+	}
+}
+
+ensureGitRepo(
+	nativeDir,
+	join("mlkem", "mlkem_native.h"),
+	"https://github.com/pq-code-package/mlkem-native.git",
+	"mlkem-native",
+);
 
 if (!existsSync(join(falconDir, "falcon.h"))) {
 	console.error(
@@ -24,24 +43,19 @@ if (!existsSync(join(falconDir, "falcon.h"))) {
 	process.exit(1);
 }
 
-if (!existsSync(join(mldsaDir, "mldsa", "mldsa_native.h"))) {
-	console.error(
-		"Missing mldsa-native under vendor/mldsa-native. Clone it:\n  git clone --depth 1 https://github.com/pq-code-package/mldsa-native.git vendor/mldsa-native",
-	);
-	process.exit(1);
-}
+ensureGitRepo(
+	mldsaDir,
+	join("mldsa", "mldsa_native.h"),
+	"https://github.com/pq-code-package/mldsa-native.git",
+	"mldsa-native",
+);
 
-if (!existsSync(join(sqisignDir, "CMakeLists.txt"))) {
-	console.error(
-		"Missing SQISign sources under vendor/sqisign-native. Clone it:\n  git clone --depth 1 https://github.com/SQISign/the-sqisign.git vendor/sqisign-native",
-	);
-	process.exit(1);
-}
-
-function run(cmd, args, opts = {}) {
-	const r = spawnSync(cmd, args, { stdio: "inherit", ...opts });
-	if (r.status !== 0) process.exit(r.status ?? 1);
-}
+ensureGitRepo(
+	sqisignDir,
+	"CMakeLists.txt",
+	"https://github.com/SQISign/the-sqisign.git",
+	"sqisign-native",
+);
 
 const hasEmcc = spawnSync("which", ["emcc"], { encoding: "utf8" }).status === 0;
 

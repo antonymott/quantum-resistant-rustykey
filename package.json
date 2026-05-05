@@ -45,9 +45,10 @@
     "build:vendor": "pnpm build:wasm && pnpm bundle:mlkem && pnpm bundle:signatures",
     "build": "pnpm build:vendor && tsdown",
     "test": "pnpm build:vendor && vitest run",
-    "prepack": "pnpm build",
-    "prepublishOnly": "pnpm build",
-    "release": "pnpm build && changeset publish",
+    "verify:dist": "node scripts/verify-dist.mjs",
+    "prepack": "pnpm verify:dist",
+    "prepublishOnly": "pnpm verify:dist",
+    "release": "pnpm verify:dist && changeset publish",
     "example:browser": "pnpm --filter browser-demo dev"
   },
   "devDependencies": {
