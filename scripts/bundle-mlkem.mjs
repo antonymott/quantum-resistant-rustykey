@@ -9,27 +9,39 @@ const bundles = [
 	{
 		entry: join(root, "mlkem-src/mlkem768.ts"),
 		outfile: join(root, "src/vendor/mlkem.js"),
+		requiredInputs: [join(root, "wasm/build/wasm-module.js")],
 	},
 	{
 		entry: join(root, "mlkem-src/mlkem512.ts"),
 		outfile: join(root, "src/vendor/mlkem512.js"),
+		requiredInputs: [join(root, "wasm/build/wasm-module-512.js")],
 	},
 	{
 		entry: join(root, "mlkem-src/mlkem1024.ts"),
 		outfile: join(root, "src/vendor/mlkem1024.js"),
+		requiredInputs: [join(root, "wasm/build/wasm-module-1024.js")],
 	},
 ];
 
-for (const { entry, outfile } of bundles) {
-	if (!existsSync(entry)) {
+for (const { entry, outfile, requiredInputs } of bundles) {
+	const hasEntry = existsSync(entry);
+	const missingRequired = (requiredInputs ?? []).filter((path) => !existsSync(path));
+
+	if (!hasEntry || missingRequired.length > 0) {
 		if (existsSync(outfile)) {
 			console.warn(
-				`Skipping ML-KEM rebundle; missing source ${entry}. Using existing ${outfile}.`,
+				`Skipping ML-KEM rebundle; missing source inputs. Using existing ${outfile}.`,
 			);
+			if (!hasEntry) {
+				console.warn(` - missing entry: ${entry}`);
+			}
+			for (const path of missingRequired) {
+				console.warn(` - missing dependency: ${path}`);
+			}
 			continue;
 		}
 		throw new Error(
-			`Missing ML-KEM bundle source ${entry} and no existing artifact at ${outfile}.`,
+			`Missing ML-KEM source inputs and no existing artifact at ${outfile}.`,
 		);
 	}
 
