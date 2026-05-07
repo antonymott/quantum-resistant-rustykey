@@ -1,5 +1,6 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { existsSync } from "node:fs";
 import { build } from "esbuild";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -20,6 +21,18 @@ const bundles = [
 ];
 
 for (const { entry, outfile } of bundles) {
+	if (!existsSync(entry)) {
+		if (existsSync(outfile)) {
+			console.warn(
+				`Skipping ML-KEM rebundle; missing source ${entry}. Using existing ${outfile}.`,
+			);
+			continue;
+		}
+		throw new Error(
+			`Missing ML-KEM bundle source ${entry} and no existing artifact at ${outfile}.`,
+		);
+	}
+
 	await build({
 		entryPoints: [entry],
 		bundle: true,

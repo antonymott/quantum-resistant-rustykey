@@ -16,6 +16,20 @@ function run(cmd, args, opts = {}) {
 	if (r.status !== 0) process.exit(r.status ?? 1);
 }
 
+function runResult(cmd, args, opts = {}) {
+	return spawnSync(cmd, args, { stdio: "inherit", ...opts });
+}
+
+function hasCommand(cmd) {
+	return spawnSync("which", [cmd], { encoding: "utf8" }).status === 0;
+}
+
+function isGnuMake(cmd) {
+	const result = spawnSync(cmd, ["--version"], { encoding: "utf8" });
+	const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+	return result.status === 0 && output.includes("GNU Make");
+}
+
 function ensureGitRepo(path, probeFile, repoUrl, label) {
 	if (existsSync(join(path, probeFile))) return;
 	mkdirSync(vendorDir, { recursive: true });
@@ -57,10 +71,14 @@ ensureGitRepo(
 	"sqisign-native",
 );
 
-const hasEmcc = spawnSync("which", ["emcc"], { encoding: "utf8" }).status === 0;
+const hasEmcc = hasCommand("emcc");
+const hasDocker = hasCommand("docker");
+const dockerReady = hasDocker && runResult("docker", ["info"]).status === 0;
+const makeCmd = hasCommand("gmake") ? "gmake" : "make";
+const canRunLocalMake = isGnuMake(makeCmd);
 
-if (hasEmcc) {
-	run("make", ["-C", wasmDir], {
+if (hasEmcc && canRunLocalMake) {
+	run(makeCmd, ["-C", wasmDir], {
 		env: {
 			...process.env,
 			MLKEM_NATIVE_DIR: nativeDir,
@@ -77,7 +95,7 @@ if (hasEmcc) {
 	run("bash", [join(wasmDir, "build_sqisign_lvl5.sh")], {
 		env: { ...process.env, SQISIGN_NATIVE_DIR: sqisignDir },
 	});
-} else {
+} else if (dockerReady) {
 	const image = "emscripten/emsdk:3.1.51";
 	run("docker", [
 		"run",
@@ -133,4 +151,21 @@ if (hasEmcc) {
 		"-lc",
 		"export SQISIGN_NATIVE_DIR=/work/vendor/sqisign-native && bash ./build_sqisign_lvl5.sh",
 	]);
+} else {
+	console.warn("Skipping WASM build: no usable local toolchain and Docker is unavailable.");
+	if (!hasEmcc) {
+		console.warn(" - emcc not found");
+	}
+	if (hasEmcc && !canRunLocalMake) {
+		console.warn(" - GNU Make not found (install `make` as `gmake` on macOS)");
+	}
+	if (hasDocker && !dockerReady) {
+		console.warn(" - Docker command exists but daemon is not running");
+	}
+	console.warn(
+		"Continuing without rebuilding wasm artifacts. Set REQUIRE_WASM_BUILD=1 to make this fatal in CI.",
+	);
+	if (process.env.REQUIRE_WASM_BUILD === "1") {
+		process.exit(1);
+	}
 }
