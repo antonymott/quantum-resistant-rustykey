@@ -77,25 +77,7 @@ const dockerReady = hasDocker && runResult("docker", ["info"]).status === 0;
 const makeCmd = hasCommand("gmake") ? "gmake" : "make";
 const canRunLocalMake = isGnuMake(makeCmd);
 
-if (hasEmcc && canRunLocalMake) {
-	run(makeCmd, ["-C", wasmDir], {
-		env: {
-			...process.env,
-			MLKEM_NATIVE_DIR: nativeDir,
-			FALCON_REF_DIR: falconDir,
-			MLDSA_NATIVE_DIR: mldsaDir,
-		},
-	});
-	run("bash", [join(wasmDir, "build_sqisign_lvl1.sh")], {
-		env: { ...process.env, SQISIGN_NATIVE_DIR: sqisignDir },
-	});
-	run("bash", [join(wasmDir, "build_sqisign_lvl3.sh")], {
-		env: { ...process.env, SQISIGN_NATIVE_DIR: sqisignDir },
-	});
-	run("bash", [join(wasmDir, "build_sqisign_lvl5.sh")], {
-		env: { ...process.env, SQISIGN_NATIVE_DIR: sqisignDir },
-	});
-} else if (dockerReady) {
+function runDockerBuild() {
 	const image = "emscripten/emsdk:3.1.51";
 	run("docker", [
 		"run",
@@ -151,6 +133,46 @@ if (hasEmcc && canRunLocalMake) {
 		"-lc",
 		"export SQISIGN_NATIVE_DIR=/work/vendor/sqisign-native && bash ./build_sqisign_lvl5.sh",
 	]);
+}
+
+if (hasEmcc && canRunLocalMake) {
+	const localMake = runResult(makeCmd, ["-C", wasmDir], {
+		env: {
+			...process.env,
+			MLKEM_NATIVE_DIR: nativeDir,
+			FALCON_REF_DIR: falconDir,
+			MLDSA_NATIVE_DIR: mldsaDir,
+		},
+	});
+	if (localMake.status !== 0) {
+		console.warn(
+			`Local WASM build failed via ${makeCmd} (exit ${localMake.status}).`,
+		);
+		if (dockerReady) {
+			console.warn("Falling back to Docker-based WASM build.");
+			runDockerBuild();
+		} else {
+			console.warn(
+				"Skipping WASM build: Docker is unavailable and local build failed.",
+			);
+			console.warn(
+				"Continuing without rebuilding wasm artifacts. Set REQUIRE_WASM_BUILD=1 to make this fatal in CI.",
+			);
+			if (process.env.REQUIRE_WASM_BUILD === "1") process.exit(1);
+			process.exit(0);
+		}
+	}
+	run("bash", [join(wasmDir, "build_sqisign_lvl1.sh")], {
+		env: { ...process.env, SQISIGN_NATIVE_DIR: sqisignDir },
+	});
+	run("bash", [join(wasmDir, "build_sqisign_lvl3.sh")], {
+		env: { ...process.env, SQISIGN_NATIVE_DIR: sqisignDir },
+	});
+	run("bash", [join(wasmDir, "build_sqisign_lvl5.sh")], {
+		env: { ...process.env, SQISIGN_NATIVE_DIR: sqisignDir },
+	});
+} else if (dockerReady) {
+	runDockerBuild();
 } else {
 	console.warn("Skipping WASM build: no usable local toolchain and Docker is unavailable.");
 	if (!hasEmcc) {
