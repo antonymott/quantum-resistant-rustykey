@@ -432,7 +432,6 @@ This project was generously supported by:
 
 
 ## Appendix (WIP) testbed 'coming soon' features
-
 Below our some examples of stats and interactivity we plan to add to the testbed depending on user-interest that will help users understand the trade-offs between lattice-based (ML-KEM/DSA) and isogeny-based (SQISign) crypto:
 
 - Memory Peak (Heap Usage): WASM runs in a linear memory space. Tracking performance.memory.usedJSHeapSize (in supported browsers) or monitoring the WASM instance’s memory growth is vital, especially for ML-DSA (Dilithium), which can be memory-intensive.
