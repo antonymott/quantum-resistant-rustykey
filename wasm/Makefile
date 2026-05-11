@@ -67,77 +67,77 @@ FALCON_CFLAGS_COMMON := $(CFLAGS_BASE) -I$(FALCON_REF_DIR) \
 	-DFALCON_ASM_CORTEXM4=0
 MLDSA_CFLAGS_COMMON := $(CFLAGS_BASE) -I$(MLDSA_NATIVE_DIR)/mldsa
 
-$(BINARY_768): private CFLAGS := $(MLKEM_CFLAGS_COMMON) -DMLK_CONFIG_PARAMETER_SET=768
-$(BINARY_768): private WASM_FLAGS := $(WASM_FLAGS_SHARED) \
+CFLAGS_768 := $(MLKEM_CFLAGS_COMMON) -DMLK_CONFIG_PARAMETER_SET=768
+WASM_FLAGS_768 := $(WASM_FLAGS_SHARED) \
 	-s EXPORT_NAME="'MLKEM768Module'" \
 	-s EXPORTED_FUNCTIONS='["_mlkem768_keypair_derand","_mlkem768_enc_derand","_mlkem768_dec"]'
 
 $(BINARY_768): $(MLK_SOURCE) wasm_wrapper_768.c
 	@test -f "$(MLK_PREFIX)/mlkem_native.h" || (echo "Set MLKEM_NATIVE_DIR to mlkem-native repo root (expected $(MLK_PREFIX)/mlkem_native.h)"; exit 1)
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(WASM_FLAGS) $^ -o $@
+	$(CC) $(CFLAGS_768) $(WASM_FLAGS_768) $^ -o $@
 
-$(BINARY_512): private CFLAGS := $(MLKEM_CFLAGS_COMMON) -DMLK_CONFIG_PARAMETER_SET=512
-$(BINARY_512): private WASM_FLAGS := $(WASM_FLAGS_SHARED) \
+CFLAGS_512 := $(MLKEM_CFLAGS_COMMON) -DMLK_CONFIG_PARAMETER_SET=512
+WASM_FLAGS_512 := $(WASM_FLAGS_SHARED) \
 	-s EXPORT_NAME="'MLKEM512Module'" \
 	-s EXPORTED_FUNCTIONS='["_mlkem512_keypair_derand","_mlkem512_enc_derand","_mlkem512_dec"]'
 
 $(BINARY_512): $(MLK_SOURCE) wasm_wrapper_512.c
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(WASM_FLAGS) $^ -o $@
+	$(CC) $(CFLAGS_512) $(WASM_FLAGS_512) $^ -o $@
 
-$(BINARY_1024): private CFLAGS := $(MLKEM_CFLAGS_COMMON) -DMLK_CONFIG_PARAMETER_SET=1024
-$(BINARY_1024): private WASM_FLAGS := $(WASM_FLAGS_SHARED) \
+CFLAGS_1024 := $(MLKEM_CFLAGS_COMMON) -DMLK_CONFIG_PARAMETER_SET=1024
+WASM_FLAGS_1024 := $(WASM_FLAGS_SHARED) \
 	-s EXPORT_NAME="'MLKEM1024Module'" \
 	-s EXPORTED_FUNCTIONS='["_mlkem1024_keypair_derand","_mlkem1024_enc_derand","_mlkem1024_dec"]'
 
 $(BINARY_1024): $(MLK_SOURCE) wasm_wrapper_1024.c
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(WASM_FLAGS) $^ -o $@
+	$(CC) $(CFLAGS_1024) $(WASM_FLAGS_1024) $^ -o $@
 
-$(BINARY_FALCON_512): private CFLAGS := $(FALCON_CFLAGS_COMMON)
-$(BINARY_FALCON_512): private WASM_FLAGS := $(WASM_FLAGS_SHARED) \
+CFLAGS_FALCON_512 := $(FALCON_CFLAGS_COMMON)
+WASM_FLAGS_FALCON_512 := $(WASM_FLAGS_SHARED) \
 	-s EXPORT_NAME="'Falcon512Module'" \
 	-s EXPORTED_FUNCTIONS='["_falcon512_public_key_bytes","_falcon512_private_key_bytes","_falcon512_signature_bytes","_falcon512_seed_bytes","_falcon512_keypair_seeded","_falcon512_sign_seeded","_falcon512_verify"]'
 
 $(BINARY_FALCON_512): $(FALCON_SOURCE) wasm_wrapper_falcon_512.c
 	@test -f "$(FALCON_REF_DIR)/falcon.h" || (echo "Missing Falcon reference source at $(FALCON_REF_DIR)"; exit 1)
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(WASM_FLAGS) $^ -lm -o $@
+	$(CC) $(CFLAGS_FALCON_512) $(WASM_FLAGS_FALCON_512) $^ -lm -o $@
 
-$(BINARY_FALCON_1024): private CFLAGS := $(FALCON_CFLAGS_COMMON)
-$(BINARY_FALCON_1024): private WASM_FLAGS := $(WASM_FLAGS_SHARED) \
+CFLAGS_FALCON_1024 := $(FALCON_CFLAGS_COMMON)
+WASM_FLAGS_FALCON_1024 := $(WASM_FLAGS_SHARED) \
 	-s EXPORT_NAME="'Falcon1024Module'" \
 	-s EXPORTED_FUNCTIONS='["_falcon1024_public_key_bytes","_falcon1024_private_key_bytes","_falcon1024_signature_bytes","_falcon1024_seed_bytes","_falcon1024_keypair_seeded","_falcon1024_sign_seeded","_falcon1024_verify"]'
 
 $(BINARY_FALCON_1024): $(FALCON_SOURCE) wasm_wrapper_falcon_1024.c
 	@test -f "$(FALCON_REF_DIR)/falcon.h" || (echo "Missing Falcon reference source at $(FALCON_REF_DIR)"; exit 1)
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(WASM_FLAGS) $^ -lm -o $@
+	$(CC) $(CFLAGS_FALCON_1024) $(WASM_FLAGS_FALCON_1024) $^ -lm -o $@
 
-$(BINARY_MLDSA_65): private CFLAGS := $(MLDSA_CFLAGS_COMMON) \
+CFLAGS_MLDSA_65 := $(MLDSA_CFLAGS_COMMON) \
 	-DMLD_CONFIG_PARAMETER_SET=65 \
 	-DMLD_CONFIG_NAMESPACE_PREFIX=mldsa65
-$(BINARY_MLDSA_65): private WASM_FLAGS := $(WASM_FLAGS_SHARED) \
+WASM_FLAGS_MLDSA_65 := $(WASM_FLAGS_SHARED) \
 	-s EXPORT_NAME="'MlDsa65Module'" \
 	-s EXPORTED_FUNCTIONS='["_mldsa65_public_key_bytes","_mldsa65_private_key_bytes","_mldsa65_signature_bytes","_mldsa65_seed_bytes","_mldsa65_random_bytes","_mldsa65_keypair_seeded","_mldsa65_sign_seeded","_mldsa65_verify_signature"]'
 
 $(BINARY_MLDSA_65): $(MLDSA_SOURCE) wasm_wrapper_mldsa_65.c
 	@test -f "$(MLDSA_NATIVE_DIR)/mldsa/mldsa_native.h" || (echo "Missing mldsa-native source at $(MLDSA_NATIVE_DIR)"; exit 1)
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(WASM_FLAGS) $^ -o $@
+	$(CC) $(CFLAGS_MLDSA_65) $(WASM_FLAGS_MLDSA_65) $^ -o $@
 
-$(BINARY_MLDSA_87): private CFLAGS := $(MLDSA_CFLAGS_COMMON) \
+CFLAGS_MLDSA_87 := $(MLDSA_CFLAGS_COMMON) \
 	-DMLD_CONFIG_PARAMETER_SET=87 \
 	-DMLD_CONFIG_NAMESPACE_PREFIX=mldsa87
-$(BINARY_MLDSA_87): private WASM_FLAGS := $(WASM_FLAGS_SHARED) \
+WASM_FLAGS_MLDSA_87 := $(WASM_FLAGS_SHARED) \
 	-s EXPORT_NAME="'MlDsa87Module'" \
 	-s EXPORTED_FUNCTIONS='["_mldsa87_public_key_bytes","_mldsa87_private_key_bytes","_mldsa87_signature_bytes","_mldsa87_seed_bytes","_mldsa87_random_bytes","_mldsa87_keypair_seeded","_mldsa87_sign_seeded","_mldsa87_verify_signature"]'
 
 $(BINARY_MLDSA_87): $(MLDSA_SOURCE) wasm_wrapper_mldsa_87.c
 	@test -f "$(MLDSA_NATIVE_DIR)/mldsa/mldsa_native.h" || (echo "Missing mldsa-native source at $(MLDSA_NATIVE_DIR)"; exit 1)
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(WASM_FLAGS) $^ -o $@
+	$(CC) $(CFLAGS_MLDSA_87) $(WASM_FLAGS_MLDSA_87) $^ -o $@
 
 all: build
 

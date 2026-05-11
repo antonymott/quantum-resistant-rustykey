@@ -56,6 +56,15 @@ for (const { entry, outfile, requiredInputs } of bundles) {
 		legalComments: "none",
 		logLevel: "info",
 		// Emscripten 3.1+ may emit `await import("module")` for Node; keep it external so esbuild can bundle for web + Node.
-		external: ["module", "fs", "path", "url"],
+		external: [
+			"module",
+			"fs",
+			"path",
+			"url",
+			"node:module",
+			"node:fs",
+			"node:path",
+			"node:url",
+		],
 	});
 }

@@ -59,6 +59,15 @@ for (const { entry, outfile } of bundles) {
 		sourcemap: false,
 		legalComments: "none",
 		logLevel: "info",
-		external: ["module", "fs", "path", "url"],
+		external: [
+			"module",
+			"fs",
+			"path",
+			"url",
+			"node:module",
+			"node:fs",
+			"node:path",
+			"node:url",
+		],
 	});
 }
