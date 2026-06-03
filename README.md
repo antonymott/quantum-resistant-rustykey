@@ -21,10 +21,10 @@ npm i quantum-resistant-rustykey
 
 ### NOTE: Why we support SQISign when it is 'NIST-on-ramp' only
 *TLDR; to help hurdle the "silent" barrier to post-quantum adoption: 1024-byte buffer limit in many existing FIDO2/WebAuthn implementations*
-- please see our IETF standards track draft for inclusion of SQISign [cose-sqisign](https://www.ietf.org/archive/id/draft-mott-cose-sqisign-02.html)
+- please see our IETF standards track draft for inclusion of SQISign [cose-sqisign](https://www.ietf.org/archive/id/draft-mott-cose-sqisign-03.html)
 
 #### WebAuthn PQC Signature size constraints
-Dilithium variants, and Falcon-1024 are physical incompatibile with millions of existing FIDO2/WebAuthn authenticators that rely on the CTAP2 1024-byte buffer limit.
+Dilithium variants, and Falcon-1024 are physically incompatible with millions of existing FIDO2/WebAuthn authenticators that rely on the CTAP2 1024-byte buffer limit.
 
 - CTAP2 protocol, which allows browsers to talk to security keys, often operates within tight memory constraints to maintain the speed and low-power requirements of embedded devices.
 
@@ -35,9 +35,9 @@ Dilithium variants, and Falcon-1024 are physical incompatibile with millions of 
 #### Critical use case example
 For mission-critical applications like low-latency augmented reality remote telesurgery, where ultra-low latency and hardware-rooted trust are non-negotiable. RustyKey® who financially support this repo and the npm package, required a WASM port of SQIsign specifically because the 204-byte signatures are the only PQC option that worked within their current hardware constraints, enabling immediate quantum-resistant public key ceremonies without breaking the existing WebAuthn ecosystem.
 
-## Broad user-friendly live example testbed and playground (coming May 2026)
+## Broad user-friendly live example testbed and playground
 
-- live test environment where general purpose users together with seasoned cryptanalysts, can encrypt and descrypt and play, using all 3 varients of KEM and a test WebAuthn implementations using the signature algorithms
+Live at **[pqc.rustykey.me](https://pqc.rustykey.me)** — a test environment where general-purpose users and seasoned cryptanalysts can encrypt and decrypt and play, using all three variants of KEM and test WebAuthn implementations using the signature algorithms.
 - lattice-based vs isogeny: run tests to check: Montgomery constant times, the surprising difference in time taken for the various steps
 - all are encouraged to suggest improvements, and help a wider audience see how PQC works under the hood and adopt it more quickly and without breaking existing infrastructure.
 
@@ -75,7 +75,7 @@ Increasingly, developers favor Rust => wasm-bindgen over C => emscripten for Rus
 
 - upstream Reliability: Many NIST-standardized PQC algorithms (like ML-KEM) have highly optimized, audited, and "constant-time" reference implementations written in C. Using C => Emscripten allows RustyKey® to port these vetted "upstream" sources directly, reducing the risk of introducing new implementation bugs during a full rewrite into Rust.
 
-- Constant-Time Guarantees: web-assembly is particularly opaque. In cryptography, protection against side-channel attacks (like timing attacks) is often more critical than general-purpose memory safety. Using audited C code that is already proven to be constant-time may be a safer WASM route than a new Rust implementation that might inadvertently introduce timing leaks. We encourage realtime constant time checks in our testbed site and appreciate any feedback to improve.
+- Constant-Time Guarantees: web-assembly is particularly opaque. In cryptography, protection against side-channel attacks (like timing attacks) is often more critical than general-purpose memory safety. Using audited C code that is already proven to be constant-time may be a safer WASM route than a new Rust implementation that might inadvertently introduce timing leaks. We encourage realtime constant time checks in our [testbed](https://pqc.rustykey.me) and appreciate any feedback to improve.
 
 - Toolchain Maturity: Emscripten is a mature leader in the WASM ecosystem (sometimes...bloated!). For projects needing to bridge legacy or specialized C libraries with the web, emscripten provides a stable environment that can, when optimized, outperform wasm-bindgen in raw execution speed for specific linear memory access patterns.
 
@@ -366,6 +366,8 @@ async function main() {
 
 ## Browser example (local)
 
+See the live [PQC testbed](https://pqc.rustykey.me) or run the frontend examples above in a Vite/browser project.
+
 ## Project Structure
 
 ML-KEM logic comes from **mlkem-native** (C), compiled with **Emscripten** under `wasm/`, wrapped by TypeScript in `mlkem-src/`, then bundled into `src/vendor/mlkem*.js`.
@@ -431,8 +433,9 @@ This project was generously supported by:
 
 
 
-## Appendix (WIP) testbed 'coming soon' features
-Below our some examples of stats and interactivity we plan to add to the testbed depending on user-interest that will help users understand the trade-offs between lattice-based (ML-KEM/DSA) and isogeny-based (SQISign) crypto:
+## Appendix: testbed features
+
+Below are some examples of stats and interactivity on the [testbed](https://pqc.rustykey.me), with more planned depending on user interest, to help users understand the trade-offs between lattice-based (ML-KEM/DSA) and isogeny-based (SQISign) crypto:
 
 - Memory Peak (Heap Usage): WASM runs in a linear memory space. Tracking performance.memory.usedJSHeapSize (in supported browsers) or monitoring the WASM instance’s memory growth is vital, especially for ML-DSA (Dilithium), which can be memory-intensive.
 

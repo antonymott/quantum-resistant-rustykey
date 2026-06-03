@@ -1,9 +1,15 @@
-// @ts-expect-error generated Emscripten module
-import MlDsa65Module from "./vendor/mldsa65.js";
-// @ts-expect-error generated Emscripten module
-import MlDsa87Module from "./vendor/mldsa87.js";
-import { asBytes, readBytes, toHex, withStack, writeBytes } from "./signature-common.js";
+import {
+	asBytes,
+	readBytes,
+	toHex,
+	wasmExport,
+	wasmExportWithArgs,
+	withStack,
+	writeBytes,
+} from "./signature-common.js";
 import type { IFnDsa, MlDsaVariant } from "./types.js";
+import MlDsa65Module from "./vendor/mldsa65.js";
+import MlDsa87Module from "./vendor/mldsa87.js";
 
 type MlDsaModule = {
 	_mldsa65_public_key_bytes?: () => number;
@@ -55,7 +61,12 @@ type MlDsaApi = {
 	signatureBytes: (module: MlDsaModule) => number;
 	seedBytes: (module: MlDsaModule) => number;
 	randomBytes: (module: MlDsaModule) => number;
-	keypair: (module: MlDsaModule, pk: number, sk: number, seed: number) => number;
+	keypair: (
+		module: MlDsaModule,
+		pk: number,
+		sk: number,
+		seed: number,
+	) => number;
 	sign: (
 		module: MlDsaModule,
 		sig: number,
@@ -95,31 +106,62 @@ function getApi(variant: MlDsaVariant): MlDsaApi {
 	if (variant === "dilithium5") {
 		return {
 			getModule: getMlDsa87Module,
-			publicKeyBytes: (module) => module._mldsa87_public_key_bytes!(),
-			privateKeyBytes: (module) => module._mldsa87_private_key_bytes!(),
-			signatureBytes: (module) => module._mldsa87_signature_bytes!(),
-			seedBytes: (module) => module._mldsa87_seed_bytes!(),
-			randomBytes: (module) => module._mldsa87_random_bytes!(),
-			keypair: (module, pk, sk, seed) => module._mldsa87_keypair_seeded!(pk, sk, seed),
+			publicKeyBytes: (module) => wasmExport(module._mldsa87_public_key_bytes),
+			privateKeyBytes: (module) =>
+				wasmExport(module._mldsa87_private_key_bytes),
+			signatureBytes: (module) => wasmExport(module._mldsa87_signature_bytes),
+			seedBytes: (module) => wasmExport(module._mldsa87_seed_bytes),
+			randomBytes: (module) => wasmExport(module._mldsa87_random_bytes),
+			keypair: (module, pk, sk, seed) =>
+				wasmExportWithArgs(module._mldsa87_keypair_seeded, pk, sk, seed),
 			sign: (module, sig, msg, msgLen, sk, rnd) =>
-				module._mldsa87_sign_seeded!(sig, msg, msgLen, sk, rnd),
+				wasmExportWithArgs(
+					module._mldsa87_sign_seeded,
+					sig,
+					msg,
+					msgLen,
+					sk,
+					rnd,
+				),
 			verify: (module, sig, sigLen, msg, msgLen, pk) =>
-				module._mldsa87_verify_signature!(sig, sigLen, msg, msgLen, pk),
+				wasmExportWithArgs(
+					module._mldsa87_verify_signature,
+					sig,
+					sigLen,
+					msg,
+					msgLen,
+					pk,
+				),
 		};
 	}
 
 	return {
 		getModule: getMlDsa65Module,
-		publicKeyBytes: (module) => module._mldsa65_public_key_bytes!(),
-		privateKeyBytes: (module) => module._mldsa65_private_key_bytes!(),
-		signatureBytes: (module) => module._mldsa65_signature_bytes!(),
-		seedBytes: (module) => module._mldsa65_seed_bytes!(),
-		randomBytes: (module) => module._mldsa65_random_bytes!(),
-		keypair: (module, pk, sk, seed) => module._mldsa65_keypair_seeded!(pk, sk, seed),
+		publicKeyBytes: (module) => wasmExport(module._mldsa65_public_key_bytes),
+		privateKeyBytes: (module) => wasmExport(module._mldsa65_private_key_bytes),
+		signatureBytes: (module) => wasmExport(module._mldsa65_signature_bytes),
+		seedBytes: (module) => wasmExport(module._mldsa65_seed_bytes),
+		randomBytes: (module) => wasmExport(module._mldsa65_random_bytes),
+		keypair: (module, pk, sk, seed) =>
+			wasmExportWithArgs(module._mldsa65_keypair_seeded, pk, sk, seed),
 		sign: (module, sig, msg, msgLen, sk, rnd) =>
-			module._mldsa65_sign_seeded!(sig, msg, msgLen, sk, rnd),
+			wasmExportWithArgs(
+				module._mldsa65_sign_seeded,
+				sig,
+				msg,
+				msgLen,
+				sk,
+				rnd,
+			),
 		verify: (module, sig, sigLen, msg, msgLen, pk) =>
-			module._mldsa65_verify_signature!(sig, sigLen, msg, msgLen, pk),
+			wasmExportWithArgs(
+				module._mldsa65_verify_signature,
+				sig,
+				sigLen,
+				msg,
+				msgLen,
+				pk,
+			),
 	};
 }
 
@@ -134,7 +176,9 @@ class MlDsaWrapper implements IFnDsa {
 		const pairPromise = (async () => {
 			const api = getApi(this.variant);
 			const module = await api.getModule();
-			const seed = crypto.getRandomValues(new Uint8Array(api.seedBytes(module)));
+			const seed = crypto.getRandomValues(
+				new Uint8Array(api.seedBytes(module)),
+			);
 			return withStack(module, (alloc) => {
 				const pkPtr = alloc(api.publicKeyBytes(module));
 				const skPtr = alloc(api.privateKeyBytes(module));
@@ -162,25 +206,28 @@ class MlDsaWrapper implements IFnDsa {
 		message: Uint8Array | ArrayBuffer | string,
 		private_key: unknown,
 	): Promise<Uint8Array> {
-		return Promise.all([ensureInit(this.variant), Promise.resolve(private_key)]).then(
-			([module, sk]) => {
-				const api = getApi(this.variant);
-				const msg = asBytes(message);
-				const key = asBytes(sk as Uint8Array | ArrayBuffer | string);
-				const rnd = crypto.getRandomValues(new Uint8Array(api.randomBytes(module)));
-				return withStack(module, (alloc) => {
-					const sigPtr = alloc(api.signatureBytes(module));
-					const msgPtr = writeBytes(module, alloc, msg);
-					const skPtr = writeBytes(module, alloc, key);
-					const rndPtr = writeBytes(module, alloc, rnd);
-					const rc = api.sign(module, sigPtr, msgPtr, msg.length, skPtr, rndPtr);
-					if (rc !== 0) {
-						throw new Error(`ML-DSA sign failed with code ${rc}`);
-					}
-					return readBytes(module, sigPtr, api.signatureBytes(module));
-				});
-			},
-		);
+		return Promise.all([
+			ensureInit(this.variant),
+			Promise.resolve(private_key),
+		]).then(([module, sk]) => {
+			const api = getApi(this.variant);
+			const msg = asBytes(message);
+			const key = asBytes(sk as Uint8Array | ArrayBuffer | string);
+			const rnd = crypto.getRandomValues(
+				new Uint8Array(api.randomBytes(module)),
+			);
+			return withStack(module, (alloc) => {
+				const sigPtr = alloc(api.signatureBytes(module));
+				const msgPtr = writeBytes(module, alloc, msg);
+				const skPtr = writeBytes(module, alloc, key);
+				const rndPtr = writeBytes(module, alloc, rnd);
+				const rc = api.sign(module, sigPtr, msgPtr, msg.length, skPtr, rndPtr);
+				if (rc !== 0) {
+					throw new Error(`ML-DSA sign failed with code ${rc}`);
+				}
+				return readBytes(module, sigPtr, api.signatureBytes(module));
+			});
+		});
 	}
 
 	verify(
@@ -188,27 +235,24 @@ class MlDsaWrapper implements IFnDsa {
 		message: Uint8Array | ArrayBuffer | string,
 		public_key: unknown,
 	): Promise<boolean> {
-		return Promise.all([ensureInit(this.variant), Promise.resolve(public_key)]).then(
-			([module, pk]) => {
-				const api = getApi(this.variant);
-				const sig = asBytes(signature);
-				const msg = asBytes(message);
-				const key = asBytes(pk as Uint8Array | ArrayBuffer | string);
-				return withStack(module, (alloc) => {
-					const sigPtr = writeBytes(module, alloc, sig);
-					const msgPtr = writeBytes(module, alloc, msg);
-					const pkPtr = writeBytes(module, alloc, key);
-					return api.verify(
-						module,
-						sigPtr,
-						sig.length,
-						msgPtr,
-						msg.length,
-						pkPtr,
-					) === 0;
-				});
-			},
-		);
+		return Promise.all([
+			ensureInit(this.variant),
+			Promise.resolve(public_key),
+		]).then(([module, pk]) => {
+			const api = getApi(this.variant);
+			const sig = asBytes(signature);
+			const msg = asBytes(message);
+			const key = asBytes(pk as Uint8Array | ArrayBuffer | string);
+			return withStack(module, (alloc) => {
+				const sigPtr = writeBytes(module, alloc, sig);
+				const msgPtr = writeBytes(module, alloc, msg);
+				const pkPtr = writeBytes(module, alloc, key);
+				return (
+					api.verify(module, sigPtr, sig.length, msgPtr, msg.length, pkPtr) ===
+					0
+				);
+			});
+		});
 	}
 
 	buffer_to_string(value: Uint8Array | ArrayBuffer | string): string {

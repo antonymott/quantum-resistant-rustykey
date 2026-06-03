@@ -1,9 +1,15 @@
-// @ts-expect-error generated Emscripten module
-import Falcon1024Module from "./vendor/falcon1024.js";
-// @ts-expect-error generated Emscripten module
-import Falcon512Module from "./vendor/falcon512.js";
-import { asBytes, readBytes, toHex, withStack, writeBytes } from "./signature-common.js";
+import {
+	asBytes,
+	readBytes,
+	toHex,
+	wasmExport,
+	wasmExportWithArgs,
+	withStack,
+	writeBytes,
+} from "./signature-common.js";
 import type { FnDsaVariant, IFnDsa, KeyPair } from "./types.js";
+import Falcon512Module from "./vendor/falcon512.js";
+import Falcon1024Module from "./vendor/falcon1024.js";
 
 type FalconModule = {
 	_falcon512_public_key_bytes?: () => number;
@@ -52,7 +58,12 @@ type FalconApi = {
 	privateKeyBytes: (module: FalconModule) => number;
 	signatureBytes: (module: FalconModule) => number;
 	seedBytes: (module: FalconModule) => number;
-	keypair: (module: FalconModule, pk: number, sk: number, seed: number) => number;
+	keypair: (
+		module: FalconModule,
+		pk: number,
+		sk: number,
+		seed: number,
+	) => number;
 	sign: (
 		module: FalconModule,
 		sig: number,
@@ -92,30 +103,63 @@ function getApi(variant: FnDsaVariant): FalconApi {
 	if (variant === "falcon1024") {
 		return {
 			getModule: getFalcon1024Module,
-			publicKeyBytes: (module) => module._falcon1024_public_key_bytes!(),
-			privateKeyBytes: (module) => module._falcon1024_private_key_bytes!(),
-			signatureBytes: (module) => module._falcon1024_signature_bytes!(),
-			seedBytes: (module) => module._falcon1024_seed_bytes!(),
+			publicKeyBytes: (module) =>
+				wasmExport(module._falcon1024_public_key_bytes),
+			privateKeyBytes: (module) =>
+				wasmExport(module._falcon1024_private_key_bytes),
+			signatureBytes: (module) =>
+				wasmExport(module._falcon1024_signature_bytes),
+			seedBytes: (module) => wasmExport(module._falcon1024_seed_bytes),
 			keypair: (module, pk, sk, seed) =>
-				module._falcon1024_keypair_seeded!(pk, sk, seed),
+				wasmExportWithArgs(module._falcon1024_keypair_seeded, pk, sk, seed),
 			sign: (module, sig, msg, msgLen, sk, seed) =>
-				module._falcon1024_sign_seeded!(sig, msg, msgLen, sk, seed),
+				wasmExportWithArgs(
+					module._falcon1024_sign_seeded,
+					sig,
+					msg,
+					msgLen,
+					sk,
+					seed,
+				),
 			verify: (module, sig, sigLen, msg, msgLen, pk) =>
-				module._falcon1024_verify!(sig, sigLen, msg, msgLen, pk),
+				wasmExportWithArgs(
+					module._falcon1024_verify,
+					sig,
+					sigLen,
+					msg,
+					msgLen,
+					pk,
+				),
 		};
 	}
 
 	return {
 		getModule: getFalcon512Module,
-		publicKeyBytes: (module) => module._falcon512_public_key_bytes!(),
-		privateKeyBytes: (module) => module._falcon512_private_key_bytes!(),
-		signatureBytes: (module) => module._falcon512_signature_bytes!(),
-		seedBytes: (module) => module._falcon512_seed_bytes!(),
-		keypair: (module, pk, sk, seed) => module._falcon512_keypair_seeded!(pk, sk, seed),
+		publicKeyBytes: (module) => wasmExport(module._falcon512_public_key_bytes),
+		privateKeyBytes: (module) =>
+			wasmExport(module._falcon512_private_key_bytes),
+		signatureBytes: (module) => wasmExport(module._falcon512_signature_bytes),
+		seedBytes: (module) => wasmExport(module._falcon512_seed_bytes),
+		keypair: (module, pk, sk, seed) =>
+			wasmExportWithArgs(module._falcon512_keypair_seeded, pk, sk, seed),
 		sign: (module, sig, msg, msgLen, sk, seed) =>
-			module._falcon512_sign_seeded!(sig, msg, msgLen, sk, seed),
+			wasmExportWithArgs(
+				module._falcon512_sign_seeded,
+				sig,
+				msg,
+				msgLen,
+				sk,
+				seed,
+			),
 		verify: (module, sig, sigLen, msg, msgLen, pk) =>
-			module._falcon512_verify!(sig, sigLen, msg, msgLen, pk),
+			wasmExportWithArgs(
+				module._falcon512_verify,
+				sig,
+				sigLen,
+				msg,
+				msgLen,
+				pk,
+			),
 	};
 }
 
@@ -130,7 +174,9 @@ class FnDsaWrapper implements IFnDsa {
 		const pairPromise = (async () => {
 			const api = getApi(this.variant);
 			const module = await api.getModule();
-			const seed = crypto.getRandomValues(new Uint8Array(api.seedBytes(module)));
+			const seed = crypto.getRandomValues(
+				new Uint8Array(api.seedBytes(module)),
+			);
 			return withStack(module, (alloc) => {
 				const pkPtr = alloc(api.publicKeyBytes(module));
 				const skPtr = alloc(api.privateKeyBytes(module));
@@ -158,25 +204,28 @@ class FnDsaWrapper implements IFnDsa {
 		message: Uint8Array | ArrayBuffer | string,
 		private_key: unknown,
 	): Promise<Uint8Array> {
-		return Promise.all([ensureInit(this.variant), Promise.resolve(private_key)]).then(
-			([module, sk]) => {
-				const api = getApi(this.variant);
-				const msg = asBytes(message as Uint8Array | ArrayBuffer | string);
-				const key = asBytes(sk as Uint8Array | ArrayBuffer | string);
-				const seed = crypto.getRandomValues(new Uint8Array(api.seedBytes(module)));
-				return withStack(module, (alloc) => {
-					const sigPtr = alloc(api.signatureBytes(module));
-					const msgPtr = writeBytes(module, alloc, msg);
-					const skPtr = writeBytes(module, alloc, key);
-					const seedPtr = writeBytes(module, alloc, seed);
-					const rc = api.sign(module, sigPtr, msgPtr, msg.length, skPtr, seedPtr);
-					if (rc !== 0) {
-						throw new Error(`Falcon sign failed with code ${rc}`);
-					}
-					return readBytes(module, sigPtr, api.signatureBytes(module));
-				});
-			},
-		);
+		return Promise.all([
+			ensureInit(this.variant),
+			Promise.resolve(private_key),
+		]).then(([module, sk]) => {
+			const api = getApi(this.variant);
+			const msg = asBytes(message as Uint8Array | ArrayBuffer | string);
+			const key = asBytes(sk as Uint8Array | ArrayBuffer | string);
+			const seed = crypto.getRandomValues(
+				new Uint8Array(api.seedBytes(module)),
+			);
+			return withStack(module, (alloc) => {
+				const sigPtr = alloc(api.signatureBytes(module));
+				const msgPtr = writeBytes(module, alloc, msg);
+				const skPtr = writeBytes(module, alloc, key);
+				const seedPtr = writeBytes(module, alloc, seed);
+				const rc = api.sign(module, sigPtr, msgPtr, msg.length, skPtr, seedPtr);
+				if (rc !== 0) {
+					throw new Error(`Falcon sign failed with code ${rc}`);
+				}
+				return readBytes(module, sigPtr, api.signatureBytes(module));
+			});
+		});
 	}
 
 	verify(
@@ -184,27 +233,24 @@ class FnDsaWrapper implements IFnDsa {
 		message: Uint8Array | ArrayBuffer | string,
 		public_key: unknown,
 	): Promise<boolean> {
-		return Promise.all([ensureInit(this.variant), Promise.resolve(public_key)]).then(
-			([module, pk]) => {
-				const api = getApi(this.variant);
-				const sig = asBytes(signature);
-				const msg = asBytes(message);
-				const key = asBytes(pk as Uint8Array | ArrayBuffer | string);
-				return withStack(module, (alloc) => {
-					const sigPtr = writeBytes(module, alloc, sig);
-					const msgPtr = writeBytes(module, alloc, msg);
-					const pkPtr = writeBytes(module, alloc, key);
-					return api.verify(
-						module,
-						sigPtr,
-						sig.length,
-						msgPtr,
-						msg.length,
-						pkPtr,
-					) === 0;
-				});
-			},
-		);
+		return Promise.all([
+			ensureInit(this.variant),
+			Promise.resolve(public_key),
+		]).then(([module, pk]) => {
+			const api = getApi(this.variant);
+			const sig = asBytes(signature);
+			const msg = asBytes(message);
+			const key = asBytes(pk as Uint8Array | ArrayBuffer | string);
+			return withStack(module, (alloc) => {
+				const sigPtr = writeBytes(module, alloc, sig);
+				const msgPtr = writeBytes(module, alloc, msg);
+				const pkPtr = writeBytes(module, alloc, key);
+				return (
+					api.verify(module, sigPtr, sig.length, msgPtr, msg.length, pkPtr) ===
+					0
+				);
+			});
+		});
 	}
 
 	buffer_to_string(value: Uint8Array | ArrayBuffer | string): string {

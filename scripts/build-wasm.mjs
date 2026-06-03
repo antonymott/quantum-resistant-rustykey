@@ -34,9 +34,13 @@ function ensureGitRepo(path, probeFile, repoUrl, label) {
 	if (existsSync(join(path, probeFile))) return;
 	mkdirSync(vendorDir, { recursive: true });
 	console.log(`Missing ${label}. Cloning ${repoUrl} ...`);
-	const cloneResult = spawnSync("git", ["clone", "--depth", "1", repoUrl, path], {
-		stdio: "inherit",
-	});
+	const cloneResult = spawnSync(
+		"git",
+		["clone", "--depth", "1", repoUrl, path],
+		{
+			stdio: "inherit",
+		},
+	);
 	if (cloneResult.status !== 0 || !existsSync(join(path, probeFile))) {
 		console.error(`Failed to prepare ${label} at ${path}`);
 		process.exit(cloneResult.status ?? 1);
@@ -174,7 +178,9 @@ if (hasEmcc && canRunLocalMake) {
 } else if (dockerReady) {
 	runDockerBuild();
 } else {
-	console.warn("Skipping WASM build: no usable local toolchain and Docker is unavailable.");
+	console.warn(
+		"Skipping WASM build: no usable local toolchain and Docker is unavailable.",
+	);
 	if (!hasEmcc) {
 		console.warn(" - emcc not found");
 	}

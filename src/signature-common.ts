@@ -58,3 +58,20 @@ export function readBytes(
 ): Uint8Array {
 	return new Uint8Array(module.HEAPU8.slice(ptr, ptr + length));
 }
+
+export function wasmExport<T>(fn: (() => T) | undefined): T {
+	if (fn === undefined) {
+		throw new Error("WASM export is not available");
+	}
+	return fn();
+}
+
+export function wasmExportWithArgs<TArgs extends unknown[], TResult>(
+	fn: ((...args: TArgs) => TResult) | undefined,
+	...args: TArgs
+): TResult {
+	if (fn === undefined) {
+		throw new Error("WASM export is not available");
+	}
+	return fn(...args);
+}

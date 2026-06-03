@@ -1,6 +1,6 @@
+import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { existsSync } from "node:fs";
 import { build } from "esbuild";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -25,7 +25,9 @@ const bundles = [
 
 for (const { entry, outfile, requiredInputs } of bundles) {
 	const hasEntry = existsSync(entry);
-	const missingRequired = (requiredInputs ?? []).filter((path) => !existsSync(path));
+	const missingRequired = (requiredInputs ?? []).filter(
+		(path) => !existsSync(path),
+	);
 
 	if (!hasEntry || missingRequired.length > 0) {
 		if (existsSync(outfile)) {

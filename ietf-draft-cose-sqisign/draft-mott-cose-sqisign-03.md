@@ -5,7 +5,7 @@ title: |
   Registrations for SQIsign
 abbrev: cose-sqisign
 category: std
-docName: draft-mott-cose-sqisign-02
+docName: draft-mott-cose-sqisign-03
 submissiontype: IETF
 number:
 consensus: true
@@ -781,7 +781,7 @@ This approach:
 
 \[RFC Editor Note:** Please remove this section before publication\]
 
-## draft-mott-cose-sqisign-02
+## draft-mott-cose-sqisign-03
 
 - Incorporated technical corrections and feedback from Luca De Feo on draft-00
 - Updated the Abstract and Introduction to utilize more neutral, objective language
