@@ -1,21 +1,21 @@
 ---
 title: |
-  CBOR Object Signing and Encryption (COSE) and
-  JSON Object Signing and Encryption (JOSE)
-  Registrations for SQIsign
+  CBOR Object Signing and Encryption (COSE) and JSON Object Signing and Encryption (JOSE) Registrations for SQIsign
 abbrev: cose-sqisign
 category: std
-docName: draft-mott-cose-sqisign-latest
+docName: draft-mott-cose-sqisign-04
 submissiontype: IETF
 number:
 consensus: true
-v: 4
+v: 3
 area: SEC
 workgroup: COSE
 keyword:
   - post-quantum cryptography
   - isogeny-based cryptography
   - constrained devices
+  - aerospace satellite
+  - remote robotic telesurgery IAM
   - IoT security
 venue:
   group: COSE
@@ -44,18 +44,23 @@ informative:
   I-D.ietf-cose-falcon:
   I-D.ietf-cose-dilithium:
 
+  NIST-3rd-round-candidates:
+    target: https://csrc.nist.gov/News/2026/nist-advances-9-candidates-to-the-3rd-round-of-pqc
+    title: Nine Candidates Advance to the Third Round of the Additional Digital Signatures for the PQC Standardization Process
+    author:
+      - ins: NIST
+    date: 2026-05
+
   SQIsign-Spec:
     target: https://sqisign.org/spec/sqisign-20250205.pdf
-    title: "SQIsign: Compact Post-Quantum Signatures \
-      from Quaternions and Isogenies (Round 2)"
+    title: "SQIsign: Compact Post-Quantum Signatures from Quaternions and Isogenies (Round 2)"
     author:
       - ins: SQIsign team
     date: 2025-02
 
   NIST-Finalized-Standards:
     target: |
-      https://www.nist.gov/news-events/news/2024/08/
-      nist-releases-first-3-finalized-post-quantum-encryption-standards
+      https://www.nist.gov/news-events/news/2024/08/nist-releases-first-3-finalized-post-quantum-encryption-standards
     title: |
       "NIST Releases First 3 Finalized
       Post-Quantum Encryption Standards"
@@ -74,12 +79,19 @@ informative:
 
   CNSA-2:
     target: |
-      https://media.defense.gov/2025/May/30/
-      2003728741/-1/-1/0/CSA_CNSA_2.0_ALGORITHMS.PDF
+      https://media.defense.gov/2025/May/30/2003728741/-1/-1/0/CSA_CNSA_2.0_ALGORITHMS.PDF
     title: "Commercial National Security Algorithm Suite 2.0"
     author:
       org: National Security Agency
     date: 2025-05
+
+  PQC-Testbed:
+    title: "PQC RustyKey Testbed"
+    target: "https://pqc.rustykey.me"
+    author:
+      ins: "RustyKey"
+      org: "RustyKey Project"
+    date: 2026-06
 
   WebAuthn-PQC-Signature-size-constraints:
     target: https://www.npmjs.com/package/quantum-resistant-rustykey
@@ -91,13 +103,15 @@ informative:
 
 --- abstract
 
-**NOTE: This document describes a signature scheme based on an algorithm currently under evaluation in the NIST Post-Quantum Cryptography standardization process. Be aware that the underlying primitive may change as a result of that process.**
+**NOTE: This document describes a signature scheme based on an algorithm currently under evaluation in the 3rd round {{NIST-3rd-round-candidates}} NIST Post-Quantum Cryptography standardization process. Be aware that the underlying primitive may change as a result of that process.**
  
 This document specifies the algorithm encodings and representations for the SQIsign digital signature scheme within the CBOR Object Signing and Encryption (COSE) and JSON Object Signing and Encryption (JOSE) frameworks.
 
 SQIsign is an isogeny-based post-quantum signature scheme that provides the most compact signature and public key sizes of any candidate in the NIST Post-Quantum Cryptography (PQC) standardization and on-ramp-to-standardization processes.
 
-The standardization of SQIsign will be helpful to address current infrastructure bottlenecks, specifically the FIDO2 CTAP2 specification used by billions of in-service devices and browser installations. Depending on authenticator implementation, transport (USB/NFC/BLE) and message fragmentation support. Some deployments of CTAP2-based authenticators enforce limits near 1024 bytes for external key communication, and some standardized post-quantum signature schemes increase message sizes and may stress constrained authenticators or transports. As a result CBOR-encoded messages may hit limits in some authenticators. SQIsign-L1, L2 and L5 signatures are small enough to enable delivery over constrained networks like 802.15.4 and may be more suitable for constrained networks due to smaller signature sizes.
+The standardization of SQIsign will be helpful to address current infrastructure bottlenecks, specifically the FIDO2 CTAP2 specification used by billions of in-service devices and browser installations.
+
+Depending on authenticator implementation, transport (USB/NFC/BLE) and message fragmentation support, some deployments of CTAP2-based authenticators enforce limits near 1024 bytes for external key communication, and some standardized post-quantum signature schemes increase message sizes and may stress constrained authenticators or transports. As a result CBOR-encoded messages may hit 7609-byte limit in some authenticators. SQIsign-L1, L2 and L5 signatures are small enough to enable delivery over constrained networks like 802.15.4 and may be more suitable for constrained networks due to smaller signature sizes.
 
 This document clarifies that SQIsign does not expose the auxiliary torsion-point information exploited in the SIDH/SIKE attacks. Consequently, the specific attack techniques of Castryck–Decru do not directly apply. However, the scheme remains subject to ongoing cryptanalysis of isogeny-based constructions. By establishing stable COSE and JOSE identifiers, this document ensures the interoperability required for the seamless integration of post-quantum security into high-density, bandwidth-constrained, and legacy-compatible hardware environments.
 
@@ -119,7 +133,7 @@ The fundamental differences between ML-DSA, FN-DSA, and SQIsign lie in their und
 
 Falcon (NIST secondary) uses NTRU lattices to achieve very small signatures and fast verification, but requires complex floating-point math. Dilithium (NIST primary) is a balanced, high-efficiency lattice scheme using Module-LWE/SIS, easy to implement.
 
-SQIsign {{SQIsign-Spec}} {{SQIsign-Analysis}} is a non-lattice, isogeny-based scheme that offers the smallest signature sizes but suffers from significantly slower signature generation where even vI may take seconds to minutes, or longer with WASM implementations for browsers of particular relevance to signatures required for WebAuthn PassKeys {{WebAuthn-PQC-Signature-size-constraints}}. SQIsign is an isogeny-based digital signature scheme participating in NIST's Round 2 Additional Digital Signature Schemes, not yet a NIST standard {{NIST-Finalized-Standards}}.
+SQIsign {{SQIsign-Spec}} {{SQIsign-Analysis}} is a non-lattice, isogeny-based scheme that offers the smallest signature sizes but suffers from significantly slower signature generation where even vI may take seconds to minutes, or longer with WASM implementations for browsers of particular relevance to signatures required for WebAuthn PassKeys {{WebAuthn-PQC-Signature-size-constraints}}. SQIsign is an isogeny-based digital signature scheme participating in NIST's Round 3 {{NIST-3rd-round-candidates}} Additional Digital Signature Schemes, not yet a NIST standard {{NIST-Finalized-Standards}}.
 
 Speed: SQIsign is significantly slower at signing (roughly 100x to 1000x) compared to ML-DSA, though the math is changing fast and variants improve this.
 
@@ -198,7 +212,7 @@ This document uses the following terms:
 - **ECDH**: Elliptic Curve Diffie-Hellman
 - **IANA**: Internet Assigned Numbers Authority
 
-# Resistance to "Torsion Point" attack
+# Cryptanalytic Resistance: SIDH/SIKE Attacks Do Not Apply
 
 ## SIKE Vulnerability (The "Torsion Point" Attack) of 2022
 
@@ -492,6 +506,10 @@ Early implementations SHOULD participate in interoperability testing to ensure:
 - Proper encoding in COSE and JOSE formats
 - Cross-platform compatibility
 
+## Performance testing under real-world scenarios
+
+- public metrics, interoperability and performance testing of the proposed WASM versions can be evaluated on a live testbed {{PQC-Testbed}}.
+
 # Security Considerations
 
 ## Algorithm Security
@@ -504,11 +522,11 @@ These assumptions are **different from lattice-based schemes**, providing crypto
 
 SQIsign is designed to resist attacks by large-scale quantum computers. The three parameter sets provide security equivalent to AES-128, AES-192, and AES-256 against both classical and quantum adversaries.
 
-## Current Cryptanalysis Status
+## Cryptanalysis and Algorithm Maturity
 
 As of this writing, SQIsign is undergoing active cryptanalytic review:
 
-- **NIST Round 2 evaluation**: {{NIST-Finalized-Standards}}
+- **NIST Round 3 evaluation**: {{NIST-3rd-round-candidates}}
 - **Academic research**: Ongoing analysis of isogeny-based cryptography
 - **Known attacks**: No attacks are currently known that recover private keys for the standardized parameter sets within their claimed security levels. However, the scheme and its underlying assumptions remain under active study.
 
@@ -631,6 +649,8 @@ The authors would like to thank:
 - The COSE and JOSE working groups for guidance on integration
 
 - The IRTF Crypto Forum Research Group for ongoing cryptanalytic review
+
+- Aerospace and constrained-telemetry engineers/contractors who suggested the idea for pqc.rustykey.me, a public testbed devoted to anyone wishing to testout, evaluate and critique actual working WASM implemented code of all three levels.
 
 - Early implementers who provide valuable feedback
 
@@ -894,9 +914,9 @@ This section records the status of known implementations at the time of writing.
 
 The requested algorithm identifiers (-61, -62, -63) are:
 
-- In the range designated for experimental/informational use
+- In the Standards Action range (-255 to -1) per RFC 9053
 - Sequential for the three parameter sets
-- Not conflicting with existing registrations
+- Not conflicting with existing registrations (verified against IANA COSE registry)
 - Consistent with the approach used for other PQC algorithms
 
 ## Key Type Design
@@ -920,10 +940,12 @@ This approach:
 
 - Added SQIsign-L3 and SQIsign-L5 COSE_Sign1 and JWS test vectors (algorithms -62 and -63)
 - Documented NIST KAT count = 0 byte values for cross-implementation checks
+- added informational resource for interactive working code public testbed
+- SQISign advances to NIST round 3 with 8 other candidates
 
-## draft-mott-cose-sqisign-02
+## draft-mott-cose-sqisign versions prior to -04
 
-- Incorporated technical corrections and feedback from Luca De Feo on draft-00
+- Incorporated technical corrections and feedback from Luca De Feo
 - Updated the Abstract and Introduction to utilize more neutral, objective language
 - Removed vendor-specific branding in favor of generic cryptographic terminology
 - fixed various formatting issues
