@@ -980,17 +980,18 @@ This approach:
 
 \[RFC Editor Note:** Please remove this section before publication\]
 
-## draft-mott-cose-sqisign-04
+## draft-mott-cose-sqisign-05
 
-- Added SQIsign-L3 and SQIsign-L5 COSE_Sign1 and JWS test vectors (algorithms -62 and -63)
-- Documented NIST KAT count = 0 byte values for cross-implementation checks
-- added informational resource for interactive working code public testbed
-- SQISign advances to NIST round 3 with 8 other candidates
+- added section "SQIsign Variants and the Post-SIKE Landscape"
 
-## draft-mott-cose-sqisign versions prior to -04
+## draft-mott-cose-sqisign versions prior to -05
 
 - Incorporated technical corrections and feedback from Luca De Feo
 - Updated the Abstract and Introduction to utilize more neutral, objective language
 - Removed vendor-specific branding in favor of generic cryptographic terminology
 - fixed various formatting issues
+- Added SQIsign-L3 and SQIsign-L5 COSE_Sign1 and JWS test vectors (algorithms -62 and -63)
+- Documented NIST KAT count = 0 byte values for cross-implementation checks
+- added informational resource for interactive working code public testbed
+- updated after SQISign advances to NIST round 3 with 8 other candidates
 ---
