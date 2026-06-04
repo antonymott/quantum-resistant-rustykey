@@ -13,15 +13,15 @@ npm i quantum-resistant-rustykey
 ## Implementation status: Pre-production (stable for testing)
 
 - ***Recommendation***: Await v1.0.0 (following security audit) for production/regulated deployment.
-- includes NIST approved as well as riskier NIST 'on-ramp' variants eg SQISign
-- **ML-DSA** (ML-DSA-65, ML-DSA-87)
-- **FN-DSA** (FN-DSA-512, FN-DSA-1024)
-- **SQIsign** (Level 1, Level 3, Level 5)
-- **ML-KEM** (512, 768, 1024) using [mlkem-native](https://github.com/pq-code-package/mlkem-native).
+- includes NIST approved and NIST "on-ramp" round 3 candidate SQISign
+- **SQIsign** Level 1, Level 3, Level 5 NOT approved yet by NIST, refer [cose-sqisign] (https://datatracker.ietf.org/doc/draft-mott-cose-sqisign/)
+- **ML-DSA** ML-DSA-65, ML-DSA-87
+- **FN-DSA** FN-DSA-512, FN-DSA-1024
+- **ML-KEM** 512, 768, 1024 using [mlkem-native](https://github.com/pq-code-package/mlkem-native).
 
-### NOTE: Why we support SQISign when it is 'NIST-on-ramp' only
+### SQISign is 'NIST-on-ramp' only yet highly suitable for constrained-development use 
 *TLDR; to help hurdle the "silent" barrier to post-quantum adoption: 1024-byte buffer limit in many existing FIDO2/WebAuthn implementations*
-- please see our IETF standards track draft for inclusion of SQISign [cose-sqisign](https://www.ietf.org/archive/id/draft-mott-cose-sqisign-03.html)
+- support our IETF standards track draft and help move things along with SQISign [cose-sqisign](https://www.ietf.org/archive/id/draft-mott-cose-sqisign-03.html)
 
 #### WebAuthn PQC Signature size constraints
 Dilithium variants, and Falcon-1024 are physically incompatible with millions of existing FIDO2/WebAuthn authenticators that rely on the CTAP2 1024-byte buffer limit.
@@ -33,13 +33,13 @@ Dilithium variants, and Falcon-1024 are physically incompatible with millions of
 - At roughly 204 bytes, SQIsign is currently the only candidate that offers NIST-level (more accurately NIST-on-ramp-level) security safely within the 1024-byte limit alongside its necessary metadata.
 
 #### Critical use case example
-For mission-critical applications like low-latency augmented reality remote telesurgery, where ultra-low latency and hardware-rooted trust are non-negotiable. RustyKey® who financially support this repo and the npm package, required a WASM port of SQIsign specifically because the 204-byte signatures are the only PQC option that worked within their current hardware constraints, enabling immediate quantum-resistant public key ceremonies without breaking the existing WebAuthn ecosystem.
+For constrained-device or mission-critical applications like low-latency augmented reality remote telesurgery, ultra-low latency and hardware-rooted trust are non-negotiable. RustyKey® who financially support this repo and the npm package, required a WASM port of SQIsign specifically as the small signatures is the only PQC option that works with current demanding hardware constraints, with the practical advantage of near-immediate quantum-resistant public key ceremonies without breaking the existing WebAuthn ecosystem.
 
 ## Broad user-friendly live example testbed and playground
 
 Live at **[pqc.rustykey.me](https://pqc.rustykey.me)** — a test environment where general-purpose users and seasoned cryptanalysts can encrypt and decrypt and play, using all three variants of KEM and test WebAuthn implementations using the signature algorithms.
 - lattice-based vs isogeny: run tests to check: Montgomery constant times, the surprising difference in time taken for the various steps
-- all are encouraged to suggest improvements, and help a wider audience see how PQC works under the hood and adopt it more quickly and without breaking existing infrastructure.
+- any and all who are interested kicking the tires of SQISign and other PQC algorithms are encouraged to suggest improvements. The playground's goal is to help a wider audience see how PQC works under the hood, find bugs, suggest improvements and help adopt it more quickly without breaking existing infrastructure.
 
 ## Security assurance and verification
 
@@ -67,11 +67,13 @@ The three parameter sets (512/768/1024) use the same implementation family and d
 - This package builds the same source for all three variants by changing only `MLK_CONFIG_PARAMETER_SET` in `wasm/Makefile`.
 - Variant sizes/parameters are defined upstream in `mlkem/mlkem_native.h`.
 
-### Why we mix C => emscripten with Rust => wasm-bindgen for web-assembly module creation
+### We predominantly use C, not Rust for our web-assembly (WASM) modules: Why?
 
-Current status in this repository: the shipped cryptographic WASM modules are built via Emscripten from vetted C/C++ upstream code, while Rust/TypeScript is primarily used for package-level ergonomics and integration layers.
+It seems all the cool cryptanalyst kids nowadays rely on Rust's proven memory and concurrency safety and high performance without a Garbage Collector. As outlined below, current way forward in this repository: the shipped cryptographic WASM modules will continue to be built via Emscripten from vetted C/C++ upstream code, while Rust/TypeScript will be primarily used for package-level ergonomics and integration layers.
 
-Increasingly, developers favor Rust => wasm-bindgen over C => emscripten for Rust's superior compile-time memory safety...and leaning on Rust is implied in our brand! RustyKey® current dual approach is a way to balance performance, security-vetted logic, and web compatibility. Some technical factors may make C => emscripten approach acceptable and, in some cases, preferable for post-quantum cryptography:
+Leaning on Rust is implied in our brand, so this deserves a bit of explanation! Many developers new to web-assembly migrations (i.e. from other languages) don't realize that final WebAssembly (WASM) bytecode looks completely different depending on if we start with C or Rust!
+
+RustyKey® current dual approach is a way to balance performance, security-vetted logic, and web compatibility. Some technical factors may make C => emscripten approach acceptable and, in some cases, preferable for post-quantum cryptography:
 
 - upstream Reliability: Many NIST-standardized PQC algorithms (like ML-KEM) have highly optimized, audited, and "constant-time" reference implementations written in C. Using C => Emscripten allows RustyKey® to port these vetted "upstream" sources directly, reducing the risk of introducing new implementation bugs during a full rewrite into Rust.
 
@@ -85,7 +87,7 @@ Increasingly, developers favor Rust => wasm-bindgen over C => emscripten for Rus
 
 - Practical Side-Channel Discipline in Rust is non-trivial: Rust memory safety does not automatically guarantee constant-time behavior. Extra care is still required around branching, indexing, optimizer behavior, allocations, and panic paths, especially when targeting wasm32.
 
-- Long-term Strategy: once a Rust implementation reaches parity in test vectors, profiling, and side-channel review, migrating selected modules can reduce FFI complexity. Until then, Emscripten can be the lower-risk route for production-adjacent cryptographic primitives.
+- Long-term Strategy: once a Rust implementation reaches parity in test vectors, profiling, and side-channel review, migrating selected modules can reduce FFI complexity. Until then, Emscripten appears to be the lower-risk route for production-adjacent cryptographic primitives.
 
 
 ### Why we offer WASM implementations of SQISign (NIST on-ramp only) alongside established, standards-track Falcon and Dilithium?
@@ -101,7 +103,7 @@ Increasingly, developers favor Rust => wasm-bindgen over C => emscripten for Rus
 - SQISign has smaller signatures: Short Quaternion Isogeny Signatures. This repo and associated npm package is primarily a WASM-based project targeting web or mobile, where signature size is a massive bottleneck for bandwidth.
 
 
-### How users can independently verify all algorithms and variants
+### How to independently verify all algorithms and variants
 
 From the repository root:
 
@@ -129,7 +131,7 @@ Notes:
 - signature algorithms:
   - FN-DSA (Falcon-512, Falcon-1024)
   - ML-DSA (Dilithium variants)
-  - SQISign
+  - SQISign Team
 - module-lattice-based key-encapsulation mechanism
   - ML-KEM
   - approach adapted from Dmitry Chestnykh's `mlkem-wasm`: https://github.com/dchest/mlkem-wasm
@@ -362,7 +364,7 @@ async function main() {
 ```
 
 > [!NOTE]
-> **SQIsign Performance**: Level 1 signing is extremely CPU-intensive (can take seconds to minutes depending on hardware). It is recommended for "sign-once, verify-many" scenarios like certificates or firmware updates.
+> **SQIsign Performance**: Level 1 signing is CPU-intensive (can take seconds to minutes depending on hardware). We recommend "sign-once, verify-many" scenarios for certificates or firmware updates.
 
 ## Browser example (local)
 
