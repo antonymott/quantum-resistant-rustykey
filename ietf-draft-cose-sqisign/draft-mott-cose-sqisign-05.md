@@ -1,11 +1,9 @@
 ---
 title: |
-  CBOR Object Signing and Encryption (COSE) and
-  JSON Object Signing and Encryption (JOSE)
-  Registrations for SQIsign
+  CBOR Object Signing and Encryption (COSE) and JSON Object Signing and Encryption (JOSE) Registrations for SQIsign
 abbrev: cose-sqisign
 category: std
-docName: draft-mott-cose-sqisign-03
+docName: draft-mott-cose-sqisign-05
 submissiontype: IETF
 number:
 consensus: true
@@ -16,6 +14,8 @@ keyword:
   - post-quantum cryptography
   - isogeny-based cryptography
   - constrained devices
+  - aerospace satellite
+  - remote robotic telesurgery IAM
   - IoT security
 venue:
   group: COSE
@@ -26,7 +26,7 @@ venue:
 author:
   - ins: A. R. Mott
     name: Antony R. Mott
-    organization: RustyKey
+    organization: RustyKey®
     email: antony@rustykey.io
     country: United States of America
 
@@ -44,18 +44,23 @@ informative:
   I-D.ietf-cose-falcon:
   I-D.ietf-cose-dilithium:
 
+  NIST-3rd-round-candidates:
+    target: https://csrc.nist.gov/News/2026/nist-advances-9-candidates-to-the-3rd-round-of-pqc
+    title: Nine Candidates Advance to the Third Round of the Additional Digital Signatures for the PQC Standardization Process
+    author:
+      - ins: NIST
+    date: 2026-05
+
   SQIsign-Spec:
     target: https://sqisign.org/spec/sqisign-20250205.pdf
-    title: "SQIsign: Compact Post-Quantum Signatures \
-      from Quaternions and Isogenies (Round 2)"
+    title: "SQIsign: Compact Post-Quantum Signatures from Quaternions and Isogenies (Round 2)"
     author:
       - ins: SQIsign team
     date: 2025-02
 
   NIST-Finalized-Standards:
     target: |
-      https://www.nist.gov/news-events/news/2024/08/
-      nist-releases-first-3-finalized-post-quantum-encryption-standards
+      https://www.nist.gov/news-events/news/2024/08/nist-releases-first-3-finalized-post-quantum-encryption-standards
     title: |
       "NIST Releases First 3 Finalized
       Post-Quantum Encryption Standards"
@@ -74,12 +79,19 @@ informative:
 
   CNSA-2:
     target: |
-      https://media.defense.gov/2025/May/30/
-      2003728741/-1/-1/0/CSA_CNSA_2.0_ALGORITHMS.PDF
+      https://media.defense.gov/2025/May/30/2003728741/-1/-1/0/CSA_CNSA_2.0_ALGORITHMS.PDF
     title: "Commercial National Security Algorithm Suite 2.0"
     author:
       org: National Security Agency
     date: 2025-05
+
+  PQC-Testbed:
+    title: "PQC RustyKey® Testbed"
+    target: "https://pqc.rustykey.me"
+    author:
+      ins: "®"
+      org: "RustyKey® Project"
+    date: 2026-06
 
   WebAuthn-PQC-Signature-size-constraints:
     target: https://www.npmjs.com/package/quantum-resistant-rustykey
@@ -91,13 +103,15 @@ informative:
 
 --- abstract
 
-**NOTE: This document describes a signature scheme based on an algorithm currently under evaluation in the NIST Post-Quantum Cryptography standardization process. Be aware that the underlying primitive may change as a result of that process.**
+**NOTE: This document describes a signature scheme based on an algorithm currently under evaluation in the 3rd round {{NIST-3rd-round-candidates}} NIST Post-Quantum Cryptography standardization process. Be aware that the underlying primitive may change as a result of that process.**
  
 This document specifies the algorithm encodings and representations for the SQIsign digital signature scheme within the CBOR Object Signing and Encryption (COSE) and JSON Object Signing and Encryption (JOSE) frameworks.
 
 SQIsign is an isogeny-based post-quantum signature scheme that provides the most compact signature and public key sizes of any candidate in the NIST Post-Quantum Cryptography (PQC) standardization and on-ramp-to-standardization processes.
 
-The standardization of SQIsign will be helpful to address current infrastructure bottlenecks, specifically the FIDO2 CTAP2 specification used by billions of in-service devices and browser installations. Depending on authenticator implementation, transport (USB/NFC/BLE) and message fragmentation support. Some deployments of CTAP2-based authenticators enforce limits near 1024 bytes for external key communication, and some standardized post-quantum signature schemes increase message sizes and may stress constrained authenticators or transports. As a result CBOR-encoded messages may hit limits in some authenticators. SQIsign-L1, L2 and L5 signatures are small enough to enable delivery over constrained networks like 802.15.4 and may be more suitable for constrained networks due to smaller signature sizes.
+The standardization of SQIsign will be helpful to address current infrastructure bottlenecks, specifically the FIDO2 CTAP2 specification used by billions of in-service devices and browser installations.
+
+Depending on authenticator implementation, transport (USB/NFC/BLE) and message fragmentation support, some deployments of CTAP2-based authenticators enforce limits near 1024 bytes for external key communication, and some standardized post-quantum signature schemes increase message sizes and may stress constrained authenticators or transports. As a result CBOR-encoded messages may hit 7609-byte limit in some authenticators. SQIsign-L1, L2 and L5 signatures are small enough to enable delivery over constrained networks like 802.15.4 and may be more suitable for constrained networks due to smaller signature sizes.
 
 This document clarifies that SQIsign does not expose the auxiliary torsion-point information exploited in the SIDH/SIKE attacks. Consequently, the specific attack techniques of Castryck–Decru do not directly apply. However, the scheme remains subject to ongoing cryptanalysis of isogeny-based constructions. By establishing stable COSE and JOSE identifiers, this document ensures the interoperability required for the seamless integration of post-quantum security into high-density, bandwidth-constrained, and legacy-compatible hardware environments.
 
@@ -119,7 +133,7 @@ The fundamental differences between ML-DSA, FN-DSA, and SQIsign lie in their und
 
 Falcon (NIST secondary) uses NTRU lattices to achieve very small signatures and fast verification, but requires complex floating-point math. Dilithium (NIST primary) is a balanced, high-efficiency lattice scheme using Module-LWE/SIS, easy to implement.
 
-SQIsign {{SQIsign-Spec}} {{SQIsign-Analysis}} is a non-lattice, isogeny-based scheme that offers the smallest signature sizes but suffers from significantly slower signature generation where even vI may take seconds to minutes, or longer with WASM implementations for browsers of particular relevance to signatures required for WebAuthn PassKeys {{WebAuthn-PQC-Signature-size-constraints}}. SQIsign is an isogeny-based digital signature scheme participating in NIST's Round 2 Additional Digital Signature Schemes, not yet a NIST standard {{NIST-Finalized-Standards}}.
+SQIsign {{SQIsign-Spec}} {{SQIsign-Analysis}} is a non-lattice, isogeny-based scheme that offers the smallest signature sizes but suffers from significantly slower signature generation where even vI may take seconds to minutes, or longer with WASM implementations for browsers of particular relevance to signatures required for WebAuthn PassKeys {{WebAuthn-PQC-Signature-size-constraints}}. SQIsign is an isogeny-based digital signature scheme participating in NIST's Round 3 {{NIST-3rd-round-candidates}} Additional Digital Signature Schemes, not yet a NIST standard {{NIST-Finalized-Standards}}.
 
 Speed: SQIsign is significantly slower at signing (roughly 100x to 1000x) compared to ML-DSA, though the math is changing fast and variants improve this.
 
@@ -198,7 +212,7 @@ This document uses the following terms:
 - **ECDH**: Elliptic Curve Diffie-Hellman
 - **IANA**: Internet Assigned Numbers Authority
 
-# Resistance to "Torsion Point" attack
+# Cryptanalytic Resistance: SIDH/SIKE Attacks Do Not Apply
 
 ## SIKE Vulnerability (The "Torsion Point" Attack) of 2022
 
@@ -492,6 +506,10 @@ Early implementations SHOULD participate in interoperability testing to ensure:
 - Proper encoding in COSE and JOSE formats
 - Cross-platform compatibility
 
+## Performance testing under real-world scenarios
+
+- public metrics, interoperability and performance testing of the proposed WASM versions can be evaluated on a live testbed {{PQC-Testbed}}.
+
 # Security Considerations
 
 ## Algorithm Security
@@ -504,11 +522,11 @@ These assumptions are **different from lattice-based schemes**, providing crypto
 
 SQIsign is designed to resist attacks by large-scale quantum computers. The three parameter sets provide security equivalent to AES-128, AES-192, and AES-256 against both classical and quantum adversaries.
 
-## Current Cryptanalysis Status
+## Cryptanalysis and Algorithm Maturity
 
 As of this writing, SQIsign is undergoing active cryptanalytic review:
 
-- **NIST Round 2 evaluation**: {{NIST-Finalized-Standards}}
+- **NIST Round 3 evaluation**: {{NIST-3rd-round-candidates}}
 - **Academic research**: Ongoing analysis of isogeny-based cryptography
 - **Known attacks**: No attacks are currently known that recover private keys for the standardized parameter sets within their claimed security levels. However, the scheme and its underlying assumptions remain under active study.
 
@@ -632,6 +650,8 @@ The authors would like to thank:
 
 - The IRTF Crypto Forum Research Group for ongoing cryptanalytic review
 
+- Aerospace and constrained-telemetry engineers/contractors who suggested the idea for pqc.rustykey.me, a public testbed devoted to anyone wishing to testout, evaluate and critique actual working WASM implemented code of all three levels.
+
 - Early implementers who provide valuable feedback
 
 This work builds upon the template established by {{I-D.ietf-cose-falcon}} and similar PQC integration efforts.
@@ -649,6 +669,12 @@ This work builds upon the template established by {{I-D.ietf-cose-falcon}} and s
 --- back
 
 # Test Vectors
+
+Vectors use NIST KAT count = 0 from upstream SQIsign response files
+(`PQCsignKAT_*_SQIsign_lvl*.rsp`). The same 32-byte message appears at
+each security level so implementers can compare keys and signatures.
+Algorithm identifiers -61, -62, and -63 map to SQIsign-L1, SQIsign-L3, and
+SQIsign-L5 respectively.
 
 ## SQIsign-L1 Test Vectors
 
@@ -708,15 +734,144 @@ ovbsO-g1s7JiS5oN9og3rQC8rMJ9HsgGpEhAJnRx2G7_NEcBitsKZVHugyKrMAECAg
 
 ## SQIsign-L3 Test Vectors
 
+### Example 1: Simple Message Signing
+
+The following test vector exhibits a SQIsign Level III signature over a short
+message (NIST KAT count = 0; COSE/JOSE algorithm -62).
+
+Message (hex): `D81C4D8D734FCBFBEADE3D3F8A039FAA2A2C9957E835AD55B22E75BF \
+57BB556AC8`
+Message (ASCII): `MsO=?*,W5U.uWUj`
+
+Public Key (hex): `C32377D6F6D70729884A7F6877EF4791E35D21F751A3E96DE23F9 \
+A7A3C01BCD8A5F146DC19E4E2AC63007457F97D8A40EE84AEE7564CA9A7FBE6200FD3E5 \
+E55901BFC60EB25C50D39F5C91C96510556BAA22028DF76360841721A601D65E8D0F06`
+Public Key (Base64url): `wyN31vbXBymISn9od-9HkeNdIfdRo-lt4j-aejwBvNil8Ub \
+cGeTirGMAdFf5fYpA7oSu51ZMqaf75iAP0-XlWQG_xg6yXFDTn1yRyWUQVWuqIgKN92NghB \
+chpgHWXo0PBg`
+
+Signature (hex): `0868CFBF275B8E7B19BF597D658D62CC913B9B2933E30A297288FB \
+E687F6F6B8AC8AF7AA007F191386BB1A203CDDBC2BDB42792D05DA69A4507073D12B0BD \
+C47E2B36BC4BA45C68791918281E578F2DC14294504726DCD4CA4C4565FBB89A1280004 \
+8C7B84746A2CBD8247248E248B70B51AE91994957857692A028D8F5CABABFC91E4BF1C5 \
+D350219A0189C57DE4A7710D29E0364C79B2188449EC0397359430D594C7B5980CC6755 \
+1933A902D3C11F0FBD6DC39711D3E1F501159EE7FB85CE81B4CE24E1016006567DF4693 \
+15D513E73F69F6301664E6449AF9DCEB4000D15`
+Signature (Base64url): `CGjPvydbjnsZv1l9ZY1izJE7mykz4wopcoj75of29risiveq \
+AH8ZE4a7GiA83bwr20J5LQXaaaRQcHPRKwvcR-Kza8S6RcaHkZGCgeV48twUKUUEcm3NTKT \
+EVl-7iaEoAASMe4R0aiy9gkckjiSLcLUa6RmUlXhXaSoCjY9cq6v8keS_HF01AhmgGJxX3k \
+p3ENKeA2THmyGIRJ7AOXNZQw1ZTHtZgMxnVRkzqQLTwR8PvW3DlxHT4fUBFZ7n-4XOgbTOJ \
+OEBYAZWffRpMV1RPnP2n2MBZk5kSa-dzrQADRU`
+
+### COSE_Sign1 Complete Example
+
+```cbor
+18(
+  [
+    h'a10139003d', / protected: {"alg": -62} /
+    {},           / unprotected /
+    h'd81c4d8d734fcbfbeade3d3f8a039faa2a2c995 \
+    7e835ad55b22e75bf57bb556ac8', / payload /
+    h'0868cfbf275b8e7b19bf597d658d62cc913b9b2 \
+    933e30a297288fbe687f6f6b8ac8af7aa007f191386bb1a203cddbc2bdb42792 \
+    d05da69a4507073d12b0bdc47e2b36bc4ba45c68791918281e578f2dc1429450 \
+    4726dcd4ca4c4565fbb89a12800048c7b84746a2cbd8247248e248b70b51ae91 \
+    994957857692a028d8f5cababfc91e4bf1c5d350219a0189c57de4a7710d29e0 \
+    364c79b2188449ec0397359430d594c7b5980cc67551933a902d3c11f0fbd6dc \
+    39711d3e1f501159ee7fb85ce81b4ce24e1016006567df469315d513e73f69f6 \
+    301664e6449af9dceb4000d15', / signature /
+  ]
+)
 ```
-[PLACEHOLDER FOR L3 TEST VECTORS]
+
+### JWS Complete Example
+
 ```
+eyJhbGciOiJTUUlzaWduLUwzIiwidHlwIjoiSldUIn0
+.
+2BxNjXNPy_vq3j0_igOfqiosmVfoNa1Vsi51v1e7VWrI
+.
+CGjPvydbjnsZv1l9ZY1izJE7mykz4wopcoj75of29risiveqAH8ZE4a7GiA83bwr20J5LQXa \
+aaRQcHPRKwvcR-Kza8S6RcaHkZGCgeV48twUKUUEcm3NTKTEVl-7iaEoAASMe4R0aiy9gkck \
+jiSLcLUa6RmUlXhXaSoCjY9cq6v8keS_HF01AhmgGJxX3kp3ENKeA2THmyGIRJ7AOXNZQw1Z \
+THtZgMxnVRkzqQLTwR8PvW3DlxHT4fUBFZ7n-4XOgbTOJOEBYAZWffRpMV1RPnP2n2MBZk5k \
+Sa-dzrQADRU
+```
+
 
 ## SQIsign-L5 Test Vectors
 
+### Example 1: Simple Message Signing
+
+The following test vector exhibits a SQIsign Level V signature over a short
+message (NIST KAT count = 0; COSE/JOSE algorithm -63).
+
+Message (hex): `D81C4D8D734FCBFBEADE3D3F8A039FAA2A2C9957E835AD55B22E75BF \
+57BB556AC8`
+Message (ASCII): `MsO=?*,W5U.uWUj`
+
+Public Key (hex): `86FFA3B0F73D55A64D13C6F89F28D75FD17C5E2368E1D451127C1 \
+6D1A97CDB440E20333A233AD2F8E4D70187C8AE31602049ADE949A87F95E79DA4C456F5 \
+D400B2485A96D04708A2F30046812B8D65A3BFBFDED0DD6563462F9E2BCE760CD753CAE \
+8471BEC7049EF28FFEFE859C15DAC49DB959AEE99842D97A380A70DD7330106`
+Public Key (Base64url): `hv-jsPc9VaZNE8b4nyjXX9F8XiNo4dRREnwW0al820QOIDM \
+6IzrS-OTXAYfIrjFgIEmt6Umof5XnnaTEVvXUALJIWpbQRwii8wBGgSuNZaO_v97Q3WVjRi \
+-eK852DNdTyuhHG-xwSe8o_-_oWcFdrEnblZrumYQtl6OApw3XMwEG`
+
+Signature (hex): `6B8EF5D7689A1EA1CFCE9C6F7495E309E9D1D1B03E61CD97088E67 \
+9C4901D0B6B6D38217F4AED6C44949B41F9AF80B43E84D0C91BDB1D00E06957BEBF30A5 \
+8012AD01E52CF7906CE197AD06696F7FCF756908EA980549E7C215D089BDE7117799F62 \
+8817A1B9C8FB7FEBFF7E9D9B776142460CFAAFC97D48A57E09E0DA378401000229CC8E1 \
+B94E1F2F8AFDC42066BEACE076E3E70DD01F90C4D01DAC17BEC58743532848D438A87A5 \
+74D9DB940C17236AE3566281E27A99EFE5EE26E05B88A1D610A80B3AF38267D845C7FE3 \
+30F199B43794A9B2E14846924127366B8F6A1F0F24D3C4B54D79DBB61B098BF32D98EA8 \
+819F7BE4A5FFBA29E88B1A996C6CDFD32B048BC2ACFFA28870181447FCC8B6F97B63C47 \
+CB013C6F3D84CBD07619A5C355B000911`
+Signature (Base64url): `a47112iaHqHPzpxvdJXjCenR0bA-Yc2XCI5nnEkB0La204IX \
+9K7WxElJtB-a-AtD6E0Mkb2x0A4GlXvr8wpYASrQHlLPeQbOGXrQZpb3_PdWkI6pgFSefCF \
+dCJvecRd5n2KIF6G5yPt_6_9-nZt3YUJGDPqvyX1IpX4J4No3hAEAAinMjhuU4fL4r9xCBm \
+vqzgduPnDdAfkMTQHawXvsWHQ1MoSNQ4qHpXTZ25QMFyNq41ZigeJ6me_l7ibgW4ih1hCoC \
+zrzgmfYRcf-Mw8Zm0N5SpsuFIRpJBJzZrj2ofDyTTxLVNedu2GwmL8y2Y6ogZ975KX_uino \
+ixqZbGzf0ysEi8Ks_6KIcBgUR_zItvl7Y8R8sBPG89hMvQdhmlw1WwAJEQ`
+
+### COSE_Sign1 Complete Example
+
+```cbor
+18(
+  [
+    h'a10139003e', / protected: {"alg": -63} /
+    {},           / unprotected /
+    h'd81c4d8d734fcbfbeade3d3f8a039faa2a2c995 \
+    7e835ad55b22e75bf57bb556ac8', / payload /
+    h'6b8ef5d7689a1ea1cfce9c6f7495e309e9d1d1b \
+    03e61cd97088e679c4901d0b6b6d38217f4aed6c44949b41f9af80b43e84d0c9 \
+    1bdb1d00e06957bebf30a58012ad01e52cf7906ce197ad06696f7fcf756908ea \
+    980549e7c215d089bde7117799f628817a1b9c8fb7febff7e9d9b776142460cf \
+    aafc97d48a57e09e0da378401000229cc8e1b94e1f2f8afdc42066beace076e3 \
+    e70dd01f90c4d01dac17bec58743532848d438a87a574d9db940c17236ae3566 \
+    281e27a99efe5ee26e05b88a1d610a80b3af38267d845c7fe330f199b43794a9 \
+    b2e14846924127366b8f6a1f0f24d3c4b54d79dbb61b098bf32d98ea8819f7be \
+    4a5ffba29e88b1a996c6cdfd32b048bc2acffa28870181447fcc8b6f97b63c47 \
+    cb013c6f3d84cbd07619a5c355b000911', / signature /
+  ]
+)
 ```
-[PLACEHOLDER FOR L5 TEST VECTORS]
+
+### JWS Complete Example
+
 ```
+eyJhbGciOiJTUUlzaWduLUw1IiwidHlwIjoiSldUIn0
+.
+2BxNjXNPy_vq3j0_igOfqiosmVfoNa1Vsi51v1e7VWrI
+.
+a47112iaHqHPzpxvdJXjCenR0bA-Yc2XCI5nnEkB0La204IX9K7WxElJtB-a-AtD6E0Mkb2x \
+0A4GlXvr8wpYASrQHlLPeQbOGXrQZpb3_PdWkI6pgFSefCFdCJvecRd5n2KIF6G5yPt_6_9- \
+nZt3YUJGDPqvyX1IpX4J4No3hAEAAinMjhuU4fL4r9xCBmvqzgduPnDdAfkMTQHawXvsWHQ1 \
+MoSNQ4qHpXTZ25QMFyNq41ZigeJ6me_l7ibgW4ih1hCoCzrzgmfYRcf-Mw8Zm0N5SpsuFIRp \
+JBJzZrj2ofDyTTxLVNedu2GwmL8y2Y6ogZ975KX_uinoixqZbGzf0ysEi8Ks_6KIcBgUR_zI \
+tvl7Y8R8sBPG89hMvQdhmlw1WwAJEQ
+```
+
 
 # Implementation Status
 
@@ -759,9 +914,9 @@ This section records the status of known implementations at the time of writing.
 
 The requested algorithm identifiers (-61, -62, -63) are:
 
-- In the range designated for experimental/informational use
+- In the Standards Action range (-255 to -1) per RFC 9053
 - Sequential for the three parameter sets
-- Not conflicting with existing registrations
+- Not conflicting with existing registrations (verified against IANA COSE registry)
 - Consistent with the approach used for other PQC algorithms
 
 ## Key Type Design
@@ -781,9 +936,16 @@ This approach:
 
 \[RFC Editor Note:** Please remove this section before publication\]
 
-## draft-mott-cose-sqisign-03
+## draft-mott-cose-sqisign-04
 
-- Incorporated technical corrections and feedback from Luca De Feo on draft-00
+- Added SQIsign-L3 and SQIsign-L5 COSE_Sign1 and JWS test vectors (algorithms -62 and -63)
+- Documented NIST KAT count = 0 byte values for cross-implementation checks
+- added informational resource for interactive working code public testbed
+- SQISign advances to NIST round 3 with 8 other candidates
+
+## draft-mott-cose-sqisign versions prior to -04
+
+- Incorporated technical corrections and feedback from Luca De Feo
 - Updated the Abstract and Introduction to utilize more neutral, objective language
 - Removed vendor-specific branding in favor of generic cryptographic terminology
 - fixed various formatting issues
