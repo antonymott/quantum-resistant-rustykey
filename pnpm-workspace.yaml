@@ -1,6 +1,8 @@
 packages:
   - .
   - examples/*
+allowBuilds:
+  esbuild: true
 onlyBuiltDependencies:
   - core-js
   - esbuild

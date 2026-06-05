@@ -1,5 +1,22 @@
 # quantum-resistant-rustykey
 
+## 0.10.1
+
+### Patch Changes
+
+- update readme.md
+
+## 0.10.0
+
+### Minor Changes
+
+- 817c05f: Make file and DOcker prerequisute issue fixed
+- 498d967: draft updated , readme updated , lint fixes
+
+### Patch Changes
+
+- improve supply-chain management
+
 ## 0.9.4
 
 ### Patch Changes
