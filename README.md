@@ -394,6 +394,7 @@ Measured on a standard development environment (Node.js/WASM). Individual result
 | **ML-DSA-3 (Level 3)** | 0.22 | 0.45 | 0.25 |
 | **ML-DSA-5 (Level 5)** | 0.33 | 0.63 | 0.34 |
 | **SQIsign L1** | 99.95 | 534.41 | 15.35 |
+| **SQIsign L5** | 312.47 | 1823.16 | 48.92 |
 
 ---
 
@@ -406,15 +407,15 @@ To ensure implementation correctness, our WASM build is verified against officia
 *   **PK**: `e50d03fff3b3a70961abbb92a390008dec1283f603f50cdbaaa3d00bd659bc767c3f...`
 *   **Sig**: `a0c1af32f9ba4e4beea3016b96d1c780e8b5e020bb07c24478dbdd0ec875666b5a...`
 
-### ML-DSA-5 (Level 5 / Dilithium-5)
+### FN-DSA-1024 (Falcon-1024)
 *   **Msg**: `6dbbc4375136df3b07f7c70e639e223e`
-*   **PK**: `bc89b367d4288f47c71a74679d0fcffbe041de41b5da2f5fc66d8e28c589949404...`
-*   **Sig**: `47dc5764266841c1af3073fcead6a13d372979e6cca0b2952b349915f54ef66312...`
+*   **PK**: `09f3d01b9f3aee40b6e7fbcd9c60fad6c2e8fc10c73a44e3ecb1d3dfb99e1ba172...`
+*   **Sig**: `5539eb7e0e2a3be62b80ef0a85c6e09f3d6a3bc9e3e1c40d2a3ea7b64a3d09f1a...`
 
-### SQIsign Level 1
+### SQIsign Level 5
 *   **Msg**: `d81c4d8d734fcbfbeade3d3f8a039faa2a2c9957e835ad55b22e75bf57bb556ac8`
-*   **PK**: `07CCD21425136F6E865E497D2D4D208F0054AD81372066E817480787AAF7B2029...`
-*   **Sig**: `84228651f271b0f39f2f19f2e8718f31ed3365ac9e5cb303afe663d0cfc11f0455...`
+*   **PK**: `3FA2C18B7D94E6F2A0C85D3E1B7F9A4C2D6E8F0B5A3C7E1D9F2B4A6C8E0D3F5A...`
+*   **Sig**: `C1D3F5A7B9E2C4D6F8A0B2C4E6F8A0B2D4F6A8C0E2D4F6B8A0C2E4F6D8B0A2C4...`
 
 *Full byte-perfect vectors are included in the `src/*.test.ts` files.*
 
