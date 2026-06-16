@@ -23,6 +23,9 @@ npm i quantum-resistant-rustykey
 *TLDR; to help hurdle the "silent" barrier to post-quantum adoption: 1024-byte buffer limit in many existing FIDO2/WebAuthn implementations*
 - support our IETF standards track draft and help move things along with SQISign [cose-sqisign](https://www.ietf.org/archive/id/draft-mott-cose-sqisign-03.html)
 
+#### ⚠️ IMPORTANT SPECIFICATION NOTICE (as of June 2026)
+COSE/JOSE Algorithm IDs (-61, -62, -63) and case-sensitive identifier strings (SQIsign-L1, SQIsign-L3, SQIsign-L5) utilized in this package are derived directly from the active [cose-sqisign](https://datatracker.ietf.org/doc/draft-mott-cose-sqisign/)Internet-Draft. These identifiers are provisional, experimental, have NOT been formally assigned by IANA or an active IETF Working Group. This implementation is intended strictly for interoperability testing, testbed simulations, and R&D prototyping. Parameters and identifiers may change in future revisions to align with the formal IETF and W3C standardization processes.
+
 #### WebAuthn PQC Signature size constraints
 Dilithium variants, and Falcon-1024 are physically incompatible with millions of existing FIDO2/WebAuthn authenticators that rely on the CTAP2 1024-byte buffer limit.
 
