@@ -153,6 +153,25 @@ yarn add quantum-resistant-rustykey
 
 ## Usage
 
+### SQISign-webGPU (browser accelerated)
+
+Browser-only accelerated SQISign variants: **SQISign-L1-webGPU**, **SQISign-L3-webGPU**, **SQISign-L5-webGPU**.
+Requires COOP/COEP headers (`crossOriginIsolated`). See [docs/SQISIGN-WEBGPU.md](./docs/SQISIGN-WEBGPU.md).
+
+```typescript
+import {
+  isSqisignWebGpuAvailable,
+  loadSqisignLvl5WebGpu,
+  benchSqisignWebGpu,
+} from "quantum-resistant-rustykey";
+
+if (isSqisignWebGpuAvailable()) {
+  const sq = await loadSqisignLvl5WebGpu();
+  const bench = await benchSqisignWebGpu("lvl5");
+  console.log(bench.steps);
+}
+```
+
 ### Node.js example
 
 ```typescript
