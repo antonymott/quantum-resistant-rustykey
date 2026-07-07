@@ -11,6 +11,19 @@ export {
 	loadSqisignLvl5,
 } from "./sqisign.js";
 export {
+	benchSqisignWebGpu,
+	getSqisignWebGpuSupport,
+	isSqisignWebGpuAvailable,
+	loadSqisignLvl1WebGpu,
+	loadSqisignLvl3WebGpu,
+	loadSqisignLvl5WebGpu,
+	setSqisignAccelWorkerUrl,
+	SQISIGN_WEBGPU_VARIANT_LABELS,
+	type SqisignBenchSteps,
+	type SqisignWebGpuSupport,
+	type SqisignWebGpuVariant,
+} from "./sqisign-webgpu.js";
+export {
 	SQISIGN_LVL1_KAT0_MSG_HEX,
 	SQISIGN_LVL1_KAT0_PK_HEX,
 	SQISIGN_LVL1_KAT0_SIG_HEX,
