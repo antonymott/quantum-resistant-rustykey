@@ -1,5 +1,15 @@
 # quantum-resistant-rustykey
 
+## 0.12.0
+
+### Minor Changes
+
+- update accelerated browser coop-coep sqisign variants
+
+### Patch Changes
+
+- 89527e0: WebGpu accel
+
 ## 0.11.0
 
 ### Minor Changes
