@@ -20,7 +20,11 @@ type SqisignModule = {
 	_sqisign_lvl1_private_key_bytes?: () => number;
 	_sqisign_lvl1_signature_bytes?: () => number;
 	_sqisign_lvl1_seed_bytes?: () => number;
-	_sqisign_lvl1_keypair_seeded?: (pk: number, sk: number, seed: number) => number;
+	_sqisign_lvl1_keypair_seeded?: (
+		pk: number,
+		sk: number,
+		seed: number,
+	) => number;
 	_sqisign_lvl1_sign_seeded?: (
 		sig: number,
 		msg: number,
@@ -39,7 +43,11 @@ type SqisignModule = {
 	_sqisign_lvl3_private_key_bytes?: () => number;
 	_sqisign_lvl3_signature_bytes?: () => number;
 	_sqisign_lvl3_seed_bytes?: () => number;
-	_sqisign_lvl3_keypair_seeded?: (pk: number, sk: number, seed: number) => number;
+	_sqisign_lvl3_keypair_seeded?: (
+		pk: number,
+		sk: number,
+		seed: number,
+	) => number;
 	_sqisign_lvl3_sign_seeded?: (
 		sig: number,
 		msg: number,
@@ -58,7 +66,11 @@ type SqisignModule = {
 	_sqisign_lvl5_private_key_bytes?: () => number;
 	_sqisign_lvl5_signature_bytes?: () => number;
 	_sqisign_lvl5_seed_bytes?: () => number;
-	_sqisign_lvl5_keypair_seeded?: (pk: number, sk: number, seed: number) => number;
+	_sqisign_lvl5_keypair_seeded?: (
+		pk: number,
+		sk: number,
+		seed: number,
+	) => number;
 	_sqisign_lvl5_sign_seeded?: (
 		sig: number,
 		msg: number,
@@ -94,7 +106,14 @@ type WorkerOp =
 	  };
 
 type WorkerResult =
-	| { id: number; ok: true; pk?: Uint8Array; sk?: Uint8Array; sig?: Uint8Array; valid?: boolean }
+	| {
+			id: number;
+			ok: true;
+			pk?: Uint8Array;
+			sk?: Uint8Array;
+			sig?: Uint8Array;
+			valid?: boolean;
+	  }
 	| { id: number; ok: false; error: string };
 
 const moduleLoaders: Record<SqisignVariant, () => Promise<SqisignModule>> = {
@@ -106,28 +125,46 @@ const moduleLoaders: Record<SqisignVariant, () => Promise<SqisignModule>> = {
 const moduleCache: Partial<Record<SqisignVariant, Promise<SqisignModule>>> = {};
 
 function getModule(variant: SqisignVariant): Promise<SqisignModule> {
-	if (!moduleCache[variant]) {
-		moduleCache[variant] = moduleLoaders[variant]();
+	let cached = moduleCache[variant];
+	if (!cached) {
+		cached = moduleLoaders[variant]();
+		moduleCache[variant] = cached;
 	}
-	return moduleCache[variant]!;
+	return cached;
 }
 
 function prefix(variant: SqisignVariant): "lvl1" | "lvl3" | "lvl5" {
 	return variant;
 }
 
-async function runKeygen(variant: SqisignVariant): Promise<{ pk: Uint8Array; sk: Uint8Array }> {
+async function runKeygen(
+	variant: SqisignVariant,
+): Promise<{ pk: Uint8Array; sk: Uint8Array }> {
 	const module = await getModule(variant);
 	const p = prefix(variant);
 	const seed = crypto.getRandomValues(
-		new Uint8Array(wasmExport(module[`_sqisign_${p}_seed_bytes` as keyof SqisignModule] as () => number)),
+		new Uint8Array(
+			wasmExport(
+				module[
+					`_sqisign_${p}_seed_bytes` as keyof SqisignModule
+				] as () => number,
+			),
+		),
 	);
 	return withStack(module, (alloc) => {
 		const pkPtr = alloc(
-			wasmExport(module[`_sqisign_${p}_public_key_bytes` as keyof SqisignModule] as () => number),
+			wasmExport(
+				module[
+					`_sqisign_${p}_public_key_bytes` as keyof SqisignModule
+				] as () => number,
+			),
 		);
 		const skPtr = alloc(
-			wasmExport(module[`_sqisign_${p}_private_key_bytes` as keyof SqisignModule] as () => number),
+			wasmExport(
+				module[
+					`_sqisign_${p}_private_key_bytes` as keyof SqisignModule
+				] as () => number,
+			),
 		);
 		const seedPtr = writeBytes(module, alloc, seed);
 		const rc = wasmExportWithArgs(
@@ -140,17 +177,26 @@ async function runKeygen(variant: SqisignVariant): Promise<{ pk: Uint8Array; sk:
 			skPtr,
 			seedPtr,
 		);
-		if (rc !== 0) throw new Error(`SQISign ${variant} keypair failed with code ${rc}`);
+		if (rc !== 0)
+			throw new Error(`SQISign ${variant} keypair failed with code ${rc}`);
 		return {
 			pk: readBytes(
 				module,
 				pkPtr,
-				wasmExport(module[`_sqisign_${p}_public_key_bytes` as keyof SqisignModule] as () => number),
+				wasmExport(
+					module[
+						`_sqisign_${p}_public_key_bytes` as keyof SqisignModule
+					] as () => number,
+				),
 			),
 			sk: readBytes(
 				module,
 				skPtr,
-				wasmExport(module[`_sqisign_${p}_private_key_bytes` as keyof SqisignModule] as () => number),
+				wasmExport(
+					module[
+						`_sqisign_${p}_private_key_bytes` as keyof SqisignModule
+					] as () => number,
+				),
 			),
 		};
 	});
@@ -164,11 +210,21 @@ async function runSign(
 	const module = await getModule(variant);
 	const p = prefix(variant);
 	const seed = crypto.getRandomValues(
-		new Uint8Array(wasmExport(module[`_sqisign_${p}_seed_bytes` as keyof SqisignModule] as () => number)),
+		new Uint8Array(
+			wasmExport(
+				module[
+					`_sqisign_${p}_seed_bytes` as keyof SqisignModule
+				] as () => number,
+			),
+		),
 	);
 	return withStack(module, (alloc) => {
 		const sigPtr = alloc(
-			wasmExport(module[`_sqisign_${p}_signature_bytes` as keyof SqisignModule] as () => number),
+			wasmExport(
+				module[
+					`_sqisign_${p}_signature_bytes` as keyof SqisignModule
+				] as () => number,
+			),
 		);
 		const msgPtr = writeBytes(module, alloc, msg);
 		const skPtr = writeBytes(module, alloc, sk);
@@ -187,11 +243,16 @@ async function runSign(
 			skPtr,
 			seedPtr,
 		);
-		if (rc !== 0) throw new Error(`SQISign ${variant} sign failed with code ${rc}`);
+		if (rc !== 0)
+			throw new Error(`SQISign ${variant} sign failed with code ${rc}`);
 		return readBytes(
 			module,
 			sigPtr,
-			wasmExport(module[`_sqisign_${p}_signature_bytes` as keyof SqisignModule] as () => number),
+			wasmExport(
+				module[
+					`_sqisign_${p}_signature_bytes` as keyof SqisignModule
+				] as () => number,
+			),
 		);
 	});
 }
@@ -234,7 +295,11 @@ async function handleOp(request: WorkerOp): Promise<WorkerResult> {
 			return { id: request.id, ok: true, pk, sk };
 		}
 		if (request.op === "sign") {
-			const sig = await runSign(request.variant, asBytes(request.msg), asBytes(request.sk));
+			const sig = await runSign(
+				request.variant,
+				asBytes(request.msg),
+				asBytes(request.sk),
+			);
 			return { id: request.id, ok: true, sig };
 		}
 		const valid = await runVerify(
@@ -269,5 +334,3 @@ workerScope.onmessage = (event: MessageEvent<WorkerOp>): void => {
 		workerScope.postMessage(result, transfers);
 	});
 };
-
-export {};

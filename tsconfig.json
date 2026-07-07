@@ -9,7 +9,7 @@
     "incremental": false,
     "isolatedModules": true,
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
-    "types": ["node"],
+    "types": ["node", "@webgpu/types"],
     "module": "NodeNext",
     "moduleDetection": "force",
     "moduleResolution": "NodeNext",

@@ -1,15 +1,15 @@
 import {
+	loadSqisignLvl1,
+	loadSqisignLvl3,
+	loadSqisignLvl5,
+} from "./sqisign.js";
+import {
 	getSqisignWebGpuSupport,
 	isSqisignWebGpuAvailable,
 	SQISIGN_WEBGPU_VARIANT_LABELS,
 	type SqisignWebGpuSupport,
 	type SqisignWebGpuVariant,
 } from "./sqisign-accel-env.js";
-import {
-	loadSqisignLvl1,
-	loadSqisignLvl3,
-	loadSqisignLvl5,
-} from "./sqisign.js";
 import type { IFnDsa, KeyPair, SqisignVariant } from "./types.js";
 import { initWebGpuDevice, warmupWebGpu } from "./webgpu/init.js";
 
@@ -42,7 +42,14 @@ type WorkerOp =
 	  };
 
 type WorkerResult =
-	| { id: number; ok: true; pk?: Uint8Array; sk?: Uint8Array; sig?: Uint8Array; valid?: boolean }
+	| {
+			id: number;
+			ok: true;
+			pk?: Uint8Array;
+			sk?: Uint8Array;
+			sig?: Uint8Array;
+			valid?: boolean;
+	  }
 	| { id: number; ok: false; error: string };
 
 let customWorkerUrl: string | null = null;
@@ -56,10 +63,7 @@ const pending = new Map<
 
 let initPromise: Promise<void> | null = null;
 
-const mainThreadLoaders: Record<
-	SqisignVariant,
-	() => Promise<IFnDsa>
-> = {
+const mainThreadLoaders: Record<SqisignVariant, () => Promise<IFnDsa>> = {
 	lvl1: loadSqisignLvl1,
 	lvl3: loadSqisignLvl3,
 	lvl5: loadSqisignLvl5,
@@ -174,14 +178,18 @@ async function ensureAccelReady(): Promise<void> {
 	return initPromise;
 }
 
-function postToWorker(request: WorkerOp, transfer: Transferable[] = []): Promise<WorkerResult> {
+function postToWorker(
+	request: WorkerOp,
+	transfer: Transferable[] = [],
+): Promise<WorkerResult> {
 	return ensureAccelReady().then(() => {
-		if (useMainThread || !worker) {
+		const activeWorker = worker;
+		if (useMainThread || !activeWorker) {
 			return runOnMainThread(request);
 		}
 		return new Promise<WorkerResult>((resolve, reject) => {
 			pending.set(request.id, { resolve, reject });
-			worker!.postMessage(request, transfer);
+			activeWorker.postMessage(request, transfer);
 		});
 	});
 }
@@ -287,7 +295,9 @@ class SqisignWebGpuWrapper implements IFnDsa {
 		]).then(async ([sig, msg, pk]) => {
 			const sigBytes = new Uint8Array(
 				typeof sig === "string"
-					? Uint8Array.from(sig.match(/.{1,2}/g)!.map((b) => Number.parseInt(b, 16)))
+					? Uint8Array.from(
+							(sig.match(/.{1,2}/g) ?? []).map((b) => Number.parseInt(b, 16)),
+						)
 					: sig instanceof Uint8Array
 						? sig
 						: new Uint8Array(sig),
@@ -373,7 +383,9 @@ export async function benchSqisignWebGpu(
 	};
 }
 
-async function loadSqisignWebGpu(variant: SqisignVariant): Promise<SqisignWebGpuWrapper> {
+async function loadSqisignWebGpu(
+	variant: SqisignVariant,
+): Promise<SqisignWebGpuWrapper> {
 	await ensureAccelReady();
 	return new SqisignWebGpuWrapper(variant);
 }

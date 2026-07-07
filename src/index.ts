@@ -11,19 +11,6 @@ export {
 	loadSqisignLvl5,
 } from "./sqisign.js";
 export {
-	benchSqisignWebGpu,
-	getSqisignWebGpuSupport,
-	isSqisignWebGpuAvailable,
-	loadSqisignLvl1WebGpu,
-	loadSqisignLvl3WebGpu,
-	loadSqisignLvl5WebGpu,
-	setSqisignAccelWorkerUrl,
-	SQISIGN_WEBGPU_VARIANT_LABELS,
-	type SqisignBenchSteps,
-	type SqisignWebGpuSupport,
-	type SqisignWebGpuVariant,
-} from "./sqisign-webgpu.js";
-export {
 	SQISIGN_LVL1_KAT0_MSG_HEX,
 	SQISIGN_LVL1_KAT0_PK_HEX,
 	SQISIGN_LVL1_KAT0_SIG_HEX,
@@ -37,6 +24,19 @@ export {
 	SQISIGN_LVL5_KAT0_SIG_HEX,
 	SQISIGN_LVL5_KAT0_SM_HEX,
 } from "./sqisign-kat-lvl1.js";
+export {
+	benchSqisignWebGpu,
+	getSqisignWebGpuSupport,
+	isSqisignWebGpuAvailable,
+	loadSqisignLvl1WebGpu,
+	loadSqisignLvl3WebGpu,
+	loadSqisignLvl5WebGpu,
+	SQISIGN_WEBGPU_VARIANT_LABELS,
+	type SqisignBenchSteps,
+	type SqisignWebGpuSupport,
+	type SqisignWebGpuVariant,
+	setSqisignAccelWorkerUrl,
+} from "./sqisign-webgpu.js";
 
 /** Minimal surface used by this package (mlkem-wasm–style API). */
 type MlKemImpl = {

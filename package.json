@@ -37,8 +37,8 @@
   ],
   "scripts": {
     "clean": "rm -rf dist",
-    "lint": "biome check . && tsc --project tsconfig.lint.json",
-    "lint:fix": "biome check --write .",
+    "lint": "biome check --config-path ./biome.json ./src ./scripts ./tsconfig.json ./tsconfig.lint.json ./tsdown.config.ts && tsc --project ./tsconfig.lint.json",
+    "lint:fix": "biome check --config-path ./biome.json --write ./src ./scripts ./tsconfig.json ./tsconfig.lint.json ./tsdown.config.ts",
     "build:wasm": "node scripts/build-wasm.mjs",
     "bundle:mlkem": "node scripts/bundle-mlkem.mjs",
     "bundle:signatures": "node scripts/bundle-signatures.mjs",
@@ -56,6 +56,7 @@
     "@biomejs/biome": "2.4.11",
     "@changesets/cli": "2.30.0",
     "@types/node": "25.6.0",
+    "@webgpu/types": "0.1.71",
     "esbuild": "0.28.0",
     "tsdown": "0.21.8",
     "typescript": "6.0.2",
