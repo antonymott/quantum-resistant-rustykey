@@ -3,6 +3,8 @@
 [![npm version](https://img.shields.io/npm/v/quantum-resistant-rustykey)](https://npmjs.com)
 [![Weekly Downloads](https://img.shields.io/npm/dw/quantum-resistant-rustykey)](https://npmjs.com)
 ![Node v26.4.0](https://img.shields.io/badge/node-v26.4.0-blue.svg)
+
+
 Fast, secure WebAssembly implementations of useful post-quantum-resistant tools both for backend (node) and frontend web.
 
 ```bash
@@ -75,7 +77,7 @@ The three parameter sets (512/768/1024) use the same implementation family and d
 
 ### We predominantly use C, not Rust for our web-assembly (WASM) modules: Why?
 
-- ***we're not cryptanalysts, not the smartipants type. We choose not to 'roll our own' cryptography. Think of us as enthusiastic interweb equivalents of stonemasons, ironworkers, mechanics and logisticians. Our creased caps still with the price tag on, you'll find us when you need us: well below decks, grubby overalls, sweating over the engines. Far above us lounge the sharply-dressed engineers who long ago earned their Hugo spritzes. We publish frequently 'into the wild' to guarantee our code is battle-tested, bugs found quickly. It only works because we rely absolutely on vetted, peer-reviewed designs from you and the rest of the research community.***
+- ***we're not cryptanalysts, not the smartipants type. We choose not to 'roll our own' cryptography. Think of us as enthusiastic interweb equivalents of stonemasons, ironworkers, mechanics and logistics crew. Our caps might still have the price tag on, but you'll find us exactly when you need us: well below decks in grubby overalls, keeping the engines humming. Far above us lounge the sharply-dressed engineers who long ago earned their Hugo spritzes. We publish frequently 'into the wild' to guarantee our code is battle-tested, bugs found quickly. It only works because we rely absolutely on vetted, peer-reviewed designs from you and the rest of the research community.***
 
 It seems all the cool cryptanalyst kids nowadays rely on Rust's proven memory and concurrency safety and high performance without a Garbage Collector. But that's not our way, not right now! It's old-school for the time being: ALL shipped cryptographic WASM modules will continue to be built via Emscripten from vetted C/C++ upstream code. We do love Rust when used at the right time: Rust/TypeScript will be primarily used for package-level ergonomics and integration layers.
 
