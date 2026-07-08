@@ -1,9 +1,12 @@
 {
-  "name": "quantum-resistant-rustykey",
-  "version": "0.12.0",
+  "name": "@antonymott/quantum-resistant-rustykey",
+  "version": "0.12.1",
   "description": "WebAssembly post-quantum-resistant tools for web",
-  "author": "Antony R Mott <a@auditcanary.com> (https://rustykey.app)",
+  "author": "Antony R Mott <antony@rustykey.io> (https://rustykey.io)",
   "license": "ISC",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "funding": [
     {
       "type": "github",
@@ -15,11 +18,21 @@
     "url": "git+https://github.com/antonymott/quantum-resistant-rustykey.git"
   },
   "homepage": "https://github.com/antonymott/quantum-resistant-rustykey.git#readme",
+  "bugs": {
+    "url": "https://github.com"
+  },
   "keywords": [
     "NIST",
     "post-quantum",
+    "pqc",
     "WebAssembly",
-    "cryptography"
+    "wasm",
+    "cryptography",
+    "crypto",
+    "sqisign",
+    "ml-dsa",
+    "ml-kem",
+    "webauthn"
   ],
   "type": "module",
   "sideEffects": false,
@@ -49,7 +62,7 @@
     "verify:dist": "node scripts/verify-dist.mjs",
     "prepack": "pnpm verify:dist",
     "prepublishOnly": "pnpm verify:dist",
-    "release": "pnpm verify:dist && changeset publish",
+    "release": "changeset publish",
     "example:browser": "pnpm --filter browser-demo dev"
   },
   "devDependencies": {

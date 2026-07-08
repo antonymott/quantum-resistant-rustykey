@@ -1,5 +1,11 @@
 # quantum-resistant-rustykey
 
+## 0.12.1
+
+### Patch Changes
+
+- update package.json
+
 ## 0.12.0
 
 ### Minor Changes
