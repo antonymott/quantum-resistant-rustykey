@@ -1,13 +1,18 @@
 # <img src="./logo-rustykey.png" width="57" align="center" /> Quantum-resistant RustyKey®
 
-Fast, secure WebAssembly implementations of useful post-quantum-resistant tools both for backend (node) and frontend web.
-
 [![npm version](https://img.shields.io/npm/v/quantum-resistant-rustykey)](https://npmjs.com)
 [![Weekly Downloads](https://img.shields.io/npm/dw/quantum-resistant-rustykey)](https://npmjs.com)
-![Node v25.9.0](https://img.shields.io/badge/node-v25.9.0-blue.svg)
+[![Node Version](https://shields.io)](https://npmjs.com)
+
+<!-- ![Node v26.4.0](https://img.shields.io/badge/node-v26.4.0-blue.svg) -->
+Fast, secure WebAssembly implementations of useful post-quantum-resistant tools both for backend (node) and frontend web.
 
 ```bash
-npm i quantum-resistant-rustykey
+# Install via pnpm (preferred)
+pnpm i quantum-resistant-rustykey
+# or
+bun add quantum-resistant-rustykey
+npm add quantum-resistant-rustykey
 ```
 
 ## Implementation status: Pre-production (stable for testing)

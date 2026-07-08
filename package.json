@@ -1,6 +1,6 @@
 {
   "name": "quantum-resistant-rustykey",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "WebAssembly post-quantum-resistant tools for web",
   "author": "Antony R Mott <antony@rustykey.io> (https://rustykey.io)",
   "license": "ISC",
@@ -65,14 +65,17 @@
   "devDependencies": {
     "@biomejs/biome": "2.4.11",
     "@changesets/cli": "2.30.0",
-    "@types/node": "25.6.0",
+    "@types/node": "^26.1.0",
     "@webgpu/types": "0.1.71",
     "esbuild": "0.28.0",
-    "tsdown": "0.21.8",
+    "tsdown": "0.22.3",
     "typescript": "6.0.2",
     "vitest": "4.1.4"
   },
   "dependencies": {
     "@noble/post-quantum": "0.6.1"
+  },
+  "engines": {
+    "node": ">=26.4.0"
   }
 }
