@@ -2,9 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/quantum-resistant-rustykey)](https://npmjs.com)
 [![Weekly Downloads](https://img.shields.io/npm/dw/quantum-resistant-rustykey)](https://npmjs.com)
-[![Node Version](https://shields.io)](https://npmjs.com)
-
-<!-- ![Node v26.4.0](https://img.shields.io/badge/node-v26.4.0-blue.svg) -->
+![Node v26.4.0](https://img.shields.io/badge/node-v26.4.0-blue.svg)
 Fast, secure WebAssembly implementations of useful post-quantum-resistant tools both for backend (node) and frontend web.
 
 ```bash
@@ -19,17 +17,17 @@ npm add quantum-resistant-rustykey
 
 - ***Recommendation***: Await v1.0.0 (following security audit) for production/regulated deployment.
 - includes NIST approved and NIST "on-ramp" round 3 candidate SQISign
-- **SQIsign** Level 1, Level 3, Level 5 NOT approved yet by NIST, refer [cose-sqisign] (https://datatracker.ietf.org/doc/draft-mott-cose-sqisign/)
+- **SQIsign** Level 5, Level 3, Level 1 NOT approved yet by NIST, refer [cose-sqisign] (https://datatracker.ietf.org/doc/draft-mott-cose-sqisign/)
 - **ML-DSA** ML-DSA-65, ML-DSA-87
 - **FN-DSA** FN-DSA-512, FN-DSA-1024
 - **ML-KEM** 512, 768, 1024 using [mlkem-native](https://github.com/pq-code-package/mlkem-native).
 
-### SQISign is 'NIST-on-ramp' only yet highly suitable for constrained-development use 
-*TLDR; to help hurdle the "silent" barrier to post-quantum adoption: 1024-byte buffer limit in many existing FIDO2/WebAuthn implementations*
-- support our IETF standards track draft and help move things along with SQISign [cose-sqisign](https://www.ietf.org/archive/id/draft-mott-cose-sqisign-03.html)
+### SQISign is 'NIST-on-ramp': get ahead and test TODAY, SQISign is the ONLY signature for constrained-development use 
+*TLDR; breeze past the "silent" barrier to post-quantum adoption: 1024-byte buffer limit in many existing FIDO2/WebAuthn implementations*
+- support our IETF standards track draft by taking our free code for a spin, the more users enjoying these packages, the faster things go [cose-sqisign](https://www.ietf.org/archive/id/draft-mott-cose-sqisign-03.html)
 
-#### ⚠️ IMPORTANT SPECIFICATION NOTICE (as of June 2026)
-COSE/JOSE Algorithm IDs (-61, -62, -63) and case-sensitive identifier strings (SQIsign-L1, SQIsign-L3, SQIsign-L5) utilized in this package are derived directly from the active [cose-sqisign](https://datatracker.ietf.org/doc/draft-mott-cose-sqisign/)Internet-Draft. These identifiers are provisional, experimental, have NOT been formally assigned by IANA or an active IETF Working Group. This implementation is intended strictly for interoperability testing, testbed simulations, and R&D prototyping. Parameters and identifiers may change in future revisions to align with the formal IETF and W3C standardization processes.
+#### ⚠️ IMPORTANT SPECIFICATION NOTICE (as of July 2026)
+COSE/JOSE Algorithm IDs (-61, -62, -63) and case-sensitive identifier strings (SQIsign-L1, SQIsign-L3, SQIsign-L5) used in this package are derived directly from the active [cose-sqisign](https://datatracker.ietf.org/doc/draft-mott-cose-sqisign/)Internet-Draft. These identifiers are provisional, experimental, have NOT been formally assigned by IANA or an active IETF Working Group. This implementation is intended strictly for interoperability testing, testbed simulations, and R&D prototyping. Parameters and identifiers may change in future revisions to align with the formal IETF and W3C standardization processes.
 
 #### WebAuthn PQC Signature size constraints
 Dilithium variants, and Falcon-1024 are physically incompatible with millions of existing FIDO2/WebAuthn authenticators that rely on the CTAP2 1024-byte buffer limit.
@@ -69,7 +67,7 @@ The three parameter sets (512/768/1024) use the same implementation family and d
   - Generic Montgomery reduction helper:
     - [mlkem/src/poly.h](https://github.com/pq-code-package/mlkem-native/blob/main/mlkem/src/poly.h)
 
-### What this means for 512/768/1024
+### Constant-time claims and proofs
 
 - Constant-time claims and proofs are provided upstream by `mlkem-native` (see links above).
 - This package builds the same source for all three variants by changing only `MLK_CONFIG_PARAMETER_SET` in `wasm/Makefile`.
@@ -77,9 +75,9 @@ The three parameter sets (512/768/1024) use the same implementation family and d
 
 ### We predominantly use C, not Rust for our web-assembly (WASM) modules: Why?
 
-It seems all the cool cryptanalyst kids nowadays rely on Rust's proven memory and concurrency safety and high performance without a Garbage Collector. As outlined below, current way forward in this repository: the shipped cryptographic WASM modules will continue to be built via Emscripten from vetted C/C++ upstream code, while Rust/TypeScript will be primarily used for package-level ergonomics and integration layers.
+It seems all the cool cryptanalyst kids nowadays rely on Rust's proven memory and concurrency safety and high performance without a Garbage Collector. But that's not our way, not right now! It's old-school for the time being: ALL shipped cryptographic WASM modules will continue to be built via Emscripten from vetted C/C++ upstream code. We do love Rust when used at the right time: Rust/TypeScript will be primarily used for package-level ergonomics and integration layers.
 
-Leaning on Rust is implied in our brand, so this deserves a bit of explanation! Many developers new to web-assembly migrations (i.e. from other languages) don't realize that final WebAssembly (WASM) bytecode looks completely different depending on if we start with C or Rust!
+A Rust-foward approach is implied in our brand, so building direct form C libraries to web-assembly deserves more explanation. Many developers new to web-assembly migrations (i.e. from other languages) don't realize that final WebAssembly (WASM) bytecode looks completely different inside depending on if one begins with C or Rust. Yes, web-assembly modules from each (Rust or C) will function, about the same speed, and indeed will be equally platform agnostic for deployment. But we observed slight timing differences between web-assembly modules compiled from Rust and from C, so we're sticking with C.
 
 RustyKey® current dual approach is a way to balance performance, security-vetted logic, and web compatibility. Some technical factors may make C => emscripten approach acceptable and, in some cases, preferable for post-quantum cryptography:
 
