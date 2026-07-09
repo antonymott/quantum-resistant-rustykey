@@ -1,4 +1,4 @@
-# SQISign-webGPU (browser accelerated)
+# SQISign-webGPU (browser accelerated "racecar")
 
 Browser-only accelerated SQISign variants using **SharedArrayBuffer** and **WebGPU**.
 These are separate from the standard server-compatible WASM loaders and are **not available in Node.js**.
@@ -27,6 +27,19 @@ Serve these response headers on pages that load the accelerated variants:
 Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: require-corp
 ```
+
+⚠️ IMPORTANT for this highly-tuned "racecar" version
+
+Enforcing these headers on a production web app creates a challenging isolation boundary
+ - Breaking Third Parties: Every single script, analytic tracker, embedded iframe (like Stripe or YouTube), and cross-origin image on that page will immediately break or be blocked unless they are explicitly served with a Cross-Origin-Resource-Policy header
+ - Maintenance Overhead: the accelerated version is browser-only frontend, use our standard web-assembly package in nodejs backend***
+
+
+## Specific risks introduced with this "racecar" version
+
+1. Security unknowns
+- Side-Channel Vulnerabilities are untested. Offloading cryptographic math to a smartphone's WebGPU - billions of them, various model, makes, years - means executing field arithmetic directly on the host computer's GPU threads. Graphics processors are fundamentally optimized for parallel throughput, not constant-time deterministic execution.
+- Novel unseen threats: Running cryptographic primitives on shared GPU hardware makes them highly susceptible to advanced timing and memory-coalescing side-channel attacks. ⚠️ Upstream C formal proofs absolutely do not account for WebGPU compute shader pipeline execution. ⚠️
 
 ### Next.js example
 
