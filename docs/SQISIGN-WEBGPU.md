@@ -7,9 +7,9 @@ These are separate from the standard server-compatible WASM loaders and are **no
 
 | Security level | Standard loader | Accelerated (browser) |
 |----------------|-----------------|------------------------|
-| L1 | `loadSqisignLvl1()` → SQISign-L1 | `loadSqisignLvl1WebGpu()` → **SQISign-L1-webGPU** |
-| L3 | `loadSqisignLvl3()` → SQISign-L3 | `loadSqisignLvl3WebGpu()` → **SQISign-L3-webGPU** |
 | L5 | `loadSqisignLvl5()` → SQISign-L5 | `loadSqisignLvl5WebGpu()` → **SQISign-L5-webGPU** |
+| L3 | `loadSqisignLvl3()` → SQISign-L3 | `loadSqisignLvl3WebGpu()` → **SQISign-L3-webGPU** |
+| L1 | `loadSqisignLvl1()` → SQISign-L1 | `loadSqisignLvl1WebGpu()` → **SQISign-L1-webGPU** |
 
 Labels are exported as `SQISIGN_WEBGPU_VARIANT_LABELS`.
 
@@ -33,6 +33,7 @@ Cross-Origin-Embedder-Policy: require-corp
 Enforcing these headers on a production web app creates a challenging isolation boundary
  - Breaking Third Parties: Every single script, analytic tracker, embedded iframe (like Stripe or YouTube), and cross-origin image on that page will immediately break or be blocked unless they are explicitly served with a Cross-Origin-Resource-Policy header
  - Maintenance Overhead: the accelerated version is browser-only frontend, use our standard web-assembly package in nodejs backend***
+ - ok, so you're a self-confessed speed demon, you've read the cautions. But before you jump into this shiny new machine, remember you asked the crew to fit 'racing slicks for dry weather only'. If the weather changes unexpectedly, you'll find yourself behind the wheel of an 'aquatic hydroplaning device'. No airbags.
 
 
 ## Specific risks introduced with this "racecar" version

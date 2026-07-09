@@ -147,18 +147,6 @@ Notes:
   - ML-KEM
   - approach adapted from Dmitry Chestnykh's `mlkem-wasm`: https://github.com/dchest/mlkem-wasm
 
-## Installation
-
-Install via pnpm, npm or yarn:
-
-```bash
-pnpm install quantum-resistant-rustykey
-# or
-npm install quantum-resistant-rustykey
-# or
-yarn add quantum-resistant-rustykey
-```
-
 ## Usage
 
 ### SQISign-webGPU (browser accelerated)
@@ -324,8 +312,6 @@ Security note for web apps:
 
 ### Prerequisites
 
-- Node.js >= 25.9.0
-- pnpm (or npm)
 - Emscripten **or** Docker — only needed if you run `pnpm build:vendor` to regenerate `src/vendor/mlkem*.js`
 
 ### Build Instructions
