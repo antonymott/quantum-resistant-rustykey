@@ -52,7 +52,7 @@ Live at **[pqc.rustykey.me](https://pqc.rustykey.me)** — a test environment wh
 ## Security assurance and verification
 
 This project relies on upstream `mlkem-native` for arithmetic/security properties.
-The three parameter sets (512/768/1024) use the same implementation family and differ only by compile-time parameter selection.
+The three parameter sets (512/768/1024) use the same implementation family and differ only by compile-time parameter selection. Bear in mind for testing that the formal proofs validate native C and assembly source code only: the moment we passed that through a custom wasm/Makefile, those upstream formal verification guarantees evaporated. 
 
 ### Upstream evidence
 
@@ -77,10 +77,11 @@ The three parameter sets (512/768/1024) use the same implementation family and d
 
 ### We predominantly use C, not Rust for our web-assembly (WASM) modules: Why?
 
-- ***we're not cryptanalysts, not the smartipants type. We choose not to 'roll our own' cryptography. Think of us as enthusiastic interweb equivalents of stonemasons, ironworkers, mechanics and logistics crew. Our caps might still have the price tag on, but you'll find us exactly when you need us: well below decks in grubby overalls, keeping the engines humming. Far above us lounge the sharply-dressed engineers who long ago earned their Hugo spritzes. We publish frequently 'into the wild' to guarantee our code is battle-tested, bugs found quickly. It only works because we rely absolutely on vetted, peer-reviewed designs from you and the rest of the research community.***
+- ***we're not cryptanalysts, not the smartypants type. We choose not to 'roll our own' cryptography as it's worrying enough we compile the C into web-assembly...what if our work strips out constant-time protections? Think of us as enthusiastic interweb equivalents of stonemasons, ironworkers, mechanics and logistics crew. Our caps might still have the price tag on, but you'll find us exactly when you need us: well below decks in grubby overalls, keeping the engines humming. Far above us lounge the sharply-dressed engineers who long ago earned their Hugo spritzes. We publish frequently 'into the wild' to guarantee our code is battle-tested, bugs found quickly. It only works because we rely absolutely on vetted, peer-reviewed designs from you and the rest of the research community.***
 
-It seems all the cool cryptanalyst kids nowadays rely on Rust's proven memory and concurrency safety and high performance without a Garbage Collector. But that's not our way, not right now! It's old-school for the time being: ALL shipped cryptographic WASM modules will continue to be built via Emscripten from vetted C/C++ upstream code. We do love Rust when used at the right time: Rust/TypeScript will be primarily used for package-level ergonomics and integration layers.
+It seems all the cool cryptanalyst kids nowadays rely on Rust's proven memory and concurrency safety and high performance without a Garbage Collector. Hre it's old-school for the time being: shipped cryptographic WASM modules will continue to be built via Emscripten from vetted C/C++ upstream code. We do love Rust when used at the right time: Rust/TypeScript will be primarily used for package-level ergonomics and integration layers.
 
+### detail. TLDR; downstream security != upstream security
 A Rust-foward approach is implied in our brand, so building direct form C libraries to web-assembly deserves more explanation. Many developers new to web-assembly migrations (i.e. from other languages) don't realize that final WebAssembly (WASM) bytecode looks completely different inside depending on if one begins with C or Rust. Yes, web-assembly modules from each (Rust or C) will function, about the same speed, and indeed will be equally platform agnostic for deployment. But we observed slight timing differences between web-assembly modules compiled from Rust and from C, so we're sticking with C.
 
 RustyKey® current dual approach is a way to balance performance, security-vetted logic, and web compatibility. Some technical factors may make C => emscripten approach acceptable and, in some cases, preferable for post-quantum cryptography:
