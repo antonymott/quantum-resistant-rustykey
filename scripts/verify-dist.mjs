@@ -1,21 +1,77 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
-const required = [
-	join(root, "dist", "index.js"),
-	join(root, "dist", "index.d.ts"),
+const distDir = join(root, "dist");
+
+const requiredFiles = [
+	join(distDir, "index.js"),
+	join(distDir, "index.d.ts"),
+	join(distDir, "sqisign-accel-worker.js"),
 ];
 
-const missing = required.filter((path) => !existsSync(path));
-if (missing.length > 0) {
-	console.error("Missing required dist artifacts:");
-	for (const path of missing) {
-		console.error(`  - ${path}`);
+const requiredWebGpuExports = [
+	"getSqisignWebGpuSupport",
+	"benchSqisignWebGpu",
+	"loadSqisignLvl1WebGpu",
+	"loadSqisignLvl3WebGpu",
+	"loadSqisignLvl5WebGpu",
+	"setSqisignAccelWorkerUrl",
+];
+
+const errors = [];
+
+for (const path of requiredFiles) {
+	if (!existsSync(path)) {
+		errors.push(`Missing required dist artifact: ${path}`);
+	}
+}
+
+const workerPath = join(distDir, "sqisign-accel-worker.js");
+if (existsSync(workerPath)) {
+	const workerSize = statSync(workerPath).size;
+	if (workerSize < 100_000) {
+		errors.push(
+			`dist/sqisign-accel-worker.js looks too small (${workerSize} bytes); run \`pnpm build\`.`,
+		);
+	}
+}
+
+const indexDtsPath = join(distDir, "index.d.ts");
+const indexJsPath = join(distDir, "index.js");
+
+if (existsSync(indexDtsPath)) {
+	const indexDts = readFileSync(indexDtsPath, "utf8");
+	const missingExports = requiredWebGpuExports.filter(
+		(name) => !indexDts.includes(name),
+	);
+	if (missingExports.length > 0) {
+		errors.push(
+			`dist/index.d.ts is missing SQISign-webGPU exports: ${missingExports.join(", ")}`,
+		);
+	}
+}
+
+if (existsSync(indexJsPath)) {
+	const indexJs = readFileSync(indexJsPath, "utf8");
+	const missingRuntime = requiredWebGpuExports.filter(
+		(name) => !indexJs.includes(name),
+	);
+	if (missingRuntime.length > 0) {
+		errors.push(
+			`dist/index.js is missing SQISign-webGPU runtime symbols: ${missingRuntime.join(", ")}`,
+		);
+	}
+}
+
+if (errors.length > 0) {
+	console.error("dist verification failed:");
+	for (const message of errors) {
+		console.error(`  - ${message}`);
 	}
 	console.error("Run `pnpm build` before publish.");
 	process.exit(1);
 }
 
-console.log("dist artifacts verified.");
+console.log("dist artifacts verified (including SQISign-webGPU exports and worker bundle).");
