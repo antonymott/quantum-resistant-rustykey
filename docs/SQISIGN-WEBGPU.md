@@ -1,4 +1,4 @@
-# SQISign-webGPU (browser accelerated)
+# SQISign-webGPU (browser accelerated "racecar")
 
 Browser-only accelerated SQISign variants using **SharedArrayBuffer** and **WebGPU**.
 These are separate from the standard server-compatible WASM loaders and are **not available in Node.js**.
@@ -7,9 +7,9 @@ These are separate from the standard server-compatible WASM loaders and are **no
 
 | Security level | Standard loader | Accelerated (browser) |
 |----------------|-----------------|------------------------|
-| L1 | `loadSqisignLvl1()` → SQISign-L1 | `loadSqisignLvl1WebGpu()` → **SQISign-L1-webGPU** |
-| L3 | `loadSqisignLvl3()` → SQISign-L3 | `loadSqisignLvl3WebGpu()` → **SQISign-L3-webGPU** |
 | L5 | `loadSqisignLvl5()` → SQISign-L5 | `loadSqisignLvl5WebGpu()` → **SQISign-L5-webGPU** |
+| L3 | `loadSqisignLvl3()` → SQISign-L3 | `loadSqisignLvl3WebGpu()` → **SQISign-L3-webGPU** |
+| L1 | `loadSqisignLvl1()` → SQISign-L1 | `loadSqisignLvl1WebGpu()` → **SQISign-L1-webGPU** |
 
 Labels are exported as `SQISIGN_WEBGPU_VARIANT_LABELS`.
 
@@ -27,6 +27,20 @@ Serve these response headers on pages that load the accelerated variants:
 Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: require-corp
 ```
+
+⚠️ IMPORTANT for this highly-tuned "racecar" version
+
+Enforcing these headers on a production web app creates a challenging isolation boundary
+ - Breaking Third Parties: Every single script, analytic tracker, embedded iframe (like Stripe or YouTube), and cross-origin image on that page will immediately break or be blocked unless they are explicitly served with a Cross-Origin-Resource-Policy header
+ - Maintenance Overhead: the accelerated version is browser-only frontend, use our standard web-assembly package in nodejs backend***
+ - ok, so you're a self-confessed speed demon, you've read the cautions. But before you jump into this shiny new machine, remember you asked the crew to fit 'racing slicks for dry weather only'. If the weather changes unexpectedly, you'll find yourself behind the wheel of an 'aquatic hydroplaning device'. No airbags.
+
+
+## Specific risks introduced with this "racecar" version
+
+1. Security unknowns
+- Side-Channel Vulnerabilities are untested. Offloading cryptographic math to a smartphone's WebGPU - billions of them, various model, makes, years - means executing field arithmetic directly on the host computer's GPU threads. Graphics processors are fundamentally optimized for parallel throughput, not constant-time deterministic execution.
+- Novel unseen threats: Running cryptographic primitives on shared GPU hardware makes them highly susceptible to advanced timing and memory-coalescing side-channel attacks. ⚠️ Upstream C formal proofs absolutely do not account for WebGPU compute shader pipeline execution. ⚠️
 
 ### Next.js example
 

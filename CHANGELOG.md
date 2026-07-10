@@ -1,10 +1,28 @@
 # quantum-resistant-rustykey
 
+## 0.12.10
+
+### Patch Changes
+
+- chore
+
+## 0.12.9
+
+### Patch Changes
+
+- chore
+
+## 0.12.8
+
+### Patch Changes
+
+- chore
+
 ## 0.12.7
 
 ### Patch Changes
 
-- verification of missing modules
+- chore
 
 ## 0.12.6
 
