@@ -1,5 +1,11 @@
 # quantum-resistant-rustykey
 
+## 0.12.11
+
+### Patch Changes
+
+- verification of modules
+
 ## 0.12.10
 
 ### Patch Changes
