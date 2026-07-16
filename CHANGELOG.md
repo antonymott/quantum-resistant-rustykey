@@ -1,5 +1,11 @@
 # quantum-resistant-rustykey
 
+## 0.12.12
+
+### Patch Changes
+
+- fix missing files with new build
+
 ## 0.12.11
 
 ### Patch Changes
