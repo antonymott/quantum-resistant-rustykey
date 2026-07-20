@@ -4,6 +4,9 @@ import {
 	loadFnDsa1024,
 	loadMlDsa3,
 	loadMlDsa5,
+	loadSlhDsa128,
+	loadSlhDsa192,
+	loadSlhDsa256,
 	loadMlKem512,
 	loadMlKem768,
 	loadMlKem1024,
@@ -151,6 +154,45 @@ describe("quantum-resistant-rustykey (mlkem-wasm adapter)", () => {
 
 		expect(ok).toBe(true);
 	});
+
+	it("signs and verifies with SLH-DSA SHA2-128s", async () => {
+		const slhdsa = await loadSlhDsa128();
+		const kp = slhdsa.keypair();
+		const publicKey = (await kp.get("public_key")) as Uint8Array;
+		const privateKey = (await kp.get("private_key")) as Uint8Array;
+
+		const message = new TextEncoder().encode("hello slh-dsa-128s");
+		const signature = await slhdsa.sign(message, privateKey);
+		const ok = await slhdsa.verify(signature, message, publicKey);
+
+		expect(ok).toBe(true);
+	}, 30_000);
+
+	it("signs and verifies with SLH-DSA SHA2-192s", async () => {
+		const slhdsa = await loadSlhDsa192();
+		const kp = slhdsa.keypair();
+		const publicKey = (await kp.get("public_key")) as Uint8Array;
+		const privateKey = (await kp.get("private_key")) as Uint8Array;
+
+		const message = new TextEncoder().encode("hello slh-dsa-192s");
+		const signature = await slhdsa.sign(message, privateKey);
+		const ok = await slhdsa.verify(signature, message, publicKey);
+
+		expect(ok).toBe(true);
+	}, 60_000);
+
+	it("signs and verifies with SLH-DSA SHA2-256s", async () => {
+		const slhdsa = await loadSlhDsa256();
+		const kp = slhdsa.keypair();
+		const publicKey = (await kp.get("public_key")) as Uint8Array;
+		const privateKey = (await kp.get("private_key")) as Uint8Array;
+
+		const message = new TextEncoder().encode("hello slh-dsa-256s");
+		const signature = await slhdsa.sign(message, privateKey);
+		const ok = await slhdsa.verify(signature, message, publicKey);
+
+		expect(ok).toBe(true);
+	}, 120_000);
 
 	it("verifies SQISign level-1 against an upstream NIST KAT vector", async () => {
 		const sq = await loadSqisignLvl1();

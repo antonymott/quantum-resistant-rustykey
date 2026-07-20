@@ -5,6 +5,7 @@ import mlkem1024 from "./vendor/mlkem1024.js";
 
 export { loadFnDsa512, loadFnDsa1024 } from "./fndsa.js";
 export { loadMlDsa3, loadMlDsa5 } from "./mldsa.js";
+export { loadSlhDsa128, loadSlhDsa192, loadSlhDsa256 } from "./slhdsa.js";
 export {
 	loadSqisignLvl1,
 	loadSqisignLvl3,
