@@ -1,5 +1,11 @@
 # quantum-resistant-rustykey
 
+## 0.12.13
+
+### Patch Changes
+
+- slhdsa
+
 ## 0.12.12
 
 ### Patch Changes
