@@ -1,5 +1,15 @@
 # quantum-resistant-rustykey
 
+## 0.13.0
+
+### Minor Changes
+
+- fbd5982: verifications
+
+### Patch Changes
+
+- chore
+
 ## 0.12.13
 
 ### Patch Changes
