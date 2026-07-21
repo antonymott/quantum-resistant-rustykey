@@ -20,6 +20,12 @@ const requiredWebGpuExports = [
 	"setSqisignAccelWorkerUrl",
 ];
 
+const requiredSlhDsaExports = [
+	"loadSlhDsa128",
+	"loadSlhDsa192",
+	"loadSlhDsa256",
+];
+
 const errors = [];
 
 for (const path of requiredFiles) {
@@ -51,6 +57,15 @@ if (existsSync(indexDtsPath)) {
 			`dist/index.d.ts is missing SQISign-webGPU exports: ${missingExports.join(", ")}`,
 		);
 	}
+
+	const missingSlhDsaExports = requiredSlhDsaExports.filter(
+		(name) => !indexDts.includes(name),
+	);
+	if (missingSlhDsaExports.length > 0) {
+		errors.push(
+			`dist/index.d.ts is missing SLH-DSA exports: ${missingSlhDsaExports.join(", ")}`,
+		);
+	}
 }
 
 if (existsSync(indexJsPath)) {
@@ -61,6 +76,15 @@ if (existsSync(indexJsPath)) {
 	if (missingRuntime.length > 0) {
 		errors.push(
 			`dist/index.js is missing SQISign-webGPU runtime symbols: ${missingRuntime.join(", ")}`,
+		);
+	}
+
+	const missingSlhDsaRuntime = requiredSlhDsaExports.filter(
+		(name) => !indexJs.includes(name),
+	);
+	if (missingSlhDsaRuntime.length > 0) {
+		errors.push(
+			`dist/index.js is missing SLH-DSA runtime symbols: ${missingSlhDsaRuntime.join(", ")}`,
 		);
 	}
 }
@@ -74,4 +98,6 @@ if (errors.length > 0) {
 	process.exit(1);
 }
 
-console.log("dist artifacts verified (including SQISign-webGPU exports and worker bundle).");
+console.log(
+	"dist artifacts verified (including SQISign-webGPU exports, SLH-DSA exports, and worker bundle).",
+);
