@@ -22,6 +22,7 @@ npm add quantum-resistant-rustykey
 - **SQIsign** Level 5, Level 3, Level 1 NOT approved yet by NIST, refer [cose-sqisign] (https://datatracker.ietf.org/doc/draft-mott-cose-sqisign/)
 - **ML-DSA** ML-DSA-65, ML-DSA-87
 - **FN-DSA** FN-DSA-512, FN-DSA-1024
+- **SLH-DSA** (SPHINCS+) SLH-DSA-SHA2-128s / 192s / 256s — hash-based, NIST-standardized ([FIPS 205](https://csrc.nist.gov/pubs/fips/205/final))
 - **ML-KEM** 512, 768, 1024 using [mlkem-native](https://github.com/pq-code-package/mlkem-native).
 
 ### SQISign is 'NIST-on-ramp': get ahead and test TODAY, SQISign is the ONLY signature for constrained-development use 
@@ -149,24 +150,129 @@ Notes:
 
 ## Usage
 
-### SQISign-webGPU (browser accelerated)
+### SQISign-webGPU (browser accelerated "racecar")
 
-Browser-only accelerated SQISign variants: **SQISign-L1-webGPU**, **SQISign-L3-webGPU**, **SQISign-L5-webGPU**.
-Requires COOP/COEP headers (`crossOriginIsolated`). See [docs/SQISIGN-WEBGPU.md](./docs/SQISIGN-WEBGPU.md).
+Browser-only accelerated SQISign variants using **SharedArrayBuffer** and **WebGPU**.
+These are separate from the standard server-compatible WASM loaders and are **not available in Node.js**.
 
-```typescript
-import {
-  isSqisignWebGpuAvailable,
-  loadSqisignLvl5WebGpu,
-  benchSqisignWebGpu,
-} from "quantum-resistant-rustykey";
+#### Variant names
 
-if (isSqisignWebGpuAvailable()) {
-  const sq = await loadSqisignLvl5WebGpu();
-  const bench = await benchSqisignWebGpu("lvl5");
-  console.log(bench.steps);
+| Security level | Standard loader | Accelerated (browser) |
+|----------------|-----------------|------------------------|
+| L5 | `loadSqisignLvl5()` → SQISign-L5 | `loadSqisignLvl5WebGpu()` → **SQISign-L5-webGPU** |
+| L3 | `loadSqisignLvl3()` → SQISign-L3 | `loadSqisignLvl3WebGpu()` → **SQISign-L3-webGPU** |
+| L1 | `loadSqisignLvl1()` → SQISign-L1 | `loadSqisignLvl1WebGpu()` → **SQISign-L1-webGPU** |
+
+Labels are exported as `SQISIGN_WEBGPU_VARIANT_LABELS`.
+
+#### Requirements (COOP / COEP)
+
+Accelerated SQISign requires a **cross-origin isolated** browsing context:
+
+1. `crossOriginIsolated === true`
+2. `SharedArrayBuffer` available
+3. `navigator.gpu` (WebGPU) available
+
+Serve these response headers on pages that load the accelerated variants:
+
+```http
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+
+⚠️ IMPORTANT for this highly-tuned "racecar" version
+
+Enforcing these headers on a production web app creates a challenging isolation boundary
+ - Breaking Third Parties: Every single script, analytic tracker, embedded iframe (like Stripe or YouTube), and cross-origin image on that page will immediately break or be blocked unless they are explicitly served with a Cross-Origin-Resource-Policy header
+ - Maintenance Overhead: the accelerated version is browser-only frontend, use our standard web-assembly package in nodejs backend***
+ - ok, so you're a self-confessed speed demon, you've read the cautions. But before you jump into this shiny new machine, remember you asked the crew to fit 'racing slicks for dry weather only'. If the weather changes unexpectedly, you'll find yourself behind the wheel of an 'aquatic hydroplaning device'. No airbags.
+
+#### Specific risks introduced with this "racecar" version
+
+1. Security unknowns
+- Side-Channel Vulnerabilities are untested. Offloading cryptographic math to a smartphone's WebGPU - billions of them, various model, makes, years - means executing field arithmetic directly on the host computer's GPU threads. Graphics processors are fundamentally optimized for parallel throughput, not constant-time deterministic execution.
+- Novel unseen threats: Running cryptographic primitives on shared GPU hardware makes them highly susceptible to advanced timing and memory-coalescing side-channel attacks. ⚠️ Upstream C formal proofs absolutely do not account for WebGPU compute shader pipeline execution. ⚠️
+
+##### Next.js example
+
+```js
+// next.config.mjs
+async headers() {
+  return [
+    {
+      source: "/your-pqc-page/:path*",
+      headers: [
+        { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+        { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
+      ],
+    },
+  ];
 }
 ```
+
+Third-party scripts, images, and iframes on the same page must be served with appropriate `Cross-Origin-Resource-Policy` (or `crossorigin` attributes) or they will be blocked under `require-corp`.
+
+##### Worker script (required for bundlers like Next.js)
+
+Bundled apps cannot load `sqisign-accel-worker.js` from `node_modules`. Copy it to a public URL:
+
+```bash
+cp node_modules/quantum-resistant-rustykey/dist/sqisign-accel-worker.js public/pqc/
+```
+
+The testbed sync script does this automatically (`pnpm pqc:sync-local`).
+
+Default worker URL: `/pqc/sqisign-accel-worker.js`. Override if needed:
+
+```ts
+import { setSqisignAccelWorkerUrl } from "quantum-resistant-rustykey";
+setSqisignAccelWorkerUrl("/your/path/sqisign-accel-worker.js");
+```
+
+If the worker fails to load, the library falls back to main-thread WASM (same crypto, UI may stutter on L5).
+
+#### Usage
+
+```ts
+import {
+  benchSqisignWebGpu,
+  getSqisignWebGpuSupport,
+  isSqisignWebGpuAvailable,
+  loadSqisignLvl5WebGpu,
+  SQISIGN_WEBGPU_VARIANT_LABELS,
+} from "quantum-resistant-rustykey";
+
+const support = getSqisignWebGpuSupport();
+if (!support.available) {
+  console.warn(support.reason);
+}
+
+// Same IFnDsa surface as standard loaders
+const sq = await loadSqisignLvl5WebGpu();
+const kp = sq.keypair();
+const pk = await kp.get("public_key");
+const sk = await kp.get("private_key");
+const msg = new TextEncoder().encode("hello");
+const sig = await sq.sign(msg, sk);
+const ok = await sq.verify(sig, msg, pk);
+
+// Built-in keygen + sign + verify benchmark (browser only)
+const bench = await benchSqisignWebGpu("lvl5");
+console.log(bench.algorithm); // SQISign-L5-webGPU
+console.log(bench.steps);
+```
+
+#### Architecture
+
+1. **Web Worker** — SQISign WASM runs off the main thread (worker bundle: `dist/sqisign-accel-worker.js`).
+2. **SharedArrayBuffer** — enabled when COOP/COEP isolate the origin (required for future pthread WASM builds).
+3. **WebGPU** — device initialization and compute pipeline warmup for field-arithmetic acceleration.
+
+Standard `loadSqisignLvl*` loaders remain unchanged for Node.js and non-isolated browsers.
+
+#### Live comparison
+
+The [pqc.rustykey.me](https://pqc.rustykey.me) testbed shows side-by-side timings for SQISign-L1/L3/L5 vs SQISign-L1-webGPU / L3 / L5 on the **COSE** and **Verifiable Credentials** tabs when SQISign is selected.
 
 ### Node.js example
 
@@ -308,6 +414,112 @@ Security note for web apps:
 - prefer HTTPS + short-lived keys
 - use secure key storage strategy (e.g. IndexedDB + app-level protections)
 
+### SLH-DSA (SPHINCS+) — hash-based signatures
+
+SLH-DSA is a **stateless hash-based** signature scheme standardized by NIST in [FIPS 205](https://csrc.nist.gov/pubs/fips/205/final). Its security rests only on the security of its underlying hash function, giving it the most conservative assumptions of any signature family in this package — at the cost of large signatures and slow signing. This package ships the three SHA2 **`s` (small-signature)** parameter sets.
+
+| Loader | Variant | COSE (provisional) | Public key | Secret key | Signature | W3C appendix |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| `loadSlhDsa128()` | SLH-DSA-SHA2-128s | `0x1220` | 32 B | 64 B | 7,856 B | ✅ L1 golden vector |
+| `loadSlhDsa192()` | SLH-DSA-SHA2-192s | `0x1221` | 48 B | 96 B | 16,224 B | generated keys |
+| `loadSlhDsa256()` | SLH-DSA-SHA2-256s | `0x1222` | 64 B | 128 B | 29,792 B | generated keys |
+
+> [!NOTE]
+> COSE identifiers above are **provisional** and used for testbed/interop only — SLH-DSA COSE code points are not yet finalized by IANA. Cryptosuite names follow the W3C VC data-integrity pattern: `slhdsa128-rdfc-2024`, `slhdsa128-jcs-2024` (and `slhdsa192-*` / `slhdsa256-*`).
+
+> [!WARNING]
+> **SLH-DSA signing is slow and signatures are large** (kilobytes, not the ~200 bytes of SQISign). It is unsuitable for the CTAP2 1024-byte WebAuthn buffer. Prefer it where conservative, hash-only security matters and bandwidth/latency are not constrained (e.g. long-lived certificates, firmware, archival VCs). Verification is comparatively fast.
+
+All SLH-DSA loaders expose the same `IFnDsa` interface (`keypair()`, `sign()`, `verify()`, `buffer_to_string()`):
+
+```typescript
+import { loadSlhDsa128 } from "quantum-resistant-rustykey";
+
+async function demo() {
+  const slh = await loadSlhDsa128(); // or loadSlhDsa192 / loadSlhDsa256
+  const kp = slh.keypair();
+  const publicKey = await kp.get("public_key");
+  const privateKey = await kp.get("private_key");
+
+  const message = new TextEncoder().encode("Authored by RustyKey (SLH-DSA)");
+  const signature = await slh.sign(message, privateKey);
+  const isValid = await slh.verify(signature, message, publicKey);
+  console.log("SLH-DSA-SHA2-128s valid?", isValid);
+}
+
+demo().catch(console.error);
+```
+
+The pure-JS SLH-DSA path is provided via [`@noble/post-quantum`](https://github.com/paulmillr/noble-post-quantum) and works identically in Node.js and the browser (no WASM/COOP-COEP requirements).
+
+## REST endpoint summary — Verifiable Credentials (VC)
+
+This library is the cryptographic core behind the **[pqc.rustykey.me](https://pqc.rustykey.me)** testbed. The testbed exposes a small HTTP surface (Next.js route handlers) that wraps the loaders above so you can produce W3C **Verifiable Credential** data-integrity proofs over the wire. The package itself ships no server — this section documents the reference endpoints so integrators can call or replicate them.
+
+All endpoints run server-side (`runtime: "nodejs"`) and accept/return JSON.
+
+### `POST /api/pqc/vc/sign` — one-shot signed VC
+
+The high-level endpoint: generates a fresh keypair, canonicalizes the document, hashes it, and returns the data-integrity proof value.
+
+**Request body**
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `document` | object | The unsecured W3C credential payload. |
+| `algorithm` | string | One of the identifiers in the table below. |
+| `dataset_canonicalization` | `"rdfc"` \| `"ics"` | RDF Dataset Canonicalization (`rdfc`) or JSON canonicalization (`ics`/JCS). |
+
+**Supported `algorithm` identifiers**
+
+| Identifier | Family | Cryptosuite prefix |
+| :--- | :--- | :--- |
+| `SQIsign-L1` / `SQIsign-L3` / `SQIsign-L5` | SQISign | `sqisign1` / `sqisign3` / `sqisign5` |
+| `mldsa44` | ML-DSA | `mldsa44` |
+| `falcon512` | FN-DSA | `falcon512` |
+| `slhdsa128` / `slhdsa192` / `slhdsa256` | **SLH-DSA** | `slhdsa128` / `slhdsa192` / `slhdsa256` |
+
+**Response body**
+
+```jsonc
+{
+  "runtime": "nodejs",
+  "totalMs": 1234.5,
+  "algorithm": "slhdsa128",
+  "cryptosuite": "slhdsa128-rdfc-2024",
+  "dataset_canonicalization": "rdfc",
+  "publicKey": "…hex…",
+  "privateKey": "…hex…",
+  "canonicalizedDoc": "…canonical form…",
+  "hash": "…hex…",
+  "signature": "z…",        // multibase proofValue
+  "signatureHex": "…hex…"
+}
+```
+
+**Example**
+
+```bash
+curl -X POST https://pqc.rustykey.me/api/pqc/vc/sign \
+  -H "Content-Type: application/json" \
+  -d '{
+    "document": { "@context": ["https://www.w3.org/ns/credentials/v2"], "type": ["VerifiableCredential"] },
+    "algorithm": "slhdsa128",
+    "dataset_canonicalization": "rdfc"
+  }'
+```
+
+### `POST /api/pqc/vc/proof` — full pipeline / bring-your-own-keys
+
+Lower-level endpoint used by the testbed's step-by-step VC view. It has two modes:
+
+- **Proof pipeline** — send `unsecuredDocument`, `family` (`sqisign` \| `mldsa` \| `falcon` \| `slhdsa`), `level` (`l1` \| `l3` \| `l5`), `canonicalization` (`rdfc` \| `jcs`), plus `publicKeyHex` / `secretKeyHex` (and optional `verificationMethod`). Returns each canonicalize → hash → sign → verify step.
+- **Sign-only** — send `hashDataHex` with `family`, `level`, `publicKeyHex`, `secretKeyHex` (and optional `referenceProofValue`) to sign a pre-computed hash and verify it (including against a W3C appendix golden value).
+
+### `PUT /api/pqc/vc/proof` — keygen
+
+Send `{ "family": "slhdsa", "level": "l1" }` to get a fresh `publicKeyHex` / `secretKeyHex` and the resolved algorithm label. Handy for pre-provisioning keys before calling the proof pipeline.
+
 ## Building from Source
 
 ### Prerequisites
@@ -350,7 +562,7 @@ pnpm build
 
 ### Digital Signatures (Node.js & Frontend)
 
-All signature algorithms (**FN-DSA**, **ML-DSA**, and **SQIsign**) share a common interface.
+All signature algorithms (**FN-DSA**, **ML-DSA**, **SQIsign**, and **SLH-DSA**) share a common interface.
 
 ```typescript
 import { 

@@ -69,7 +69,7 @@ const mainThreadLoaders: Record<SqisignVariant, () => Promise<IFnDsa>> = {
 	lvl5: loadSqisignLvl5,
 };
 
-/** Host apps (e.g. Next.js) must serve dist/sqisign-accel-worker.js — see docs/SQISIGN-WEBGPU.md */
+/** Host apps (e.g. Next.js) must serve dist/sqisign-accel-worker.js — see the "SQISign-webGPU" section in README.md */
 export function setSqisignAccelWorkerUrl(url: string): void {
 	customWorkerUrl = url;
 	if (worker) {
