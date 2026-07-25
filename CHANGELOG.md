@@ -1,5 +1,11 @@
 # quantum-resistant-rustykey
 
+## 0.13.1
+
+### Patch Changes
+
+- docs edits
+
 ## 0.13.0
 
 ### Minor Changes
