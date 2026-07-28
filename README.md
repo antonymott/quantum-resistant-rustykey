@@ -602,6 +602,24 @@ See the live [PQC testbed](https://pqc.rustykey.me) or run the frontend examples
 
 ML-KEM logic comes from **mlkem-native** (C), compiled with **Emscripten** under `wasm/`, wrapped by TypeScript in `mlkem-src/`, then bundled into `src/vendor/mlkem*.js`.
 
+## Supply-chain provenance
+
+Each release tarball is built in GitHub Actions and signed with a Sigstore-backed
+**build provenance attestation** (keyless, via GitHub OIDC). This proves the exact
+published artifact was produced by this repository's CI at a specific commit. Verify
+before installing:
+
+```bash
+gh attestation verify "$(npm pack quantum-resistant-rustykey@<version> 2>/dev/null)" \
+  --repo antonymott/quantum-resistant-rustykey
+```
+
+**Scope of this guarantee:** the attestation proves *provenance* — who built the
+artifact, from which repository and commit. It is **not** a reproducible build and
+does **not**, on its own, prove that the compiled WASM is bit-for-bit derivable from
+the C sources. WASM behavioural correctness is covered separately by the Known Answer
+Tests below.
+
 ## Security Considerations
 
 This implementation includes patches to withstand side-channel attacks. For more information about the security improvements, see: [RaspberryPi recovers secret keys from NIST winner implementation...within minutes](https://kannwischer.eu/papers/2024_kyberslash_preprint20240628.pdf)
