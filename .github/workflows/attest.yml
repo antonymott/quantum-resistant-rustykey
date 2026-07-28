@@ -58,10 +58,15 @@ jobs:
       - name: Verify dist artifacts
         run: pnpm verify:dist
 
+      # npm pack always runs `prepack` (pnpm verify:dist). That script prints to
+      # stdout, so `FILE=$(npm pack --silent)` was capturing the log text — not
+      # the .tgz name — which broke sha256sum and GITHUB_OUTPUT. We already ran
+      # verify:dist above, so ignore lifecycle scripts and take only the tarball.
       - name: Pack the exact npm tarball
         id: pack
         run: |
-          FILE=$(npm pack --silent)
+          FILE=$(npm pack --ignore-scripts --silent | tail -n1)
+          test -n "$FILE" && test -f "$FILE"
           echo "tarball=$FILE" >> "$GITHUB_OUTPUT"
           sha256sum "$FILE"
 
