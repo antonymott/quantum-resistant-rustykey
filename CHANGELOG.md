@@ -1,5 +1,12 @@
 # quantum-resistant-rustykey
 
+## 0.13.2
+
+### Patch Changes
+
+- 611b93d: sigstore provenenance yaml
+- chore
+
 ## 0.13.1
 
 ### Patch Changes
