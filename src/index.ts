@@ -3,12 +3,32 @@ import mlkem768 from "./vendor/mlkem.js";
 import mlkem512 from "./vendor/mlkem512.js";
 import mlkem1024 from "./vendor/mlkem1024.js";
 
-export { loadFnDsa512, loadFnDsa1024 } from "./fndsa.js";
-export { loadMlDsa3, loadMlDsa5 } from "./mldsa.js";
-export { loadSlhDsa128, loadSlhDsa192, loadSlhDsa256 } from "./slhdsa.js";
 export {
+	/** FN-DSA-512 (Falcon-512) signature loader — Node and browser WASM. */
+	loadFnDsa512,
+	/** FN-DSA-1024 (Falcon-1024) signature loader — Node and browser WASM. */
+	loadFnDsa1024,
+} from "./fndsa.js";
+export {
+	/** ML-DSA-65 (Dilithium3) signature loader. */
+	loadMlDsa3,
+	/** ML-DSA-87 (Dilithium5) signature loader. */
+	loadMlDsa5,
+} from "./mldsa.js";
+export {
+	/** SLH-DSA-SHA2-128s (FIPS 205) — pure JS via @noble/post-quantum. */
+	loadSlhDsa128,
+	/** SLH-DSA-SHA2-192s (FIPS 205). */
+	loadSlhDsa192,
+	/** SLH-DSA-SHA2-256s (FIPS 205). */
+	loadSlhDsa256,
+} from "./slhdsa.js";
+export {
+	/** SQIsign Level 1 WASM loader (standard, Node + browser). */
 	loadSqisignLvl1,
+	/** SQIsign Level 3 WASM loader. */
 	loadSqisignLvl3,
+	/** SQIsign Level 5 WASM loader. */
 	loadSqisignLvl5,
 } from "./sqisign.js";
 export {
@@ -26,9 +46,12 @@ export {
 	SQISIGN_LVL5_KAT0_SM_HEX,
 } from "./sqisign-kat-lvl1.js";
 export {
+	/** Browser-only keygen/sign/verify benchmark for SQIsign-webGPU. */
 	benchSqisignWebGpu,
+	/** Detect SharedArrayBuffer + WebGPU readiness for accelerated SQIsign. */
 	getSqisignWebGpuSupport,
 	isSqisignWebGpuAvailable,
+	/** Browser-accelerated SQIsign L1 (requires COOP/COEP isolation). */
 	loadSqisignLvl1WebGpu,
 	loadSqisignLvl3WebGpu,
 	loadSqisignLvl5WebGpu,
@@ -36,6 +59,7 @@ export {
 	type SqisignBenchSteps,
 	type SqisignWebGpuSupport,
 	type SqisignWebGpuVariant,
+	/** Override URL for `dist/sqisign-accel-worker.js` in bundlers. */
 	setSqisignAccelWorkerUrl,
 } from "./sqisign-webgpu.js";
 
@@ -256,14 +280,17 @@ class MlKemWrapper implements IMlKem {
 	}
 }
 
+/** Load ML-KEM-768 (WASM). */
 export async function loadMlKem768(): Promise<IMlKem> {
 	return new MlKemWrapper(mlkem768 as MlKemImpl, { name: "ML-KEM-768" });
 }
 
+/** Load ML-KEM-512 (WASM). */
 export async function loadMlKem512(): Promise<IMlKem> {
 	return new MlKemWrapper(mlkem512 as MlKemImpl, { name: "ML-KEM-512" });
 }
 
+/** Load ML-KEM-1024 (WASM). */
 export async function loadMlKem1024(): Promise<IMlKem> {
 	return new MlKemWrapper(mlkem1024 as MlKemImpl, { name: "ML-KEM-1024" });
 }

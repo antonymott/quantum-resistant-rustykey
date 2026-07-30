@@ -10,3 +10,6 @@ wasm/build
 wasm/build-sqisign-cmake
 vendor/mlkem-native
 npm-publishing-notes.md
+website/build
+website/.docusaurus
+website/node_modules

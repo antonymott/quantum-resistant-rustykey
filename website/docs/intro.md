@@ -1,0 +1,59 @@
+---
+sidebar_position: 1
+title: Getting started
+description: Install quantum-resistant-rustykey and start using post-quantum crypto in Node or the browser.
+---
+
+# Getting started
+
+`quantum-resistant-rustykey` is a TypeScript-first npm package of **WebAssembly post-quantum** primitives for Node.js and browsers — including **SQIsign** (NIST additional-signatures / on-ramp), **ML-DSA**, **FN-DSA**, **SLH-DSA**, and **ML-KEM**.
+
+RustyKey® is a **FIDO Alliance** member. This package exists especially for constrained WebAuthn / CTAP2 contexts where lattice signatures are too large for the classic ~1024-byte buffer.
+
+:::caution Pre-production
+Await **v1.0.0** (after security audit) for production / regulated deployment. Until then, prefer `@latest` or a caret range so dependents pick up patches.
+:::
+
+## Install
+
+```bash
+pnpm i quantum-resistant-rustykey@latest
+# or
+bun add quantum-resistant-rustykey@latest
+npm add quantum-resistant-rustykey@latest
+```
+
+Requires **Node ≥ 26.5.0**.
+
+## What you get
+
+| Family | Variants | Notes |
+| --- | --- | --- |
+| **SQIsign** | L1 / L3 / L5 | Small signatures; NIST on-ramp. See [cose-sqisign](https://datatracker.ietf.org/doc/draft-mott-cose-sqisign/). |
+| **ML-DSA** | 65 / 87 | NIST FIPS 204 |
+| **FN-DSA** | 512 / 1024 | Falcon family |
+| **SLH-DSA** | 128s / 192s / 256s | Hash-based FIPS 205 (pure JS via `@noble/post-quantum`) |
+| **ML-KEM** | 512 / 768 / 1024 | From [mlkem-native](https://github.com/pq-code-package/mlkem-native) |
+
+## Quick taste (ML-KEM)
+
+```ts
+import { loadMlKem768 } from "quantum-resistant-rustykey";
+
+const kem = await loadMlKem768();
+const kp = kem.keypair();
+const enc = kem.encrypt(kp.get("public_key"));
+const sharedA = await enc.get("secret");
+const sharedB = await kem.decrypt(enc.get("cyphertext"), kp.get("private_key"));
+```
+
+## Live playground
+
+Try algorithms interactively at **[pqc.rustykey.me](https://pqc.rustykey.me)**.
+
+## Next
+
+- [Package overview](./packages/overview)
+- [Signatures](./packages/signatures)
+- [API overview](./reference/api)
+- [Security & WASM notes](./guides/security)

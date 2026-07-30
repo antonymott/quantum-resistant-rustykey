@@ -1,0 +1,107 @@
+/**
+ * SimpleWebAuthn-inspired docs theme:
+ * clean light default, strong brand accent, readable code, no clutter.
+ */
+:root {
+  --ifm-color-primary: #1a5f4a;
+  --ifm-color-primary-dark: #165541;
+  --ifm-color-primary-darker: #14503d;
+  --ifm-color-primary-darkest: #104232;
+  --ifm-color-primary-light: #1e6953;
+  --ifm-color-primary-lighter: #206e57;
+  --ifm-color-primary-lightest: #267c63;
+  --ifm-code-font-size: 95%;
+  --ifm-font-family-base: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu,
+    Cantarell, "Noto Sans", sans-serif;
+  --ifm-heading-font-weight: 650;
+  --docusaurus-highlighted-code-line-bg: rgb(26 95 74 / 10%);
+  --rk-hero-bg: linear-gradient(160deg, #f4faf7 0%, #eef3f8 55%, #f7f4ef 100%);
+}
+
+[data-theme="dark"] {
+  --ifm-color-primary: #5dcea8;
+  --ifm-color-primary-dark: #45c69b;
+  --ifm-color-primary-darker: #38c294;
+  --ifm-color-primary-darkest: #2ca07a;
+  --ifm-color-primary-light: #75d6b5;
+  --ifm-color-primary-lighter: #82dabb;
+  --ifm-color-primary-lightest: #a7e6cf;
+  --docusaurus-highlighted-code-line-bg: rgb(93 206 168 / 18%);
+  --rk-hero-bg: linear-gradient(160deg, #0f1a17 0%, #121820 55%, #1a1612 100%);
+}
+
+.navbar__title {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.hero--rk {
+  background: var(--rk-hero-bg);
+  padding: 4rem 0 3.25rem;
+}
+
+.hero--rk .hero__title {
+  font-size: clamp(1.75rem, 4vw, 2.6rem);
+  letter-spacing: -0.03em;
+}
+
+.hero--rk .hero__subtitle {
+  max-width: 40rem;
+  margin-left: auto;
+  margin-right: auto;
+  opacity: 0.88;
+}
+
+.rk-install {
+  display: inline-block;
+  margin: 1.25rem 0 0.5rem;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  background: rgb(0 0 0 / 6%);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.92rem;
+}
+
+[data-theme="dark"] .rk-install {
+  background: rgb(255 255 255 / 8%);
+}
+
+.rk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.rk-card-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin: 2rem 0 0;
+}
+
+.rk-card {
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  background: var(--ifm-background-surface-color);
+  height: 100%;
+}
+
+.rk-card h3 {
+  margin-bottom: 0.4rem;
+  font-size: 1.05rem;
+}
+
+.rk-card p {
+  margin: 0;
+  font-size: 0.92rem;
+  opacity: 0.9;
+}
+
+.footer__copyright {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  opacity: 0.85;
+}
