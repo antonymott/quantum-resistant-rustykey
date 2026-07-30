@@ -2,18 +2,20 @@
 
 [![npm version](https://img.shields.io/npm/v/quantum-resistant-rustykey)](https://npmjs.com)
 [![Weekly Downloads](https://img.shields.io/npm/dw/quantum-resistant-rustykey)](https://npmjs.com)
-![Node v26.4.0](https://img.shields.io/badge/node-v26.4.0-blue.svg)
+![Node v26.5.0](https://img.shields.io/badge/node-v26.5.0-blue.svg)
 
 
 Fast, secure WebAssembly implementations of useful post-quantum-resistant tools both for backend (node) and frontend web.
 
 ```bash
-# Install via pnpm (preferred)
-pnpm i quantum-resistant-rustykey
+# Install via pnpm (preferred) — always pull the latest pre-1.0 release
+pnpm i quantum-resistant-rustykey@latest
 # or
-bun add quantum-resistant-rustykey
-npm add quantum-resistant-rustykey
+bun add quantum-resistant-rustykey@latest
+npm add quantum-resistant-rustykey@latest
 ```
+
+> Until v1.0.0, prefer `@latest` (or a caret range like `^0.13.2` in package.json) so dependents pick up current patches automatically.
 
 ## Implementation status: Pre-production (stable for testing)
 

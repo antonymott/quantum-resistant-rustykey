@@ -9,105 +9,95 @@
 #   notes at the bottom of this file and the message that accompanied it.
 #
 # This workflow does NOT publish to npm and needs NO NPM token. It is safe to run.
+#
+# Tooling versions come from package.json:
+#   - packageManager → pnpm version (pnpm/action-setup)
+#   - engines.node   → Node version (actions/setup-node)
 name: Attest build provenance
 
 on:
-  workflow_dispatch: {}        # manual runs — the only way to actually test OIDC/attestation
+  workflow_dispatch: {}
   release:
     types: [published]
 
 permissions:
-  contents: read               # least privilege by default
+  contents: read
 
 jobs:
   build-and-attest:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write          # OIDC token for keyless Sigstore signing
-      attestations: write       # write the attestation to the repo's attestation store
+      id-token: write
+      attestations: write
     env:
-      REQUIRE_WASM_BUILD: '1'  # <-- make a skipped/stale WASM build FAIL, so the attestation is meaningful
+      REQUIRE_WASM_BUILD: '1'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v5
-        with:
-          version: '10.32.1'
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
-          node-version: '26.4.0'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'pnpm'
+          node-version-file: package.json
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Real build: compiles C -> WASM via the pinned emscripten/emsdk:3.1.51 Docker
-      # image used by scripts/build-wasm.mjs, then bundles + tsdown. REQUIRE_WASM_BUILD=1
-      # makes this fail rather than silently reuse committed prebuilt WASM.
       - name: Build (C -> WASM -> dist)
         run: pnpm build
 
       - name: Verify dist artifacts
         run: pnpm verify:dist
 
-      # npm pack always runs `prepack` (pnpm verify:dist). That script prints to
-      # stdout, so `FILE=$(npm pack --silent)` was capturing the log text — not
-      # the .tgz name — which broke sha256sum and GITHUB_OUTPUT. We already ran
-      # verify:dist above, so ignore lifecycle scripts and take only the tarball.
-      - name: Pack the exact npm tarball
+      # npm pack emits a .tgz (gzip). npm reject plain .tar (ERR_INVALID_CONTENT_TYPE / 415).
+      # Re-gzip if needed and attest/upload only the npm-compatible file.
+      - name: Pack gzip npm tarball (.tgz)
         id: pack
         run: |
-          FILE=$(npm pack --ignore-scripts --silent | tail -n1)
-          test -n "$FILE" && test -f "$FILE"
+          set -euo pipefail
+          RAW=$(npm pack --ignore-scripts --silent | tail -n1)
+          test -n "$RAW" && test -f "$RAW"
+          echo "Packed: $RAW ($(du -h "$RAW" | cut -f1))"
+          if file -b "$RAW" | grep -qi 'gzip compressed'; then
+            FILE="$RAW"
+          else
+            # Plain tar (or unexpected type) → gzip to .tgz for the registry
+            BASE="${RAW%.tar}"
+            BASE="${BASE%.tgz}"
+            FILE="${BASE}.tgz"
+            gzip -c -9 "$RAW" > "$FILE"
+            rm -f "$RAW"
+            echo "Re-gzipped to: $FILE ($(du -h "$FILE" | cut -f1))"
+          fi
+          file -b "$FILE"
+          test -f "$FILE"
           echo "tarball=$FILE" >> "$GITHUB_OUTPUT"
           sha256sum "$FILE"
 
-      # Sigstore-backed provenance for the tarball users actually install.
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: ${{ steps.pack.outputs.tarball }}
 
       - name: Upload tarball artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: npm-tarball
           path: ${{ steps.pack.outputs.tarball }}
 
 # ----------------------------------------------------------------------------
-# NOTES / KNOWN GAPS (read before relying on this for a "reproducible build" claim):
+# NOTES / KNOWN GAPS:
 #
-# 1. NOT reproducible yet. scripts/build-wasm.mjs clones vendored crypto sources
-#    with `git clone --depth 1` from moving branches (mlkem-native, mldsa-native,
-#    the-sqisign). Two runs can pull different commits. For real reproducibility,
-#    pin each vendor repo to a specific commit SHA.
-#
-# 2. Emscripten output is not bit-for-bit deterministic by default (embedded paths,
-#    tool versions). -g4 / source maps do NOT fix this; they produce a *different,
-#    larger, debug* binary than what you ship, so do not add them here.
-#
-# 3. npm --provenance is intentionally NOT enabled: releases are published manually
-#    from a maintainer machine due to npm 2FA. npm provenance requires publishing
-#    *from* trusted CI with OIDC, so it is not available in this flow.
-#
-# 4. IMPORTANT for manual publish: for the attestation to cover what users actually
-#    install, the maintainer must publish THIS workflow's tarball, not a laptop
-#    rebuild (a laptop rebuild has a different sha256 and `gh attestation verify`
-#    would fail). Flow:
-#       - run this workflow -> download the `npm-tarball` artifact
-#       - on the maintainer machine:  npm publish ./quantum-resistant-rustykey-<v>.tgz
-#    Then verify:
-#       gh attestation verify $(npm pack quantum-resistant-rustykey@<v> 2>/dev/null) \
-#         --repo antonymott/quantum-resistant-rustykey
-#
-# 5. Best practice for the score: pin these actions to commit SHAs (not floating
-#    major tags) once you've confirmed the versions you want.
+# 1. NOT reproducible yet — vendor clones use moving default branches.
+# 2. For attestation to cover what users install, publish THIS workflow's .tgz
+#    (download the npm-tarball artifact), not a laptop rebuild:
+#       npm publish ./quantum-resistant-rustykey-<v>.tgz
+# 3. Prefer pinning actions to commit SHAs once versions are confirmed.
 # ----------------------------------------------------------------------------

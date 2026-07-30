@@ -14,9 +14,7 @@ env:
   TEST_MODE: 'false' # 👈 set to false when testing is complete!
   # git add . && git commit -m "#[ccce9f5,2,2,0]" && git push
   # gh pr create --fill && gh pr merge --merge --delete-branch=false
-  NODE_VERSION: '25.x'
-  NODE_ENV: production
-  PNPM_VERSION: '10.32.1'
+  # Tooling versions come from package.json (packageManager + engines.node)
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -29,37 +27,30 @@ jobs:
     # if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      # ✅ ALWAYS RUN: Checkout
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0 # Full history needed for git describe --tags
 
-      # ✅ ALWAYS RUN: Install dependencies
       - name: Setup pnpm
-        uses: pnpm/action-setup@v5
-        with:
-          version: ${{ env.PNPM_VERSION }}
+        uses: pnpm/action-setup@v6
 
-      # ✅ ALWAYS RUN: Setup Node
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version-file: package.json
           registry-url: 'https://registry.npmjs.org'
-          cache: 'pnpm'
+          cache: pnpm
 
-      # ✅ ALWAYS RUN: Install dependencies (NOW with cache!)
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
-      # ✅ ALWAYS RUN: Clone vendor/mlkem-native (gitignored, required by build)
       - name: Clone mlkem-native vendor source
         run: |
           if [ ! -d vendor/mlkem-native ]; then
             git clone --depth 1 https://github.com/pq-code-package/mlkem-native.git vendor/mlkem-native
           fi
-          
+
       # - name: Linting typescript
       #   run: pnpm lint
 
@@ -76,7 +67,7 @@ jobs:
 
           LATEST_VERSION=${LATEST_TAG#v}
 
-          if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; 
+          if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ];
           then
             echo "Version changed"
             echo "version_changed=true" >> $GITHUB_OUTPUT
@@ -93,6 +84,7 @@ jobs:
       # Publishing is intentionally disabled:
       # - npm 2FA prevents token-only CI publish in this repo
       # - releases are published manually from a maintainer machine
+      # - use Attest build provenance → download .tgz → npm publish ./file.tgz
       #
       # - name: Publish
       #   if: steps.check.outputs.version_changed == 'true'

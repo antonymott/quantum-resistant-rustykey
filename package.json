@@ -63,19 +63,20 @@
     "example:browser": "pnpm --filter browser-demo dev"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.11",
-    "@changesets/cli": "2.30.0",
-    "@types/node": "^26.1.0",
+    "@biomejs/biome": "2.5.6",
+    "@changesets/cli": "2.31.1",
+    "@types/node": "^26.1.2",
     "@webgpu/types": "0.1.71",
-    "esbuild": "0.28.0",
-    "tsdown": "0.22.3",
-    "typescript": "6.0.2",
-    "vitest": "4.1.4"
+    "esbuild": "0.28.1",
+    "tsdown": "0.22.14",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
   },
   "dependencies": {
     "@noble/post-quantum": "0.6.1"
   },
   "engines": {
-    "node": ">=26.4.0"
-  }
+    "node": ">=26.5.0"
+  },
+  "packageManager": "pnpm@11.17.0"
 }
