@@ -1,9 +1,13 @@
 packages:
   - .
   - examples/*
+  - website
 allowBuilds:
   esbuild: true
+  "@swc/core": true
+  core-js: true
 onlyBuiltDependencies:
   - core-js
   - esbuild
   - sharp
+  - "@swc/core"

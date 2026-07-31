@@ -14,7 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/antonymott/quantum-resistant-rustykey.git"
   },
-  "homepage": "https://github.com/antonymott/quantum-resistant-rustykey.git#readme",
+  "homepage": "https://antonymott.github.io/quantum-resistant-rustykey/",
   "bugs": {
     "url": "https://github.com"
   },
@@ -60,7 +60,10 @@
     "prepack": "pnpm verify:dist",
     "prepublishOnly": "pnpm verify:dist",
     "release": "changeset publish",
-    "example:browser": "pnpm --filter browser-demo dev"
+    "example:browser": "pnpm --filter browser-demo dev",
+    "docs:dev": "pnpm --dir website start",
+    "docs:build": "pnpm --dir website build",
+    "docs:serve": "pnpm --dir website serve"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.6",
