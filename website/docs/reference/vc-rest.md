@@ -17,7 +17,7 @@ One-shot: fresh keypair → canonicalize → hash → proof.
 | --- | --- | --- |
 | `document` | object | Unsecured W3C credential payload |
 | `algorithm` | string | See table below |
-| `dataset_canonicalization` | `"rdfc"` \| `"ics"` | RDFC or JCS-style |
+| `dataset_canonicalization` | `"rdfc"` \| `"jcs"` | RDF Dataset Canonicalization or JSON Canonicalization Scheme |
 
 **Algorithms:** `SQIsign-L1` / `L3` / `L5`, `mldsa44`, `falcon512`, `slhdsa128` / `192` / `256`.
 
