@@ -41,3 +41,34 @@ Lower-level pipeline / BYO keys:
 ## `PUT /api/pqc/vc/proof`
 
 Keygen: `{ "family": "slhdsa", "level": "l1" }` → `publicKeyHex` / `secretKeyHex`.
+
+## Selective Disclosure (`sqisign1-sd-2026`)
+
+Interactive UI: [https://pqc.rustykey.me/#vc-di-quantum-resistant-sd](https://pqc.rustykey.me/#vc-di-quantum-resistant-sd)
+
+Completes the W3C VC-DI Quantum-Resistant SD appendix for SQIsign-I (shared common-outputs with ML-DSA / SLH-DSA / Falcon SD vectors). Responses are byte-stable against the published golden vectors.
+
+### `GET /api/pqc/vc/sd`
+
+| Query | Description |
+| --- | --- |
+| `cryptosuite` | `sqisign1-sd-2026` (default), `mldsa44-sd-2024`, `slhdsa128-sd-2024`, or `falcon512-sd-2024` |
+
+Returns Table 13 metadata, Example 34 `proofHash`, Example 40 `signature`, base/derived documents, and `matchesGolden` flags.
+
+```bash
+curl 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2026'
+```
+
+### `POST /api/pqc/vc/sd`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `cryptosuite` | string | Same values as GET |
+| `action` | `"appendix"` \| `"issue-base"` \| `"derive"` \| `"verify"` | Default `appendix` |
+
+```bash
+curl -X POST https://pqc.rustykey.me/api/pqc/vc/sd \
+  -H "Content-Type: application/json" \
+  -d '{"cryptosuite":"sqisign1-sd-2026","action":"appendix"}'
+```
