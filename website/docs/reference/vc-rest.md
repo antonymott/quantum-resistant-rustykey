@@ -35,12 +35,35 @@ curl -X POST https://pqc.rustykey.me/api/pqc/vc/sign \
 
 Lower-level pipeline / BYO keys:
 
-- **Proof pipeline** — `unsecuredDocument`, `family` (`sqisign` \| `mldsa` \| `falcon` \| `slhdsa`), `level`, `canonicalization`, keys
+- **Proof pipeline** — `unsecuredDocument`, `family` (`sqisign` \| `mldsa` \| `falcon` \| `slhdsa`), `level` (`l1` \| `l3` \| `l5`), `canonicalization` (`rdfc` \| `jcs`), plus `publicKeyHex` / `secretKeyHex`
 - **Sign-only** — `hashDataHex` + family/level/keys
+
+:::note Parameter shapes differ between endpoints
+`/sign` takes a single `algorithm` string (e.g. `mldsa44`, `SQIsign-L1`), whereas `/proof` takes `family` and `level` separately (e.g. `family: "mldsa"`, `level: "l1"`). Generate a keypair with `PUT /api/pqc/vc/proof` (below) first, then paste `publicKeyHex` / `secretKeyHex` into the pipeline call.
+:::
+
+```bash
+curl -X POST https://pqc.rustykey.me/api/pqc/vc/proof \
+  -H "Content-Type: application/json" \
+  -d '{
+    "unsecuredDocument": { "@context": ["https://www.w3.org/ns/credentials/v2"], "type": ["VerifiableCredential"] },
+    "family": "slhdsa",
+    "level": "l1",
+    "canonicalization": "jcs",
+    "publicKeyHex": "PASTE_FROM_KEYGEN",
+    "secretKeyHex": "PASTE_FROM_KEYGEN"
+  }'
+```
 
 ## `PUT /api/pqc/vc/proof`
 
 Keygen: `{ "family": "slhdsa", "level": "l1" }` → `publicKeyHex` / `secretKeyHex`.
+
+```bash
+curl -X PUT https://pqc.rustykey.me/api/pqc/vc/proof \
+  -H "Content-Type: application/json" \
+  -d '{ "family": "slhdsa", "level": "l1" }'
+```
 
 ## Selective Disclosure (`sqisign1-sd-2026`)
 
