@@ -69,7 +69,55 @@ curl -X PUT https://pqc.rustykey.me/api/pqc/vc/proof \
 
 Interactive UI: [https://pqc.rustykey.me/#vc-di-quantum-resistant-sd](https://pqc.rustykey.me/#vc-di-quantum-resistant-sd)
 
-Completes the W3C VC-DI Quantum-Resistant SD appendix for SQIsign-I (shared common-outputs with ML-DSA / SLH-DSA / Falcon SD vectors). Responses are byte-stable against the published golden vectors.
+Completes the W3C [VC-DI Quantum-Resistant](https://w3c.github.io/vc-di-quantum-resistant/) SD appendix for **SQIsign-I**. HMAC salts / saltedHashes / mandatoryHash / labelMap are the shared Category‑1 common outputs (same as ML-DSA / Falcon / SLH). Only the SQIsign-specific `proofHash`, signature, and CBOR `proofValue`s are suite-private.
+
+Responses are **byte-stable**: the JSON fields below are the exact strings proposed for the draft examples (no regeneration on each request).
+
+### One curl for W3C reviewers (copy-paste)
+
+Paste this into a terminal. The JSON body is large; that is intentional — it contains the full suggested appendix examples so reviewers can confirm byte-for-byte equality against a proposed draft edit.
+
+```bash
+curl -sS 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2026' | jq .
+```
+
+(`jq` is optional; omit `| jq .` if you only want the raw JSON.)
+
+Equivalent POST (same golden payload via `action: "appendix"`):
+
+```bash
+curl -sS -X POST https://pqc.rustykey.me/api/pqc/vc/sd \
+  -H "Content-Type: application/json" \
+  -d '{"cryptosuite":"sqisign1-sd-2026","action":"appendix"}' | jq .
+```
+
+### JSON → draft example map
+
+| Response field | Maps to draft |
+| --- | --- |
+| `table13` / `appendix.table13` | Table 13 cryptosuite row (`sqisign1-sd-2026`, SQIsign-I, 148) |
+| `proofHash` / `appendix.example34ProofHash` | Example 34 SD Base Hashing `proofHash` (64 hex) |
+| `signature` / `appendix.example40Signature` | Example 40 PQC Signatures entry (296 hex / 148 bytes) |
+| `baseDocument` | Example 37A Base VC (includes `proof.proofValue`) |
+| `derivedDocument` | Example 43A Derived VC (includes `proof.proofValue`) |
+| `baseProofValue` / `derivedProofValue` | Standalone multibase `u…` strings (same as the documents’ `proof.proofValue`) |
+| `matchesGolden.*` | Always `true` for this GET/appendix path (fixtures, not live re-sign) |
+
+Optional extractors (still one request):
+
+```bash
+# Example 34 proofHash only
+curl -sS 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2026' \
+  | jq -r '.proofHash'
+
+# Example 40 signature only
+curl -sS 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2026' \
+  | jq -r '.signature'
+
+# Full Base / Derived VCs (Examples 37A / 43A)
+curl -sS 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2026' \
+  | jq '.baseDocument, .derivedDocument'
+```
 
 ### `GET /api/pqc/vc/sd`
 
@@ -77,21 +125,9 @@ Completes the W3C VC-DI Quantum-Resistant SD appendix for SQIsign-I (shared comm
 | --- | --- |
 | `cryptosuite` | `sqisign1-sd-2026` (default), `mldsa44-sd-2024`, `slhdsa128-sd-2024`, or `falcon512-sd-2024` |
 
-Returns Table 13 metadata, Example 34 `proofHash`, Example 40 `signature`, base/derived documents, and `matchesGolden` flags.
-
-```bash
-curl 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2026'
-```
-
 ### `POST /api/pqc/vc/sd`
 
 | Field | Type | Description |
 | --- | --- | --- |
 | `cryptosuite` | string | Same values as GET |
-| `action` | `"appendix"` \| `"issue-base"` \| `"derive"` \| `"verify"` | Default `appendix` |
-
-```bash
-curl -X POST https://pqc.rustykey.me/api/pqc/vc/sd \
-  -H "Content-Type: application/json" \
-  -d '{"cryptosuite":"sqisign1-sd-2026","action":"appendix"}'
-```
+| `action` | `"appendix"` \| `"issue-base"` \| `"derive"` \| `"verify"` | Default `appendix`. Use `appendix` (or GET) for the byte-stable W3C check; other actions run the live pipeline and may set `matchesGolden` from recomputation. |
