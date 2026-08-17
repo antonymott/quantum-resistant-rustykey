@@ -65,7 +65,7 @@ curl -X PUT https://pqc.rustykey.me/api/pqc/vc/proof \
   -d '{ "family": "slhdsa", "level": "l1" }'
 ```
 
-## Selective Disclosure (`sqisign1-sd-2026`)
+## Selective Disclosure (`sqisign1-sd-2024`)
 
 Interactive UI: [https://pqc.rustykey.me/#vc-di-quantum-resistant-sd](https://pqc.rustykey.me/#vc-di-quantum-resistant-sd)
 
@@ -78,7 +78,7 @@ Responses are **byte-stable**: the JSON fields below are the exact strings propo
 Paste this into a terminal. The JSON body is large; that is intentional — it contains the full suggested appendix examples so reviewers can confirm byte-for-byte equality against a proposed draft edit.
 
 ```bash
-curl -sS 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2026' | jq .
+curl -sS 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2024' | jq .
 ```
 
 (`jq` is optional; omit `| jq .` if you only want the raw JSON.)
@@ -88,14 +88,14 @@ Equivalent POST (same golden payload via `action: "appendix"`):
 ```bash
 curl -sS -X POST https://pqc.rustykey.me/api/pqc/vc/sd \
   -H "Content-Type: application/json" \
-  -d '{"cryptosuite":"sqisign1-sd-2026","action":"appendix"}' | jq .
+  -d '{"cryptosuite":"sqisign1-sd-2024","action":"appendix"}' | jq .
 ```
 
 ### JSON → draft example map
 
 | Response field | Maps to draft |
 | --- | --- |
-| `table13` / `appendix.table13` | Table 13 cryptosuite row (`sqisign1-sd-2026`, SQIsign-I, 148) |
+| `table13` / `appendix.table13` | Table 13 cryptosuite row (`sqisign1-sd-2024`, SQIsign-I, 148) |
 | `proofHash` / `appendix.example34ProofHash` | Example 34 SD Base Hashing `proofHash` (64 hex) |
 | `signature` / `appendix.example40Signature` | Example 40 PQC Signatures entry (296 hex / 148 bytes) |
 | `baseDocument` | Example 37A Base VC (includes `proof.proofValue`) |
@@ -107,15 +107,15 @@ Optional extractors (still one request):
 
 ```bash
 # Example 34 proofHash only
-curl -sS 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2026' \
+curl -sS 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2024' \
   | jq -r '.proofHash'
 
 # Example 40 signature only
-curl -sS 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2026' \
+curl -sS 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2024' \
   | jq -r '.signature'
 
 # Full Base / Derived VCs (Examples 37A / 43A)
-curl -sS 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2026' \
+curl -sS 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2024' \
   | jq '.baseDocument, .derivedDocument'
 ```
 
@@ -123,7 +123,7 @@ curl -sS 'https://pqc.rustykey.me/api/pqc/vc/sd?cryptosuite=sqisign1-sd-2026' \
 
 | Query | Description |
 | --- | --- |
-| `cryptosuite` | `sqisign1-sd-2026` (default), `mldsa44-sd-2024`, `slhdsa128-sd-2024`, or `falcon512-sd-2024` |
+| `cryptosuite` | `sqisign1-sd-2024` (default), `mldsa44-sd-2024`, `slhdsa128-sd-2024`, or `falcon512-sd-2024` |
 
 ### `POST /api/pqc/vc/sd`
 
