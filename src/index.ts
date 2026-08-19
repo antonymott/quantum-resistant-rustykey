@@ -16,6 +16,14 @@ export {
 	loadMlDsa5,
 } from "./mldsa.js";
 export {
+	MLDSA65_KAT_MSG_HEX,
+	MLDSA65_KAT_PK_HEX,
+	MLDSA65_KAT_SIG_HEX,
+	MLDSA87_KAT_MSG_HEX,
+	MLDSA87_KAT_PK_HEX,
+	MLDSA87_KAT_SIG_HEX,
+} from "./mldsa-kat.js";
+export {
 	/** SLH-DSA-SHA2-128s (FIPS 205) — pure JS via @noble/post-quantum. */
 	loadSlhDsa128,
 	/** SLH-DSA-SHA2-192s (FIPS 205). */
@@ -23,6 +31,17 @@ export {
 	/** SLH-DSA-SHA2-256s (FIPS 205). */
 	loadSlhDsa256,
 } from "./slhdsa.js";
+export {
+	SLHDSA128S_KAT_MSG_HEX,
+	SLHDSA128S_KAT_PK_HEX,
+	SLHDSA128S_KAT_SIG_HEX,
+	SLHDSA192S_KAT_MSG_HEX,
+	SLHDSA192S_KAT_PK_HEX,
+	SLHDSA192S_KAT_SIG_HEX,
+	SLHDSA256S_KAT_MSG_HEX,
+	SLHDSA256S_KAT_PK_HEX,
+	SLHDSA256S_KAT_SIG_HEX,
+} from "./slhdsa-kat.js";
 export {
 	/** SQIsign Level 1 WASM loader (standard, Node + browser). */
 	loadSqisignLvl1,

@@ -13,6 +13,21 @@ import {
 	loadSqisignLvl1,
 	loadSqisignLvl3,
 	loadSqisignLvl5,
+	MLDSA65_KAT_MSG_HEX,
+	MLDSA65_KAT_PK_HEX,
+	MLDSA65_KAT_SIG_HEX,
+	MLDSA87_KAT_MSG_HEX,
+	MLDSA87_KAT_PK_HEX,
+	MLDSA87_KAT_SIG_HEX,
+	SLHDSA128S_KAT_MSG_HEX,
+	SLHDSA128S_KAT_PK_HEX,
+	SLHDSA128S_KAT_SIG_HEX,
+	SLHDSA192S_KAT_MSG_HEX,
+	SLHDSA192S_KAT_PK_HEX,
+	SLHDSA192S_KAT_SIG_HEX,
+	SLHDSA256S_KAT_MSG_HEX,
+	SLHDSA256S_KAT_PK_HEX,
+	SLHDSA256S_KAT_SIG_HEX,
 	SQISIGN_LVL1_KAT0_MSG_HEX,
 	SQISIGN_LVL1_KAT0_PK_HEX,
 	SQISIGN_LVL1_KAT0_SIG_HEX,
@@ -229,4 +244,64 @@ describe("quantum-resistant-rustykey (mlkem-wasm adapter)", () => {
 		bad[0] ^= 1;
 		expect(await sq.verify(bad, msg, pk)).toBe(false);
 	});
+
+	it("verifies ML-DSA-65 against a NIST FIPS 204 KAT vector", async () => {
+		const mldsa = await loadMlDsa3();
+		const pk = fromHex(MLDSA65_KAT_PK_HEX);
+		const msg = fromHex(MLDSA65_KAT_MSG_HEX);
+		const sig = fromHex(MLDSA65_KAT_SIG_HEX);
+		expect(await mldsa.verify(sig, msg, pk)).toBe(true);
+
+		const bad = new Uint8Array(sig);
+		bad[0] ^= 1;
+		expect(await mldsa.verify(bad, msg, pk)).toBe(false);
+	});
+
+	it("verifies ML-DSA-87 against a NIST FIPS 204 KAT vector", async () => {
+		const mldsa = await loadMlDsa5();
+		const pk = fromHex(MLDSA87_KAT_PK_HEX);
+		const msg = fromHex(MLDSA87_KAT_MSG_HEX);
+		const sig = fromHex(MLDSA87_KAT_SIG_HEX);
+		expect(await mldsa.verify(sig, msg, pk)).toBe(true);
+
+		const bad = new Uint8Array(sig);
+		bad[0] ^= 1;
+		expect(await mldsa.verify(bad, msg, pk)).toBe(false);
+	});
+
+	it("verifies SLH-DSA-SHA2-128s against a NIST FIPS 205 KAT vector", async () => {
+		const slhdsa = await loadSlhDsa128();
+		const pk = fromHex(SLHDSA128S_KAT_PK_HEX);
+		const msg = fromHex(SLHDSA128S_KAT_MSG_HEX);
+		const sig = fromHex(SLHDSA128S_KAT_SIG_HEX);
+		expect(await slhdsa.verify(sig, msg, pk)).toBe(true);
+
+		const bad = new Uint8Array(sig);
+		bad[0] ^= 1;
+		expect(await slhdsa.verify(bad, msg, pk)).toBe(false);
+	}, 30_000);
+
+	it("verifies SLH-DSA-SHA2-192s against a NIST FIPS 205 KAT vector", async () => {
+		const slhdsa = await loadSlhDsa192();
+		const pk = fromHex(SLHDSA192S_KAT_PK_HEX);
+		const msg = fromHex(SLHDSA192S_KAT_MSG_HEX);
+		const sig = fromHex(SLHDSA192S_KAT_SIG_HEX);
+		expect(await slhdsa.verify(sig, msg, pk)).toBe(true);
+
+		const bad = new Uint8Array(sig);
+		bad[0] ^= 1;
+		expect(await slhdsa.verify(bad, msg, pk)).toBe(false);
+	}, 60_000);
+
+	it("verifies SLH-DSA-SHA2-256s against a NIST FIPS 205 KAT vector", async () => {
+		const slhdsa = await loadSlhDsa256();
+		const pk = fromHex(SLHDSA256S_KAT_PK_HEX);
+		const msg = fromHex(SLHDSA256S_KAT_MSG_HEX);
+		const sig = fromHex(SLHDSA256S_KAT_SIG_HEX);
+		expect(await slhdsa.verify(sig, msg, pk)).toBe(true);
+
+		const bad = new Uint8Array(sig);
+		bad[0] ^= 1;
+		expect(await slhdsa.verify(bad, msg, pk)).toBe(false);
+	}, 120_000);
 });
