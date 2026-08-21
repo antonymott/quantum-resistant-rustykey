@@ -1,0 +1,10 @@
+mlkem-native source snapshot
+============================
+
+Source: https://github.com/pq-code-package/mlkem-native
+
+This tree is pinned by content hash in `vendor.lock.json` (mode: in-tree).
+Do not replace with an unpinned `git clone --depth 1`.
+
+After intentional upstream bumps, run:
+  pnpm fetch:vendors -- --update

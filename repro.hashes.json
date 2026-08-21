@@ -1,0 +1,21 @@
+{
+	"generatedBy": "scripts/verify-repro.mjs --update",
+	"sourceDateEpoch": 1702512000,
+	"emscripten": {
+		"image": "emscripten/emsdk",
+		"tag": "3.1.51",
+		"digest": "sha256:fde95518821ccc1b629ee674a7a068a809fda47ea16814b0ed53bd646555147b"
+	},
+	"files": {
+		"src/vendor/mlkem.js": "87337f26acf40ba1de06163c2ccaea33af33de4278a5dde50979cda86a83d6ef",
+		"src/vendor/mlkem512.js": "81563f4243b3738f87453c1afeb9d215bd723a165641bff2458f0bc358bdf661",
+		"src/vendor/mlkem1024.js": "6cb04bba52c915512edf106a3b866572b73daa46ec241a238bda3bd0ca1d5162",
+		"src/vendor/falcon512.js": "514cb5c8576c6c6acd1d91276280e5c381e34e2302d10914975900d2a879e7f2",
+		"src/vendor/falcon1024.js": "05c97602287dd8d4c53c84b04e1374ce14f68190d329b2ab63366b43d0efc399",
+		"src/vendor/mldsa65.js": "c305ebe909546d1c774b04c6053a2207d2d115af011c458f1356b4a1101cebfc",
+		"src/vendor/mldsa87.js": "da0aaf86ec2b6edffc7e84c188be0447e9019b5853c2608df9fab04bd34d059c",
+		"src/vendor/sqisignlvl1.js": "f7f7f4d55afc2d58bb1ba60cef08d73c308ff80425508ac0b52ee1e0d0062c0a",
+		"src/vendor/sqisignlvl3.js": "71de989e2f20b227042b3f6835789ba3c985fdf9f0347fa63ec2bacba672f430",
+		"src/vendor/sqisignlvl5.js": "5f15cb3e16dd78a663bd7bbed775f00d1c7c0956b5149d1116c464b262f2f456"
+	}
+}
