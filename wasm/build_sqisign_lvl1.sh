@@ -10,7 +10,12 @@ OUT_JS="$WASM_DIR/build/sqisign-lvl1-module.js"
 WRAPPER="$WASM_DIR/wasm_wrapper_sqisign_lvl1.c"
 IMAGE="${EMSCRIPTEN_DOCKER_IMAGE:-emscripten/emsdk:3.1.51}"
 
-NJOBS="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)"
+# Prefer SQISIGN_MAKE_JOBS=1 under REQUIRE_REPRODUCIBLE for deterministic archives.
+NJOBS="${SQISIGN_MAKE_JOBS:-$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)}"
+export SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-1702512000}"
+export TZ="${TZ:-UTC}"
+export LANG="${LANG:-C}"
+export LC_ALL="${LC_ALL:-C}"
 
 if [[ ! -f "$SQISIGN_SRC/CMakeLists.txt" ]]; then
 	echo "Missing SQISign sources at $SQISIGN_SRC (expected CMakeLists.txt)." >&2
@@ -74,6 +79,7 @@ run_link() {
 }
 
 if command -v emcmake >/dev/null 2>&1 && command -v emcc >/dev/null 2>&1; then
+	rm -rf "$BUILD_DIR"
 	mkdir -p "$BUILD_DIR"
 	(
 		cd "$BUILD_DIR"
@@ -87,10 +93,16 @@ if command -v emcmake >/dev/null 2>&1 && command -v emcc >/dev/null 2>&1; then
 	run_link
 elif command -v docker >/dev/null 2>&1; then
 	docker run --rm \
+		-e "SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}" \
+		-e "TZ=${TZ}" \
+		-e "LANG=${LANG}" \
+		-e "LC_ALL=${LC_ALL}" \
+		-e "SQISIGN_MAKE_JOBS=${NJOBS}" \
+		-e "SQISIGN_NATIVE_DIR=/work/vendor/sqisign-native" \
 		-v "$ROOT:/work" \
 		-w /work/wasm \
 		"$IMAGE" \
-		bash -lc 'export SQISIGN_NATIVE_DIR=/work/vendor/sqisign-native && bash ./build_sqisign_lvl1.sh'
+		bash -lc 'bash ./build_sqisign_lvl1.sh'
 else
 	echo "Need emcc (Emscripten) or Docker with image $IMAGE to build SQISign WASM." >&2
 	exit 1

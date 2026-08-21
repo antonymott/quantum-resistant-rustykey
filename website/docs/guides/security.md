@@ -44,8 +44,12 @@ This implementation includes patches aimed at side-channel resistance. Backgroun
 ## Independent checks
 
 ```bash
+pnpm fetch:vendors
+REQUIRE_REPRODUCIBLE=1 pnpm build:vendor
+pnpm verify:repro
 rg "MLK_CONFIG_PARAMETER_SET=512|MLK_CONFIG_PARAMETER_SET=768|MLK_CONFIG_PARAMETER_SET=1024" wasm/Makefile
 rg "mlk_fqmul|mlk_barrett_reduce" vendor/mlkem-native/mlkem/src/poly.c
 rg "constant-time|HOL-Light|CBMC" vendor/mlkem-native/README.md vendor/mlkem-native/SOUNDNESS.md
-pnpm build:vendor   # optional rebuild
 ```
+
+See [Supply-chain provenance](./provenance) for Sigstore vs reproducible C→WASM, and where public audit source maps are published.

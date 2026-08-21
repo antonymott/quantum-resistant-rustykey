@@ -1,6 +1,6 @@
 ---
 title: Building from source
-description: Prerequisites and build steps for quantum-resistant-rustykey.
+description: Prerequisites and reproducible WASM builds for quantum-resistant-rustykey.
 ---
 
 # Building from source
@@ -8,7 +8,8 @@ description: Prerequisites and build steps for quantum-resistant-rustykey.
 ## Prerequisites
 
 - **Node ≥ 26.5.0** and **pnpm** (see root `packageManager`)
-- **Emscripten** or **Docker** — only if you run `pnpm build:vendor` to regenerate `src/vendor/*`
+- **Docker** — required for `REQUIRE_REPRODUCIBLE=1` / CI (pinned `emscripten/emsdk` from `vendor.lock.json`)
+- Local **Emscripten** is optional for day-to-day edits; hashes may differ from CI
 
 ## Steps
 
@@ -16,19 +17,32 @@ description: Prerequisites and build steps for quantum-resistant-rustykey.
 git clone https://github.com/antonymott/quantum-resistant-rustykey.git
 cd quantum-resistant-rustykey
 pnpm i
-```
-
-Optional — clone mlkem-native if regenerating vendored bundles:
-
-```bash
-git clone --depth 1 https://github.com/pq-code-package/mlkem-native.git vendor/mlkem-native
-pnpm build:vendor
-```
-
-Compile TypeScript / package dist:
-
-```bash
+pnpm fetch:vendors   # verify vendor/ trees match vendor.lock.json
 pnpm build
+```
+
+## Reproducible WASM (recommended for releases)
+
+```bash
+REQUIRE_REPRODUCIBLE=1 pnpm build:vendor
+pnpm verify:repro
+```
+
+This forces Docker + the Emscripten image digest in `vendor.lock.json`, sets `SOURCE_DATE_EPOCH`, and checks `src/vendor/*.js` against `repro.hashes.json`.
+
+After an intentional toolchain or C-vendor change:
+
+```bash
+REQUIRE_REPRODUCIBLE=1 pnpm build:vendor
+pnpm verify:repro -- --update
+pnpm fetch:vendors -- --update   # if vendor C trees changed
+```
+
+## Audit build (source maps)
+
+```bash
+pnpm build:audit
+# outputs under wasm/audit-build/ (gitignored; also uploaded from CI)
 ```
 
 ## Project structure (ML-KEM path)

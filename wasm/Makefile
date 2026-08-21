@@ -143,5 +143,56 @@ all: build
 
 build: $(BINARIES)
 
+# Audit / opacity artifacts: separate outputs with DWARF + JS source maps.
+# Not used for npm packages (those stay -s SINGLE_FILE under build/).
+AUDIT_DIR = audit-build
+SOURCE_MAP_BASE ?= ./
+WASM_FLAGS_AUDIT_SHARED = -s WASM=1 \
+	-s EXPORTED_RUNTIME_METHODS='["getValue","setValue","stackSave","stackAlloc","stackRestore"]' \
+	-s ALLOW_MEMORY_GROWTH=0 \
+	-s STACK_SIZE=1048576 \
+	-s MODULARIZE=1 \
+	-s EXPORT_ES6=1 \
+	-s ENVIRONMENT='web,webview,worker' \
+	--no-entry \
+	-s EXIT_RUNTIME=0 \
+	-s INCOMING_MODULE_JS_API=[] \
+	-s ASSERTIONS=1 \
+	-s STACK_OVERFLOW_CHECK=2 \
+	-g \
+	-gsource-map \
+	--source-map-base $(SOURCE_MAP_BASE)
+
+AUDIT_768 = $(AUDIT_DIR)/wasm-module.js
+AUDIT_FALCON_512 = $(AUDIT_DIR)/falcon-512-module.js
+AUDIT_MLDSA_65 = $(AUDIT_DIR)/mldsa-65-module.js
+AUDIT_BINARIES = $(AUDIT_768) $(AUDIT_FALCON_512) $(AUDIT_MLDSA_65)
+
+$(AUDIT_768): $(MLK_SOURCE) wasm_wrapper_768.c
+	@test -f "$(MLK_PREFIX)/mlkem_native.h" || (echo "Missing mlkem-native"; exit 1)
+	mkdir -p $(AUDIT_DIR)
+	$(CC) $(CFLAGS_768) $(WASM_FLAGS_AUDIT_SHARED) \
+		-s EXPORT_NAME="'MLKEM768Module'" \
+		-s EXPORTED_FUNCTIONS='["_mlkem768_keypair_derand","_mlkem768_enc_derand","_mlkem768_dec"]' \
+		$^ -o $@
+
+$(AUDIT_FALCON_512): $(FALCON_SOURCE) wasm_wrapper_falcon_512.c
+	mkdir -p $(AUDIT_DIR)
+	$(CC) $(CFLAGS_FALCON_512) $(WASM_FLAGS_AUDIT_SHARED) \
+		-s EXPORT_NAME="'Falcon512Module'" \
+		-s EXPORTED_FUNCTIONS='["_falcon512_public_key_bytes","_falcon512_private_key_bytes","_falcon512_signature_bytes","_falcon512_seed_bytes","_falcon512_keypair_seeded","_falcon512_sign_seeded","_falcon512_verify"]' \
+		$^ -lm -o $@
+
+$(AUDIT_MLDSA_65): $(MLDSA_SOURCE) wasm_wrapper_mldsa_65.c
+	mkdir -p $(AUDIT_DIR)
+	$(CC) $(CFLAGS_MLDSA_65) $(WASM_FLAGS_AUDIT_SHARED) \
+		-s EXPORT_NAME="'MlDsa65Module'" \
+		-s EXPORTED_FUNCTIONS='["_mldsa65_public_key_bytes","_mldsa65_private_key_bytes","_mldsa65_signature_bytes","_mldsa65_seed_bytes","_mldsa65_random_bytes","_mldsa65_keypair_seeded","_mldsa65_sign_seeded","_mldsa65_verify_signature"]' \
+		$^ -o $@
+
+.PHONY: audit
+audit: $(AUDIT_BINARIES)
+
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) $(AUDIT_DIR)
+

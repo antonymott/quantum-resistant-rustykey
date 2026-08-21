@@ -1,0 +1,37 @@
+{
+	"$schema_comment": "Pins C vendor trees (content tree hashes) and the Emscripten image used for reproducible WASM builds.",
+	"sourceDateEpoch": 1702512000,
+	"emscripten": {
+		"image": "emscripten/emsdk",
+		"tag": "3.1.51",
+		"digest": "sha256:fde95518821ccc1b629ee674a7a068a809fda47ea16814b0ed53bd646555147b"
+	},
+	"vendors": {
+		"falcon-ref": {
+			"mode": "in-tree",
+			"path": "vendor/falcon-ref",
+			"version": "2020-09-30",
+			"source": "https://falcon-sign.info/impl/",
+			"treeHash": "9324ffb5c544f4f441ad1ce1e913805dc7e0609e2fd0fe4fd942f31ffd2ee622"
+		},
+		"mldsa-native": {
+			"mode": "in-tree",
+			"path": "vendor/mldsa-native",
+			"source": "https://github.com/pq-code-package/mldsa-native",
+			"treeHash": "3b4d3e545c96751aa2d4fb0ddeedfbbff7cb4363036b515bb214f4a5bdfa4fb5"
+		},
+		"mlkem-native": {
+			"mode": "in-tree",
+			"path": "vendor/mlkem-native",
+			"source": "https://github.com/pq-code-package/mlkem-native",
+			"treeHash": "a405eb6846a381dd16bc4f05442d505cf43a1f4f676b391f155e07bd8d0a0107"
+		},
+		"sqisign-native": {
+			"mode": "in-tree",
+			"path": "vendor/sqisign-native",
+			"source": "https://github.com/SQISign/the-sqisign",
+			"notes": "In-tree snapshot with CMakeLists patches; not a raw upstream checkout.",
+			"treeHash": "5bda85f4a004fb809763bf1d103629ba0ba2c0f2406ca385ad036fea35b49a0f"
+		}
+	}
+}

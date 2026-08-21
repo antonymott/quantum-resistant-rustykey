@@ -45,11 +45,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Clone mlkem-native vendor source
-        run: |
-          if [ ! -d vendor/mlkem-native ]; then
-            git clone --depth 1 https://github.com/pq-code-package/mlkem-native.git vendor/mlkem-native
-          fi
+      - name: Verify pinned vendor C trees
+        run: pnpm fetch:vendors
 
       # - name: Linting typescript
       #   run: pnpm lint
@@ -80,6 +77,8 @@ jobs:
       - name: Build
         run: pnpm build
         if: steps.check.outputs.version_changed == 'true'
+        env:
+          REQUIRE_REPRODUCIBLE: "1"
 
       # Publishing is intentionally disabled:
       # - npm 2FA prevents token-only CI publish in this repo
