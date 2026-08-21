@@ -41,6 +41,14 @@ The algorithm spectacularly broken in 2022 was **SIDH** (Castryck–Decru / auxi
 
 This implementation includes patches aimed at side-channel resistance. Background reading: [KyberSlash / related work](https://kannwischer.eu/papers/2024_kyberslash_preprint20240628.pdf).
 
+## TypeScript types (auditability)
+
+The public API is typed under `strict` TypeScript (`BytesLike`, `Uint8Array` / `CryptoKey` key material, typed WASM module stubs). That helps humans and automated review see how keys and buffers move through the wrappers.
+
+**What types help:** misuse resistance, clearer review of crypto boundaries, fewer opaque `any` escape hatches.
+
+**What types do not prove:** they do not control V8 optimizations and do not by themselves establish constant-time behavior. Timing and related claims still need C/WASM review (and separate test-vector work).
+
 ## Independent checks
 
 ```bash

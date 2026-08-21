@@ -1,9 +1,10 @@
+import type { BytesLike } from "./types.js";
+
 export type EmscriptenModule = {
 	HEAPU8: Uint8Array;
 	stackSave(): number;
 	stackAlloc(size: number): number;
 	stackRestore(stack: number): void;
-	[name: string]: unknown;
 };
 
 export function toHex(bytes: Uint8Array): string {
@@ -23,7 +24,7 @@ export function fromHex(hex: string): Uint8Array {
 	return out;
 }
 
-export function asBytes(value: Uint8Array | ArrayBuffer | string): Uint8Array {
+export function asBytes(value: BytesLike): Uint8Array {
 	if (typeof value === "string") return fromHex(value);
 	if (value instanceof Uint8Array) return value;
 	return new Uint8Array(value);

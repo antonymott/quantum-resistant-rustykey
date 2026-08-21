@@ -43,6 +43,13 @@ const typeOnlyExports = [
 	"SqisignWebGpuSupport",
 	"SqisignWebGpuVariant",
 	"SqisignBenchSteps",
+	"BytesLike",
+	"IFnDsa",
+	"IMlKem",
+	"KeyPair",
+	"MlKemKeyPair",
+	"EncryptResult",
+	"SecretLike",
 ];
 
 const errors = [];

@@ -4,7 +4,7 @@ import {
 	slh_dsa_sha2_256s,
 } from "@noble/post-quantum/slh-dsa.js";
 import { asBytes, toHex } from "./signature-common.js";
-import type { IFnDsa, KeyPair, SlhDsaVariant } from "./types.js";
+import type { BytesLike, IFnDsa, KeyPair, SlhDsaVariant } from "./types.js";
 
 type SlhDsaImpl = typeof slh_dsa_sha2_128s;
 
@@ -35,37 +35,27 @@ class SlhDsaWrapper implements IFnDsa {
 		};
 	}
 
-	sign(
-		message: Uint8Array | ArrayBuffer | string,
-		private_key: unknown,
-	): Promise<Uint8Array> {
+	sign(message: BytesLike, private_key: BytesLike): Promise<Uint8Array> {
 		return Promise.resolve(private_key).then((sk) =>
-			this.impl().sign(
-				asBytes(message as Uint8Array | ArrayBuffer | string),
-				asBytes(sk as Uint8Array | ArrayBuffer | string),
-			),
+			this.impl().sign(asBytes(message), asBytes(sk)),
 		);
 	}
 
 	verify(
-		signature: Uint8Array | ArrayBuffer | string,
-		message: Uint8Array | ArrayBuffer | string,
-		public_key: unknown,
+		signature: BytesLike,
+		message: BytesLike,
+		public_key: BytesLike,
 	): Promise<boolean> {
 		return Promise.all([
 			Promise.resolve(signature),
 			Promise.resolve(message),
 			Promise.resolve(public_key),
 		]).then(([sig, msg, pk]) =>
-			this.impl().verify(
-				asBytes(sig),
-				asBytes(msg),
-				asBytes(pk as Uint8Array | ArrayBuffer | string),
-			),
+			this.impl().verify(asBytes(sig), asBytes(msg), asBytes(pk)),
 		);
 	}
 
-	buffer_to_string(value: Uint8Array | ArrayBuffer | string): string {
+	buffer_to_string(value: BytesLike): string {
 		if (typeof value === "string") return value;
 		return toHex(asBytes(value));
 	}
