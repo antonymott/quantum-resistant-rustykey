@@ -15,6 +15,7 @@ pnpm i quantum-resistant-rustykey@latest
 **Live testbed:** [pqc.rustykey.me](https://pqc.rustykey.me)  
 **License:** ISC
 
+
 WASM modules are compiled from pinned C under `vendor/` (see `vendor.lock.json`). Independent C→WASM check: `REQUIRE_REPRODUCIBLE=1 pnpm build:vendor && pnpm verify:repro`. Provenance: [Supply-chain provenance](https://antonymott.github.io/quantum-resistant-rustykey/docs/guides/provenance).
 
 > Pre-production until v1.0.0. Prefer `@latest` (or a caret range) so dependents pick up patches.
