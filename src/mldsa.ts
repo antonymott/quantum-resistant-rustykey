@@ -7,52 +7,13 @@ import {
 	withStack,
 	writeBytes,
 } from "./signature-common.js";
-import type { IFnDsa, MlDsaVariant } from "./types.js";
+import type { BytesLike, IFnDsa, MlDsaVariant } from "./types.js";
+import type { MlDsa65Wasm } from "./vendor/mldsa65.js";
 import MlDsa65Module from "./vendor/mldsa65.js";
+import type { MlDsa87Wasm } from "./vendor/mldsa87.js";
 import MlDsa87Module from "./vendor/mldsa87.js";
 
-type MlDsaModule = {
-	_mldsa65_public_key_bytes?: () => number;
-	_mldsa65_private_key_bytes?: () => number;
-	_mldsa65_signature_bytes?: () => number;
-	_mldsa65_seed_bytes?: () => number;
-	_mldsa65_random_bytes?: () => number;
-	_mldsa65_keypair_seeded?: (pk: number, sk: number, seed: number) => number;
-	_mldsa65_sign_seeded?: (
-		sig: number,
-		msg: number,
-		msgLen: number,
-		sk: number,
-		rnd: number,
-	) => number;
-	_mldsa65_verify_signature?: (
-		sig: number,
-		sigLen: number,
-		msg: number,
-		msgLen: number,
-		pk: number,
-	) => number;
-	_mldsa87_public_key_bytes?: () => number;
-	_mldsa87_private_key_bytes?: () => number;
-	_mldsa87_signature_bytes?: () => number;
-	_mldsa87_seed_bytes?: () => number;
-	_mldsa87_random_bytes?: () => number;
-	_mldsa87_keypair_seeded?: (pk: number, sk: number, seed: number) => number;
-	_mldsa87_sign_seeded?: (
-		sig: number,
-		msg: number,
-		msgLen: number,
-		sk: number,
-		rnd: number,
-	) => number;
-	_mldsa87_verify_signature?: (
-		sig: number,
-		sigLen: number,
-		msg: number,
-		msgLen: number,
-		pk: number,
-	) => number;
-} & import("./signature-common.js").EmscriptenModule;
+type MlDsaModule = MlDsa65Wasm & MlDsa87Wasm;
 
 type MlDsaApi = {
 	getModule: () => Promise<MlDsaModule>;
@@ -202,17 +163,14 @@ class MlDsaWrapper implements IFnDsa {
 		};
 	}
 
-	sign(
-		message: Uint8Array | ArrayBuffer | string,
-		private_key: unknown,
-	): Promise<Uint8Array> {
+	sign(message: BytesLike, private_key: BytesLike): Promise<Uint8Array> {
 		return Promise.all([
 			ensureInit(this.variant),
 			Promise.resolve(private_key),
 		]).then(([module, sk]) => {
 			const api = getApi(this.variant);
 			const msg = asBytes(message);
-			const key = asBytes(sk as Uint8Array | ArrayBuffer | string);
+			const key = asBytes(sk);
 			const rnd = crypto.getRandomValues(
 				new Uint8Array(api.randomBytes(module)),
 			);
@@ -231,9 +189,9 @@ class MlDsaWrapper implements IFnDsa {
 	}
 
 	verify(
-		signature: Uint8Array | ArrayBuffer | string,
-		message: Uint8Array | ArrayBuffer | string,
-		public_key: unknown,
+		signature: BytesLike,
+		message: BytesLike,
+		public_key: BytesLike,
 	): Promise<boolean> {
 		return Promise.all([
 			ensureInit(this.variant),
@@ -242,7 +200,7 @@ class MlDsaWrapper implements IFnDsa {
 			const api = getApi(this.variant);
 			const sig = asBytes(signature);
 			const msg = asBytes(message);
-			const key = asBytes(pk as Uint8Array | ArrayBuffer | string);
+			const key = asBytes(pk);
 			return withStack(module, (alloc) => {
 				const sigPtr = writeBytes(module, alloc, sig);
 				const msgPtr = writeBytes(module, alloc, msg);
@@ -255,7 +213,7 @@ class MlDsaWrapper implements IFnDsa {
 		});
 	}
 
-	buffer_to_string(value: Uint8Array | ArrayBuffer | string): string {
+	buffer_to_string(value: BytesLike): string {
 		if (typeof value === "string") return value;
 		return toHex(asBytes(value));
 	}

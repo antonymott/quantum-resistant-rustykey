@@ -1,4 +1,10 @@
-import type { EncryptResult, IMlKem, KeyPair, MaybePromise } from "./types.js";
+import type {
+	EncryptResult,
+	IMlKem,
+	MaybePromise,
+	MlKemKeyPair,
+	SecretLike,
+} from "./types.js";
 import mlkem768 from "./vendor/mlkem.js";
 import mlkem512 from "./vendor/mlkem512.js";
 import mlkem1024 from "./vendor/mlkem1024.js";
@@ -82,6 +88,18 @@ export {
 	setSqisignAccelWorkerUrl,
 } from "./sqisign-webgpu.js";
 
+export type {
+	BytesLike,
+	EncryptResult,
+	IFnDsa,
+	IMlDsa,
+	IMlKem,
+	KeyPair,
+	MaybePromise,
+	MlKemKeyPair,
+	SecretLike,
+} from "./types.js";
+
 /** Minimal surface used by this package (mlkem-wasm–style API). */
 type MlKemImpl = {
 	generateKey(
@@ -163,7 +181,9 @@ function bytesToArrayBuffer(bytes: Uint8Array): ArrayBuffer {
 	return bytes.buffer as ArrayBuffer;
 }
 
-async function secretToKeyBytes(secret: unknown): Promise<Uint8Array> {
+async function secretToKeyBytes(
+	secret: MaybePromise<SecretLike>,
+): Promise<Uint8Array> {
 	const resolved = await secret;
 
 	if (typeof resolved === "string") return hexStringToBytes(resolved);
@@ -186,7 +206,7 @@ class MlKemWrapper implements IMlKem {
 		private readonly algorithm: { readonly name: string },
 	) {}
 
-	keypair(): KeyPair {
+	keypair(): MlKemKeyPair {
 		const keyPairPromise = this.impl.generateKey(this.algorithm, true, [
 			"encapsulateBits",
 			"decapsulateBits",
@@ -200,10 +220,9 @@ class MlKemWrapper implements IMlKem {
 		};
 	}
 
-	encrypt(public_key: unknown): EncryptResult {
-		const publicKeyPromise = Promise.resolve(public_key);
-		const encPromise = publicKeyPromise.then((pk) =>
-			this.impl.encapsulateBits(this.algorithm, pk as CryptoKey),
+	encrypt(public_key: MaybePromise<CryptoKey>): EncryptResult {
+		const encPromise = Promise.resolve(public_key).then((pk) =>
+			this.impl.encapsulateBits(this.algorithm, pk),
 		);
 
 		return {
@@ -215,32 +234,41 @@ class MlKemWrapper implements IMlKem {
 		};
 	}
 
-	decrypt(cyphertext: unknown, private_key: unknown): Promise<unknown> {
-		const ctPromise = Promise.resolve(cyphertext);
-		const skPromise = Promise.resolve(private_key);
-
-		return Promise.all([ctPromise, skPromise]).then(([ct, sk]) =>
-			this.impl.decapsulateBits(
-				this.algorithm,
-				sk as CryptoKey,
-				ct as BufferSource,
-			),
-		);
+	decrypt(
+		cyphertext: MaybePromise<BufferSource>,
+		private_key: MaybePromise<CryptoKey>,
+	): Promise<ArrayBuffer> {
+		return Promise.all([
+			Promise.resolve(cyphertext),
+			Promise.resolve(private_key),
+		]).then(([ct, sk]) => this.impl.decapsulateBits(this.algorithm, sk, ct));
 	}
 
-	buffer_to_string(buffer: unknown): MaybePromise<string> {
+	buffer_to_string(
+		buffer: MaybePromise<CryptoKey | BufferSource | string>,
+	): MaybePromise<string> {
 		if (buffer && typeof (buffer as Promise<unknown>).then === "function") {
-			return (buffer as Promise<unknown>).then((b) => this.buffer_to_string(b));
+			return (buffer as Promise<CryptoKey | BufferSource | string>).then((b) =>
+				this.buffer_to_string(b),
+			);
 		}
 
-		if (buffer instanceof CryptoKey) {
-			return cryptoKeyToRawHex(this.impl, buffer);
+		const value = buffer as CryptoKey | BufferSource | string;
+		if (value instanceof CryptoKey) {
+			return cryptoKeyToRawHex(this.impl, value);
 		}
 
-		return bytesToHexWithSpaces(bufferSourceToBytes(buffer));
+		if (typeof value === "string") {
+			return value;
+		}
+
+		return bytesToHexWithSpaces(bufferSourceToBytes(value));
 	}
 
-	async encryptMessage(message: string, secret: unknown): Promise<Uint8Array> {
+	async encryptMessage(
+		message: string,
+		secret: MaybePromise<SecretLike>,
+	): Promise<Uint8Array> {
 		const secretBytes = await secretToKeyBytes(secret);
 		const secretKeyBuffer = bytesToArrayBuffer(secretBytes);
 
@@ -270,7 +298,7 @@ class MlKemWrapper implements IMlKem {
 
 	async decryptMessage(
 		encryptedMessage: Uint8Array,
-		secret: unknown,
+		secret: MaybePromise<SecretLike>,
 	): Promise<string> {
 		const secretBytes = await secretToKeyBytes(secret);
 		const secretKeyBuffer = bytesToArrayBuffer(secretBytes);

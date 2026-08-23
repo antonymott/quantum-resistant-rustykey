@@ -1,22 +1,49 @@
 export type MaybePromise<T> = T | Promise<T>;
 
+/** Hex string, ArrayBuffer, or raw bytes — common input for signature APIs. */
+export type BytesLike = Uint8Array | ArrayBuffer | string;
+
+/**
+ * Key material returned by signature schemes (FN-DSA, ML-DSA, SLH-DSA, SQIsign).
+ * Prefer awaiting `get(...)` so callers always hold concrete `Uint8Array`s.
+ */
 export interface KeyPair {
-	// `mlkem-wasm` is async under the hood; we expose that via Promise values.
-	get(key: "public_key" | "private_key"): MaybePromise<any>;
+	get(key: "public_key" | "private_key"): MaybePromise<Uint8Array>;
+}
+
+/**
+ * ML-KEM keys are Web Crypto `CryptoKey` handles (raw export via `buffer_to_string`).
+ */
+export interface MlKemKeyPair {
+	get(key: "public_key" | "private_key"): MaybePromise<CryptoKey>;
 }
 
 export interface EncryptResult {
 	// `cyphertext` is intentionally spelled this way to match the existing README/API.
-	get(key: "cyphertext" | "secret"): MaybePromise<any>;
+	get(key: "cyphertext" | "secret"): MaybePromise<ArrayBuffer>;
 }
 
+/** Shared secret material for AES-GCM helpers (KEM secret or hex). */
+export type SecretLike = BytesLike | ArrayBufferView;
+
 export interface IMlKem {
-	keypair(): KeyPair;
-	encrypt(public_key: any): EncryptResult;
-	decrypt(cyphertext: any, private_key: any): Promise<any>;
-	buffer_to_string(buffer: any): MaybePromise<string>;
-	encryptMessage(message: string, secret: any): Promise<Uint8Array>;
-	decryptMessage(encryptedMessage: Uint8Array, secret: any): Promise<string>;
+	keypair(): MlKemKeyPair;
+	encrypt(public_key: MaybePromise<CryptoKey>): EncryptResult;
+	decrypt(
+		cyphertext: MaybePromise<BufferSource>,
+		private_key: MaybePromise<CryptoKey>,
+	): Promise<ArrayBuffer>;
+	buffer_to_string(
+		buffer: MaybePromise<CryptoKey | BufferSource | string>,
+	): MaybePromise<string>;
+	encryptMessage(
+		message: string,
+		secret: MaybePromise<SecretLike>,
+	): Promise<Uint8Array>;
+	decryptMessage(
+		encryptedMessage: Uint8Array,
+		secret: MaybePromise<SecretLike>,
+	): Promise<string>;
 	delete(): void;
 }
 
@@ -29,16 +56,13 @@ export type SqisignVariant = "lvl1" | "lvl3" | "lvl5";
 
 export interface IFnDsa {
 	keypair(): KeyPair;
-	sign(
-		message: Uint8Array | ArrayBuffer | string,
-		private_key: unknown,
-	): Promise<Uint8Array>;
+	sign(message: BytesLike, private_key: BytesLike): Promise<Uint8Array>;
 	verify(
-		signature: Uint8Array | ArrayBuffer | string,
-		message: Uint8Array | ArrayBuffer | string,
-		public_key: unknown,
+		signature: BytesLike,
+		message: BytesLike,
+		public_key: BytesLike,
 	): Promise<boolean>;
-	buffer_to_string(value: Uint8Array | ArrayBuffer | string): string;
+	buffer_to_string(value: BytesLike): string;
 }
 
 export type IMlDsa = IFnDsa;

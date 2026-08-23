@@ -7,50 +7,13 @@ import {
 	withStack,
 	writeBytes,
 } from "./signature-common.js";
-import type { FnDsaVariant, IFnDsa, KeyPair } from "./types.js";
+import type { BytesLike, FnDsaVariant, IFnDsa, KeyPair } from "./types.js";
+import type { Falcon512Wasm } from "./vendor/falcon512.js";
 import Falcon512Module from "./vendor/falcon512.js";
+import type { Falcon1024Wasm } from "./vendor/falcon1024.js";
 import Falcon1024Module from "./vendor/falcon1024.js";
 
-type FalconModule = {
-	_falcon512_public_key_bytes?: () => number;
-	_falcon512_private_key_bytes?: () => number;
-	_falcon512_signature_bytes?: () => number;
-	_falcon512_seed_bytes?: () => number;
-	_falcon512_keypair_seeded?: (pk: number, sk: number, seed: number) => number;
-	_falcon512_sign_seeded?: (
-		sig: number,
-		msg: number,
-		msgLen: number,
-		sk: number,
-		seed: number,
-	) => number;
-	_falcon512_verify?: (
-		sig: number,
-		sigLen: number,
-		msg: number,
-		msgLen: number,
-		pk: number,
-	) => number;
-	_falcon1024_public_key_bytes?: () => number;
-	_falcon1024_private_key_bytes?: () => number;
-	_falcon1024_signature_bytes?: () => number;
-	_falcon1024_seed_bytes?: () => number;
-	_falcon1024_keypair_seeded?: (pk: number, sk: number, seed: number) => number;
-	_falcon1024_sign_seeded?: (
-		sig: number,
-		msg: number,
-		msgLen: number,
-		sk: number,
-		seed: number,
-	) => number;
-	_falcon1024_verify?: (
-		sig: number,
-		sigLen: number,
-		msg: number,
-		msgLen: number,
-		pk: number,
-	) => number;
-} & import("./signature-common.js").EmscriptenModule;
+type FalconModule = Falcon512Wasm & Falcon1024Wasm;
 
 type FalconApi = {
 	getModule: () => Promise<FalconModule>;
@@ -200,17 +163,14 @@ class FnDsaWrapper implements IFnDsa {
 		};
 	}
 
-	sign(
-		message: Uint8Array | ArrayBuffer | string,
-		private_key: unknown,
-	): Promise<Uint8Array> {
+	sign(message: BytesLike, private_key: BytesLike): Promise<Uint8Array> {
 		return Promise.all([
 			ensureInit(this.variant),
 			Promise.resolve(private_key),
 		]).then(([module, sk]) => {
 			const api = getApi(this.variant);
-			const msg = asBytes(message as Uint8Array | ArrayBuffer | string);
-			const key = asBytes(sk as Uint8Array | ArrayBuffer | string);
+			const msg = asBytes(message);
+			const key = asBytes(sk);
 			const seed = crypto.getRandomValues(
 				new Uint8Array(api.seedBytes(module)),
 			);
@@ -229,9 +189,9 @@ class FnDsaWrapper implements IFnDsa {
 	}
 
 	verify(
-		signature: Uint8Array | ArrayBuffer | string,
-		message: Uint8Array | ArrayBuffer | string,
-		public_key: unknown,
+		signature: BytesLike,
+		message: BytesLike,
+		public_key: BytesLike,
 	): Promise<boolean> {
 		return Promise.all([
 			ensureInit(this.variant),
@@ -240,7 +200,7 @@ class FnDsaWrapper implements IFnDsa {
 			const api = getApi(this.variant);
 			const sig = asBytes(signature);
 			const msg = asBytes(message);
-			const key = asBytes(pk as Uint8Array | ArrayBuffer | string);
+			const key = asBytes(pk);
 			return withStack(module, (alloc) => {
 				const sigPtr = writeBytes(module, alloc, sig);
 				const msgPtr = writeBytes(module, alloc, msg);
@@ -253,7 +213,7 @@ class FnDsaWrapper implements IFnDsa {
 		});
 	}
 
-	buffer_to_string(value: Uint8Array | ArrayBuffer | string): string {
+	buffer_to_string(value: BytesLike): string {
 		if (typeof value === "string") return value;
 		return toHex(asBytes(value));
 	}

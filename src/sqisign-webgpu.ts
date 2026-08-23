@@ -1,3 +1,4 @@
+import { asBytes, toHex } from "./signature-common.js";
 import {
 	loadSqisignLvl1,
 	loadSqisignLvl3,
@@ -10,7 +11,7 @@ import {
 	type SqisignWebGpuSupport,
 	type SqisignWebGpuVariant,
 } from "./sqisign-accel-env.js";
-import type { IFnDsa, KeyPair, SqisignVariant } from "./types.js";
+import type { BytesLike, IFnDsa, KeyPair, SqisignVariant } from "./types.js";
 import { initWebGpuDevice, warmupWebGpu } from "./webgpu/init.js";
 
 export {
@@ -247,25 +248,10 @@ class SqisignWebGpuWrapper implements IFnDsa {
 		};
 	}
 
-	sign(
-		message: Uint8Array | ArrayBuffer | string,
-		private_key: unknown,
-	): Promise<Uint8Array> {
+	sign(message: BytesLike, private_key: BytesLike): Promise<Uint8Array> {
 		return Promise.resolve(private_key).then(async (sk) => {
-			const msg = new Uint8Array(
-				typeof message === "string"
-					? new TextEncoder().encode(message)
-					: message instanceof Uint8Array
-						? message
-						: new Uint8Array(message),
-			);
-			const key = new Uint8Array(
-				sk instanceof Uint8Array
-					? sk
-					: sk instanceof ArrayBuffer
-						? new Uint8Array(sk)
-						: new Uint8Array(sk as ArrayBuffer),
-			);
+			const msg = asBytes(message);
+			const key = asBytes(sk);
 			const result = await postToWorker(
 				{
 					id: nextId++,
@@ -284,38 +270,18 @@ class SqisignWebGpuWrapper implements IFnDsa {
 	}
 
 	verify(
-		signature: Uint8Array | ArrayBuffer | string,
-		message: Uint8Array | ArrayBuffer | string,
-		public_key: unknown,
+		signature: BytesLike,
+		message: BytesLike,
+		public_key: BytesLike,
 	): Promise<boolean> {
 		return Promise.all([
 			Promise.resolve(signature),
 			Promise.resolve(message),
 			Promise.resolve(public_key),
 		]).then(async ([sig, msg, pk]) => {
-			const sigBytes = new Uint8Array(
-				typeof sig === "string"
-					? Uint8Array.from(
-							(sig.match(/.{1,2}/g) ?? []).map((b) => Number.parseInt(b, 16)),
-						)
-					: sig instanceof Uint8Array
-						? sig
-						: new Uint8Array(sig),
-			);
-			const msgBytes = new Uint8Array(
-				typeof msg === "string"
-					? new TextEncoder().encode(msg)
-					: msg instanceof Uint8Array
-						? msg
-						: new Uint8Array(msg),
-			);
-			const pkBytes = new Uint8Array(
-				pk instanceof Uint8Array
-					? pk
-					: pk instanceof ArrayBuffer
-						? new Uint8Array(pk)
-						: new Uint8Array(pk as ArrayBuffer),
-			);
+			const sigBytes = asBytes(sig);
+			const msgBytes = asBytes(msg);
+			const pkBytes = asBytes(pk);
 			const result = await postToWorker(
 				{
 					id: nextId++,
@@ -332,10 +298,9 @@ class SqisignWebGpuWrapper implements IFnDsa {
 		});
 	}
 
-	buffer_to_string(value: Uint8Array | ArrayBuffer | string): string {
+	buffer_to_string(value: BytesLike): string {
 		if (typeof value === "string") return value;
-		const bytes = value instanceof Uint8Array ? value : new Uint8Array(value);
-		return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join(" ");
+		return toHex(asBytes(value));
 	}
 
 	get label(): string {

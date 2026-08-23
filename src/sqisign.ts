@@ -7,82 +7,15 @@ import {
 	withStack,
 	writeBytes,
 } from "./signature-common.js";
-import type { IFnDsa, KeyPair, SqisignVariant } from "./types.js";
+import type { BytesLike, IFnDsa, KeyPair, SqisignVariant } from "./types.js";
+import type { SqisignLvl1Wasm } from "./vendor/sqisignlvl1.js";
 import SqisignLvl1Module from "./vendor/sqisignlvl1.js";
+import type { SqisignLvl3Wasm } from "./vendor/sqisignlvl3.js";
 import SqisignLvl3Module from "./vendor/sqisignlvl3.js";
+import type { SqisignLvl5Wasm } from "./vendor/sqisignlvl5.js";
 import SqisignLvl5Module from "./vendor/sqisignlvl5.js";
 
-type SqisignModule = {
-	_sqisign_lvl1_public_key_bytes?: () => number;
-	_sqisign_lvl1_private_key_bytes?: () => number;
-	_sqisign_lvl1_signature_bytes?: () => number;
-	_sqisign_lvl1_seed_bytes?: () => number;
-	_sqisign_lvl1_keypair_seeded?: (
-		pk: number,
-		sk: number,
-		seed: number,
-	) => number;
-	_sqisign_lvl1_sign_seeded?: (
-		sig: number,
-		msg: number,
-		msgLen: number,
-		sk: number,
-		seed: number,
-	) => number;
-	_sqisign_lvl1_verify?: (
-		sig: number,
-		sigLen: number,
-		msg: number,
-		msgLen: number,
-		pk: number,
-	) => number;
-	_sqisign_lvl3_public_key_bytes?: () => number;
-	_sqisign_lvl3_private_key_bytes?: () => number;
-	_sqisign_lvl3_signature_bytes?: () => number;
-	_sqisign_lvl3_seed_bytes?: () => number;
-	_sqisign_lvl3_keypair_seeded?: (
-		pk: number,
-		sk: number,
-		seed: number,
-	) => number;
-	_sqisign_lvl3_sign_seeded?: (
-		sig: number,
-		msg: number,
-		msgLen: number,
-		sk: number,
-		seed: number,
-	) => number;
-	_sqisign_lvl3_verify?: (
-		sig: number,
-		sigLen: number,
-		msg: number,
-		msgLen: number,
-		pk: number,
-	) => number;
-	_sqisign_lvl5_public_key_bytes?: () => number;
-	_sqisign_lvl5_private_key_bytes?: () => number;
-	_sqisign_lvl5_signature_bytes?: () => number;
-	_sqisign_lvl5_seed_bytes?: () => number;
-	_sqisign_lvl5_keypair_seeded?: (
-		pk: number,
-		sk: number,
-		seed: number,
-	) => number;
-	_sqisign_lvl5_sign_seeded?: (
-		sig: number,
-		msg: number,
-		msgLen: number,
-		sk: number,
-		seed: number,
-	) => number;
-	_sqisign_lvl5_verify?: (
-		sig: number,
-		sigLen: number,
-		msg: number,
-		msgLen: number,
-		pk: number,
-	) => number;
-} & import("./signature-common.js").EmscriptenModule;
+type SqisignModule = SqisignLvl1Wasm & SqisignLvl3Wasm & SqisignLvl5Wasm;
 
 type SqisignApi = {
 	getModule: () => Promise<SqisignModule>;
@@ -275,17 +208,14 @@ class SqisignWrapper implements IFnDsa {
 		};
 	}
 
-	sign(
-		message: Uint8Array | ArrayBuffer | string,
-		private_key: unknown,
-	): Promise<Uint8Array> {
+	sign(message: BytesLike, private_key: BytesLike): Promise<Uint8Array> {
 		return Promise.all([
 			ensureInit(this.variant),
 			Promise.resolve(private_key),
 		]).then(([module, sk]) => {
 			const api = getApi(this.variant);
-			const msg = asBytes(message as Uint8Array | ArrayBuffer | string);
-			const key = asBytes(sk as Uint8Array | ArrayBuffer | string);
+			const msg = asBytes(message);
+			const key = asBytes(sk);
 			const seed = crypto.getRandomValues(
 				new Uint8Array(api.seedBytes(module)),
 			);
@@ -306,9 +236,9 @@ class SqisignWrapper implements IFnDsa {
 	}
 
 	verify(
-		signature: Uint8Array | ArrayBuffer | string,
-		message: Uint8Array | ArrayBuffer | string,
-		public_key: unknown,
+		signature: BytesLike,
+		message: BytesLike,
+		public_key: BytesLike,
 	): Promise<boolean> {
 		return Promise.all([
 			ensureInit(this.variant),
@@ -317,7 +247,7 @@ class SqisignWrapper implements IFnDsa {
 			const api = getApi(this.variant);
 			const sig = asBytes(signature);
 			const msg = asBytes(message);
-			const key = asBytes(pk as Uint8Array | ArrayBuffer | string);
+			const key = asBytes(pk);
 			return withStack(module, (alloc) => {
 				const sigPtr = writeBytes(module, alloc, sig);
 				const msgPtr = writeBytes(module, alloc, msg);
@@ -330,7 +260,7 @@ class SqisignWrapper implements IFnDsa {
 		});
 	}
 
-	buffer_to_string(value: Uint8Array | ArrayBuffer | string): string {
+	buffer_to_string(value: BytesLike): string {
 		if (typeof value === "string") return value;
 		return toHex(asBytes(value));
 	}
