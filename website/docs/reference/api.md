@@ -5,7 +5,22 @@ description: Public exports from quantum-resistant-rustykey with usage notes.
 
 # API overview
 
-Human-oriented map of the public surface. Types ship in `dist/index.d.ts`.
+Human-oriented map of the public surface.
+
+## Types
+
+TypeScript declarations ship with the package (`dist/index.d.ts` via `"types"` / `exports`). You do **not** need `@types/quantum-resistant-rustykey`.
+
+| Type | Role |
+| --- | --- |
+| `IFnDsa` / `IMlDsa` | Shared signature API (`keypair` / `sign` / `verify`) |
+| `IMlKem` | ML-KEM API |
+| `KeyPair` | Signature key handles → `Uint8Array` |
+| `MlKemKeyPair` | KEM key handles → `CryptoKey` |
+| `BytesLike` | `Uint8Array` \| `ArrayBuffer` \| hex `string` |
+| `EncryptResult` | KEM encapsulate result (`cyphertext` / `secret`) |
+
+Import types alongside loaders, e.g. `import { loadSqisignLvl1, type IFnDsa } from "quantum-resistant-rustykey"`.
 
 ## KEM
 
