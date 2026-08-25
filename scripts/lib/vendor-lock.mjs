@@ -6,16 +6,33 @@ import { fileURLToPath } from "node:url";
 export const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 export const lockPath = join(root, "vendor.lock.json");
 
+/** Ephemeral / OS junk must not affect the pin (CI caches, laptops, etc.). */
+const IGNORE_NAMES = new Set([
+	".DS_Store",
+	"Thumbs.db",
+	".git",
+	"node_modules",
+	"__pycache__",
+	".pytest_cache",
+	".mypy_cache",
+]);
+
 export function loadVendorLock() {
 	return JSON.parse(readFileSync(lockPath, "utf8"));
 }
 
-/** Stable SHA-256 over relative paths + file bytes (sorted). */
-export function treeHash(dir) {
+function shouldIgnoreName(name) {
+	if (IGNORE_NAMES.has(name)) return true;
+	if (name.endsWith(".pyc")) return true;
+	return false;
+}
+
+/** List relative file paths under dir (sorted, stable). */
+export function listVendorFiles(dir) {
 	const files = [];
 	function walk(current) {
 		for (const name of readdirSync(current).sort()) {
-			if (name === ".git") continue;
+			if (shouldIgnoreName(name)) continue;
 			const full = join(current, name);
 			const st = statSync(full);
 			if (st.isDirectory()) walk(full);
@@ -23,6 +40,12 @@ export function treeHash(dir) {
 		}
 	}
 	walk(dir);
+	return files;
+}
+
+/** Stable SHA-256 over relative paths + file bytes (sorted). */
+export function treeHash(dir) {
+	const files = listVendorFiles(dir);
 	const h = createHash("sha256");
 	for (const full of files) {
 		const rel = relative(dir, full).split("\\").join("/");
@@ -34,6 +57,32 @@ export function treeHash(dir) {
 		h.update(data);
 	}
 	return h.digest("hex");
+}
+
+export function treeStats(dir) {
+	const files = listVendorFiles(dir);
+	const top = new Set();
+	for (const full of files) {
+		const rel = relative(dir, full).split("\\").join("/");
+		top.add(rel.split("/")[0] ?? rel);
+	}
+	return {
+		fileCount: files.length,
+		topEntries: [...top].sort(),
+		hash: (() => {
+			const h = createHash("sha256");
+			for (const full of files) {
+				const rel = relative(dir, full).split("\\").join("/");
+				const data = readFileSync(full);
+				h.update(rel);
+				h.update("\0");
+				h.update(String(data.length));
+				h.update("\0");
+				h.update(data);
+			}
+			return h.digest("hex");
+		})(),
+	};
 }
 
 export function emscriptenImageRef(lock = loadVendorLock()) {
@@ -62,10 +111,18 @@ export function verifyVendorTrees(lock = loadVendorLock()) {
 			errors.push(`Missing vendor tree ${name} at ${entry.path}`);
 			continue;
 		}
-		const actual = treeHash(path);
-		if (actual !== entry.treeHash) {
+		const stats = treeStats(path);
+		if (
+			typeof entry.fileCount === "number" &&
+			stats.fileCount !== entry.fileCount
+		) {
 			errors.push(
-				`Vendor ${name} treeHash mismatch:\n  expected ${entry.treeHash}\n  actual   ${actual}`,
+				`Vendor ${name} fileCount mismatch:\n  expected ${entry.fileCount} files\n  actual   ${stats.fileCount} files\n  top-level: ${stats.topEntries.join(", ")}`,
+			);
+		}
+		if (stats.hash !== entry.treeHash) {
+			errors.push(
+				`Vendor ${name} treeHash mismatch:\n  expected ${entry.treeHash}\n  actual   ${stats.hash}\n  files    ${stats.fileCount} (top-level: ${stats.topEntries.join(", ")})\n  hint     If this tree is a full upstream clone, reset it:\n           git checkout HEAD -- ${entry.path} && rm -rf ${entry.path}/.git`,
 			);
 		}
 	}
