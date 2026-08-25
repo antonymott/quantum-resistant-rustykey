@@ -11,6 +11,8 @@ RustyKey® is a **FIDO Alliance** member.
 pnpm i quantum-resistant-rustykey@latest
 ```
 
+TypeScript types are included (`dist/index.d.ts`) — no `@types/quantum-resistant-rustykey`.
+
 **Docs:** [antonymott.github.io/quantum-resistant-rustykey](https://antonymott.github.io/quantum-resistant-rustykey/)  
 **Live testbed:** [pqc.rustykey.me](https://pqc.rustykey.me)  
 **License:** ISC

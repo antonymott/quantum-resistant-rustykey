@@ -25,6 +25,17 @@ npm add quantum-resistant-rustykey@latest
 
 Requires **Node ≥ 26.5.0**.
 
+## TypeScript types
+
+Types ship **inside** the package (`dist/index.d.ts`, wired through `package.json` `"types"` / `exports`). After install, editors and `tsc` resolve them automatically — **do not** install a separate DefinitelyTyped package:
+
+```bash
+# Not needed — there is no @types/quantum-resistant-rustykey
+# pnpm i -D @types/quantum-resistant-rustykey
+```
+
+Useful named exports include `IFnDsa`, `IMlKem`, `KeyPair`, `MlKemKeyPair`, `BytesLike`, and `EncryptResult`. See [API overview](./reference/api) and the [security note on what types do / do not prove](./guides/security#typescript-types-auditability).
+
 ## What you get
 
 | Family | Variants | Notes |
@@ -38,13 +49,13 @@ Requires **Node ≥ 26.5.0**.
 ## Quick taste (ML-KEM)
 
 ```ts
-import { loadMlKem768 } from "quantum-resistant-rustykey";
+import { loadMlKem768, type IMlKem } from "quantum-resistant-rustykey";
 
-const kem = await loadMlKem768();
+const kem: IMlKem = await loadMlKem768();
 const kp = kem.keypair();
 const enc = kem.encrypt(kp.get("public_key"));
-const sharedA = await enc.get("secret");
-const sharedB = await kem.decrypt(enc.get("cyphertext"), kp.get("private_key"));
+const sharedA: ArrayBuffer = await enc.get("secret");
+const sharedB: ArrayBuffer = await kem.decrypt(enc.get("cyphertext"), kp.get("private_key"));
 ```
 
 ## Live playground

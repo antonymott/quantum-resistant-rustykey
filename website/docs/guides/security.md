@@ -43,7 +43,7 @@ This implementation includes patches aimed at side-channel resistance. Backgroun
 
 ## TypeScript types (auditability)
 
-The public API is typed under `strict` TypeScript (`BytesLike`, `Uint8Array` / `CryptoKey` key material, typed WASM module stubs). That helps humans and automated review see how keys and buffers move through the wrappers.
+The public API is typed under `strict` TypeScript (`BytesLike`, `Uint8Array` / `CryptoKey` key material, typed WASM module stubs). Declaration files ship **in the npm package** (`dist/index.d.ts`) — consumers do **not** need `@types/quantum-resistant-rustykey`. See [Getting started → TypeScript types](../intro#typescript-types).
 
 **What types help:** misuse resistance, clearer review of crypto boundaries, fewer opaque `any` escape hatches.
 
