@@ -23,7 +23,7 @@ bun add quantum-resistant-rustykey@latest
 npm add quantum-resistant-rustykey@latest
 ```
 
-Requires **Node ≥ 26.5.0**.
+Requires **Node ≥ 26.7.0**.
 
 ## TypeScript types
 

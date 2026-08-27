@@ -7,7 +7,7 @@ description: Prerequisites and reproducible WASM builds for quantum-resistant-ru
 
 ## Prerequisites
 
-- **Node ≥ 26.5.0** and **pnpm** (see root `packageManager`)
+- **Node ≥ 26.7.0** and **pnpm** (see root `packageManager`)
 - **Docker** — required for `REQUIRE_REPRODUCIBLE=1` / CI (pinned `emscripten/emsdk` from `vendor.lock.json`)
 - Local **Emscripten** is optional for day-to-day edits; hashes may differ from CI
 

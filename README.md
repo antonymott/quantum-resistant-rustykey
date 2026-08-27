@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/quantum-resistant-rustykey)](https://www.npmjs.com/package/quantum-resistant-rustykey)
 [![docs](https://img.shields.io/badge/docs-GitHub%20Pages-1a5f4a)](https://antonymott.github.io/quantum-resistant-rustykey/)
-![Node v26.5.0](https://img.shields.io/badge/node-v26.5.0-blue.svg)
+![Node v26.7.0](https://img.shields.io/badge/node-v26.7.0-blue.svg)
 
 TypeScript-first **WebAssembly post-quantum** crypto for Node and the browser — SQIsign, ML-DSA, FN-DSA, SLH-DSA, ML-KEM.  
 RustyKey® is a **FIDO Alliance** member.
