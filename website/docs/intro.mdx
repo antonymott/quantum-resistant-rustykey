@@ -4,6 +4,8 @@ title: Getting started
 description: Install quantum-resistant-rustykey and start using post-quantum crypto in Node or the browser.
 ---
 
+import { NodeRequirement } from "@site/src/components/PackageMeta"
+
 # Getting started
 
 `quantum-resistant-rustykey` is a TypeScript-first npm package of **WebAssembly post-quantum** primitives for Node.js and browsers — including **SQIsign** (NIST additional-signatures / on-ramp), **ML-DSA**, **FN-DSA**, **SLH-DSA**, and **ML-KEM**.
@@ -23,7 +25,7 @@ bun add quantum-resistant-rustykey@latest
 npm add quantum-resistant-rustykey@latest
 ```
 
-Requires **Node ≥ 26.7.0**.
+<NodeRequirement />
 
 ## TypeScript types
 

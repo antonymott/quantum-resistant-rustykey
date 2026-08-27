@@ -40,6 +40,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Sync README badge from package.json
+        run: pnpm docs:sync
+
       - name: Build Docusaurus
         run: pnpm --filter website build
 

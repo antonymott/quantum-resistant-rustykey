@@ -1,6 +1,16 @@
+import { createRequire } from "node:module"
 import { themes as prismThemes } from "prism-react-renderer"
 import type { Config } from "@docusaurus/types"
 import type * as Preset from "@docusaurus/preset-classic"
+import { parsePackageMeta } from "./src/lib/packageMeta"
+
+/** Root package.json is the single source of truth for Node / pnpm versions in docs. */
+const require = createRequire(import.meta.url)
+const rootPkg = require("../package.json") as {
+  engines?: { node?: string }
+  packageManager?: string
+}
+const packageMeta = parsePackageMeta(rootPkg)
 
 const config: Config = {
   title: "quantum-resistant-rustykey",
@@ -21,6 +31,11 @@ const config: Config = {
   trailingSlash: false,
 
   onBrokenLinks: "throw",
+
+  // Injected into MDX via @site/src/components/PackageMeta
+  customFields: {
+    packageMeta,
+  },
 
   i18n: {
     defaultLocale: "en",
