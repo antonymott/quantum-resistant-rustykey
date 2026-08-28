@@ -318,13 +318,25 @@ async function handleOp(request: WorkerOp): Promise<WorkerResult> {
 	}
 }
 
+/** One WASM module per level; CTR-DRBG is global — process worker ops serially. */
+let opChain: Promise<void> = Promise.resolve();
+
+function enqueueOp(request: WorkerOp): Promise<WorkerResult> {
+	const result = opChain.then(() => handleOp(request));
+	opChain = result.then(
+		() => undefined,
+		() => undefined,
+	);
+	return result;
+}
+
 const workerScope = self as unknown as {
 	onmessage: ((event: MessageEvent<WorkerOp>) => void) | null;
 	postMessage: (message: WorkerResult, transfer?: Transferable[]) => void;
 };
 
 workerScope.onmessage = (event: MessageEvent<WorkerOp>): void => {
-	void handleOp(event.data).then((result) => {
+	void enqueueOp(event.data).then((result) => {
 		const transfers: Transferable[] = [];
 		if (result.ok) {
 			if (result.pk) transfers.push(result.pk.buffer);

@@ -33,8 +33,8 @@
 			"mode": "in-tree",
 			"path": "vendor/sqisign-native",
 			"source": "https://github.com/SQISign/the-sqisign",
-			"notes": "In-tree snapshot with CMakeLists patches; not a raw upstream checkout.",
-			"treeHash": "5bda85f4a004fb809763bf1d103629ba0ba2c0f2406ca385ad036fea35b49a0f",
+			"notes": "In-tree snapshot with CMakeLists patches; not a raw upstream checkout. Pin: treeHash below.",
+			"treeHash": "3a36082a83dc2d46807c16a095358ad70c0cea543ed32b04782ab10ac684467b",
 			"fileCount": 308
 		}
 	}

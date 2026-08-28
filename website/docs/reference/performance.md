@@ -14,11 +14,12 @@ Measured on a standard Node.js / WASM development environment — your numbers w
 | ML-DSA-3 | 0.22 | 0.45 | 0.25 |
 | ML-DSA-5 | 0.33 | 0.63 | 0.34 |
 | SQIsign L1 | 99.95 | 534.41 | 15.35 |
+| SQIsign L3 | — | — | — |
 | SQIsign L5 | 312.47 | 1823.16 | 48.92 |
 
 ## Known Answer Tests
 
-WASM builds are checked against NIST / reference vectors. Truncated excerpts:
+CI checks **verify** against NIST / reference vectors (count=0 `.rsp` excerpts inlined in `src/sqisign-kat-lvl1.ts`). **Sign/keygen KAT** regression is not in default CI (runtime). L1 sign→verify round-trip is covered in `src/index.test.ts`.
 
 ### ML-DSA-3
 

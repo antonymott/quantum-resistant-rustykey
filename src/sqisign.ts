@@ -7,6 +7,7 @@ import {
 	withStack,
 	writeBytes,
 } from "./signature-common.js";
+import { AsyncMutex } from "./async-mutex.js";
 import type { BytesLike, IFnDsa, KeyPair, SqisignVariant } from "./types.js";
 import type { SqisignLvl1Wasm } from "./vendor/sqisignlvl1.js";
 import SqisignLvl1Module from "./vendor/sqisignlvl1.js";
@@ -50,6 +51,13 @@ type SqisignApi = {
 let sqisignLvl1Promise: Promise<SqisignModule> | null = null;
 let sqisignLvl3Promise: Promise<SqisignModule> | null = null;
 let sqisignLvl5Promise: Promise<SqisignModule> | null = null;
+
+/** SQIsign test RNG (CTR-DRBG) is module-global — serialize keygen/sign per level. */
+const sqisignRngMutex: Record<SqisignVariant, AsyncMutex> = {
+	lvl1: new AsyncMutex(),
+	lvl3: new AsyncMutex(),
+	lvl5: new AsyncMutex(),
+};
 
 function getSqisignLvl1Module(): Promise<SqisignModule> {
 	if (!sqisignLvl1Promise) {
@@ -177,7 +185,7 @@ class SqisignWrapper implements IFnDsa {
 	constructor(private readonly variant: SqisignVariant) {}
 
 	keypair(): KeyPair {
-		const pairPromise = (async () => {
+		const pairPromise = sqisignRngMutex[this.variant].run(async () => {
 			const api = getApi(this.variant);
 			const module = await api.getModule();
 			const seed = crypto.getRandomValues(
@@ -198,7 +206,7 @@ class SqisignWrapper implements IFnDsa {
 					private_key: readBytes(module, skPtr, api.privateKeyBytes(module)),
 				};
 			});
-		})();
+		});
 
 		return {
 			get: (key: "public_key" | "private_key") =>
@@ -209,20 +217,18 @@ class SqisignWrapper implements IFnDsa {
 	}
 
 	sign(message: BytesLike, private_key: BytesLike): Promise<Uint8Array> {
-		return Promise.all([
-			ensureInit(this.variant),
-			Promise.resolve(private_key),
-		]).then(([module, sk]) => {
+		return sqisignRngMutex[this.variant].run(async () => {
+			const module = await ensureInit(this.variant);
 			const api = getApi(this.variant);
 			const msg = asBytes(message);
-			const key = asBytes(sk);
+			const keyBytes = asBytes(private_key);
 			const seed = crypto.getRandomValues(
 				new Uint8Array(api.seedBytes(module)),
 			);
 			return withStack(module, (alloc) => {
 				const sigPtr = alloc(api.signatureBytes(module));
 				const msgPtr = writeBytes(module, alloc, msg);
-				const skPtr = writeBytes(module, alloc, key);
+				const skPtr = writeBytes(module, alloc, keyBytes);
 				const seedPtr = writeBytes(module, alloc, seed);
 				const rc = api.sign(module, sigPtr, msgPtr, msg.length, skPtr, seedPtr);
 				if (rc !== 0) {

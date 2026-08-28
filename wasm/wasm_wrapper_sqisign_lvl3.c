@@ -57,14 +57,17 @@ sqisign_lvl3_sign_seeded(uint8_t *sig, const uint8_t *msg, size_t msg_len,
 	randombytes_init((unsigned char *)seed, NULL, 256);
 	rc = crypto_sign(sm, &smlen, msg, (unsigned long long)msg_len, sk);
 	if (rc != 0) {
+		memset(sm, 0, cap);
 		free(sm);
 		return rc;
 	}
 	if (smlen < (unsigned long long)CRYPTO_BYTES) {
+		memset(sm, 0, cap);
 		free(sm);
 		return -2;
 	}
 	memcpy(sig, sm, (size_t)CRYPTO_BYTES);
+	memset(sm, 0, cap);
 	free(sm);
 	return 0;
 }

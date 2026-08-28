@@ -37,6 +37,18 @@ Reasons we stay on C cores for now:
 
 The algorithm spectacularly broken in 2022 was **SIDH** (Castryck–Decru / auxiliary torsion points). **SQIsign** is different: it relies on the Deuring correspondence (supersingular curves ↔ quaternion algebras), not the SIDH auxiliary-point problem. NIST accepted SQIsign onto the additional-signatures / on-ramp track.
 
+## SQIsign WASM (L1 / L3 / L5)
+
+See **[SQIsign WASM toolchain](./sqisign-wasm)** for the full reviewer checklist. Summary:
+
+- Shipped modules are **ref** C → Emscripten (`SQISIGN_BUILD_TYPE=ref`), pinned in `vendor.lock.json` / `repro.hashes.json`.
+- **RNG:** WASM links upstream **test/KAT** libraries; each `keypair` / `sign` is seeded from `crypto.getRandomValues` via `randombytes_init`. This is **not** the default `RANDOMBYTES_SYSTEM` production path.
+- **Concurrency:** one WASM instance per level — `keypair` / `sign` are serialized (global CTR-DRBG).
+- **Tests:** NIST KAT **verify** vectors for all three levels; L1 sign→verify round-trip in extended tests.
+- **“webGPU” loaders:** same WASM in a Worker; WebGPU warmup only — not GPU signing. See [SQIsign-webGPU](../packages/sqisign-webgpu).
+
+Do not claim browser WASM (or a future GPU path) matches upstream native constant-time analysis without separate review.
+
 ## Side-channel note
 
 This implementation includes patches aimed at side-channel resistance. Background reading: [KyberSlash / related work](https://kannwischer.eu/papers/2024_kyberslash_preprint20240628.pdf).

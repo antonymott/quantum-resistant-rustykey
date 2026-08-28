@@ -30,7 +30,7 @@ export async function warmupWebGpu(): Promise<boolean> {
 	if (!device) return false;
 
 	const module = device.createShaderModule({
-		label: "sqisign-modmul-warmup",
+		label: "sqisign-gpu-warmup",
 		code: /* wgsl */ `
 			@group(0) @binding(0) var<storage, read> a: array<u32>;
 			@group(0) @binding(1) var<storage, read> b: array<u32>;
@@ -46,7 +46,7 @@ export async function warmupWebGpu(): Promise<boolean> {
 	});
 
 	const pipeline = device.createComputePipeline({
-		label: "sqisign-modmul-warmup-pipeline",
+		label: "sqisign-gpu-warmup-pipeline",
 		layout: "auto",
 		compute: { module, entryPoint: "main" },
 	});

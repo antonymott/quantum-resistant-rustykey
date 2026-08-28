@@ -1,7 +1,7 @@
 /**
- * NIST-style KAT vector for SQIsign level 1 (count = 0) from upstream
- * `KAT/PQCsignKAT_353_SQIsign_lvl1.rsp` in https://github.com/SQISign/the-sqisign
- * Used for fast verify-only tests (reference keygen/sign are too slow for CI).
+ * NIST-style KAT verify vectors (count = 0) from upstream the-sqisign `.rsp` files.
+ * File name is historical (lvl1); exports cover L1, L3, and L5.
+ * Used for fast verify-only tests (reference keygen/sign KAT are too slow for default CI).
  */
 export const SQISIGN_LVL1_KAT0_PK_HEX =
 	"07CCD21425136F6E865E497D2D4D208F0054AD81372066E817480787AAF7B2029550C89E892D618CE3230F23510BFBE68FCCDDAEA51DB1436B462ADFAF008A010B";

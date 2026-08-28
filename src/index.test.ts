@@ -245,6 +245,16 @@ describe("quantum-resistant-rustykey (mlkem-wasm adapter)", () => {
 		expect(await sq.verify(bad, msg, pk)).toBe(false);
 	});
 
+	it("signs and verifies with SQISign level-1 (round-trip)", async () => {
+		const sq = await loadSqisignLvl1();
+		const kp = sq.keypair();
+		const pk = (await kp.get("public_key")) as Uint8Array;
+		const sk = (await kp.get("private_key")) as Uint8Array;
+		const message = new TextEncoder().encode("sqisign-l1-round-trip");
+		const signature = await sq.sign(message, sk);
+		expect(await sq.verify(signature, message, pk)).toBe(true);
+	}, 120_000);
+
 	it("verifies ML-DSA-65 against a NIST FIPS 204 KAT vector", async () => {
 		const mldsa = await loadMlDsa3();
 		const pk = fromHex(MLDSA65_KAT_PK_HEX);

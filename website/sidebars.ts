@@ -21,6 +21,7 @@ const sidebars: SidebarsConfig = {
       collapsed: false,
       items: [
         "guides/security",
+        "guides/sqisign-wasm",
         "guides/building",
         "guides/testing",
         "guides/provenance",
