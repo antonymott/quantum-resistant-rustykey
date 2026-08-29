@@ -1,5 +1,11 @@
 # quantum-resistant-rustykey
 
+## 0.13.5
+
+### Patch Changes
+
+- recalibrate webGPU timing metrics
+
 ## 0.13.4
 
 ### Patch Changes
