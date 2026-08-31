@@ -93,6 +93,32 @@ describe("quantum-resistant-rustykey (mlkem-wasm adapter)", () => {
 		expect(decryptedMessage).toBe(msg);
 	});
 
+	it("round-trips ML-KEM-768 keys through JWK base64url", async () => {
+		const mlkem = await import("./vendor/mlkem.js");
+		const impl = mlkem.default;
+		const pair = await impl.generateKey("ML-KEM-768", true, [
+			"encapsulateBits",
+			"decapsulateBits",
+		]);
+		const jwk = (await impl.exportKey("jwk", pair.privateKey)) as JsonWebKey & {
+			pub?: string;
+			priv?: string;
+		};
+		expect(jwk.kty).toBe("AKP");
+		expect(jwk.pub).toMatch(/^[A-Za-z0-9_-]+$/);
+		expect(jwk.priv).toMatch(/^[A-Za-z0-9_-]+$/);
+
+		const imported = await impl.importKey("jwk", jwk, "ML-KEM-768", true, [
+			"decapsulateBits",
+		]);
+		const reexport = (await impl.exportKey("jwk", imported)) as JsonWebKey & {
+			pub?: string;
+			priv?: string;
+		};
+		expect(reexport.pub).toBe(jwk.pub);
+		expect(reexport.priv).toBe(jwk.priv);
+	});
+
 	it("round-trips ML-KEM-1024 encrypt/decrypt + AES-GCM message", async () => {
 		const mlkem = await loadMlKem1024();
 

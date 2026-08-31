@@ -73,12 +73,7 @@ var MLKEM768Module = (() => {
       abort("no native wasm support detected");
     }
     function intArrayFromBase64(s) {
-      var decoded = atob(s);
-      var bytes = new Uint8Array(decoded.length);
-      for (var i = 0; i < decoded.length; ++i) {
-        bytes[i] = decoded.charCodeAt(i);
-      }
-      return bytes;
+      return Uint8Array.fromBase64(s);
     }
     function tryParseAsDataURI(filename) {
       if (!isDataURI(filename)) {
@@ -400,12 +395,10 @@ function _isSupportedCryptoKey(key) {
   return key instanceof CryptoKey && keyIdKey in key && key[keyIdKey] == noClone && internalKeyData.has(key);
 }
 function toBase64url(data) {
-  return btoa(String.fromCharCode(...data)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return data.toBase64({ alphabet: "base64url", omitPadding: true });
 }
 function fromBase64url(base64url) {
-  const base64 = base64url.replace(/-/g, "+").replace(/_/g, "/");
-  const binary = atob(base64 + "===".slice((base64.length + 3) % 4));
-  return Uint8Array.from(binary, (c) => c.charCodeAt(0));
+  return Uint8Array.fromBase64(base64url, { alphabet: "base64url" });
 }
 var PUBLICKEY_BYTES = 1184;
 var SECRETKEY_BYTES = 2400;

@@ -115,16 +115,7 @@ var SqisignLvl1Module = (() => {
       abort("no native wasm support detected");
     }
     function intArrayFromBase64(s) {
-      if (typeof ENVIRONMENT_IS_NODE != "undefined" && ENVIRONMENT_IS_NODE) {
-        var buf = Buffer.from(s, "base64");
-        return new Uint8Array(buf.buffer, buf.byteOffset, buf.length);
-      }
-      var decoded = atob(s);
-      var bytes = new Uint8Array(decoded.length);
-      for (var i = 0; i < decoded.length; ++i) {
-        bytes[i] = decoded.charCodeAt(i);
-      }
-      return bytes;
+      return Uint8Array.fromBase64(s);
     }
     function tryParseAsDataURI(filename) {
       if (!isDataURI(filename)) {

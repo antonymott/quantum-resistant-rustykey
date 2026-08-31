@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
+import { rewriteVendorBase64 } from "./lib/native-base64.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -42,6 +43,7 @@ for (const { entry, outfile } of bundles) {
 			console.warn(
 				`Skipping signature rebundle; missing source ${entry}. Using existing ${outfile}.`,
 			);
+			rewriteVendorBase64(outfile);
 			continue;
 		}
 		throw new Error(
@@ -70,4 +72,6 @@ for (const { entry, outfile } of bundles) {
 			"node:url",
 		],
 	});
+
+	rewriteVendorBase64(outfile);
 }

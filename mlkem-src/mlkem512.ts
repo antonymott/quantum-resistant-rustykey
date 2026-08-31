@@ -186,17 +186,12 @@ function _isSupportedCryptoKey(key: CryptoKey): boolean {
   );
 }
 
-function toBase64url(data: Uint8Array<ArrayBuffer>): string {
-  return btoa(String.fromCharCode(...data))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+function toBase64url(data: Uint8Array): string {
+  return data.toBase64({ alphabet: "base64url", omitPadding: true });
 }
 
-function fromBase64url(base64url: string): Uint8Array<ArrayBuffer> {
-  const base64 = base64url.replace(/-/g, "+").replace(/_/g, "/");
-  const binary = atob(base64 + "===".slice((base64.length + 3) % 4));
-  return Uint8Array.from(binary, (c) => c.charCodeAt(0));
+function fromBase64url(base64url: string): Uint8Array {
+  return Uint8Array.fromBase64(base64url, { alphabet: "base64url" });
 }
 
 const PUBLICKEY_BYTES = 800;

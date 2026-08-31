@@ -73,12 +73,7 @@ var Falcon1024Module = (() => {
       abort("no native wasm support detected");
     }
     function intArrayFromBase64(s) {
-      var decoded = atob(s);
-      var bytes = new Uint8Array(decoded.length);
-      for (var i = 0; i < decoded.length; ++i) {
-        bytes[i] = decoded.charCodeAt(i);
-      }
-      return bytes;
+      return Uint8Array.fromBase64(s);
     }
     function tryParseAsDataURI(filename) {
       if (!isDataURI(filename)) {
