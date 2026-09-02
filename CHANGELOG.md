@@ -1,5 +1,11 @@
 # quantum-resistant-rustykey
 
+## 0.13.7
+
+### Patch Changes
+
+- experimental warning on WebGPU
+
 ## 0.13.6
 
 ### Patch Changes

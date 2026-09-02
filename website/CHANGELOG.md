@@ -1,5 +1,11 @@
 # website
 
+## 0.0.4
+
+### Patch Changes
+
+- experimental warning on WebGPU
+
 ## 0.0.3
 
 ### Patch Changes
