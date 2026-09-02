@@ -53,8 +53,6 @@ TypeScript types are included (`dist/index.d.ts`) — no `@types/quantum-resista
 - ML-DSA, FN-DSA, SLH-DSA, ML-KEM [NIST™ approved](https://www.nist.gov/news-events/news/2024/08/nist-releases-first-3-finalized-post-quantum-encryption-standards)
 - SQIsign [NIST™ NOT YET approved, advanced to round 3](https://csrc.nist.gov/projects/pqc-dig-sig/round-3-additional-signatures)
 
-A model running in the browser eventually becomes a sequence of GPU operations: matrix multiplications, normalizations, convolutions, attention primitives, quantization operations, data-layout transformations, and many more. WebGPU makes these operations available across modern browsers through a portable API, while WGSL provides a common language for the shaders that execute them.
-
 **Docs:** [antonymott.github.io/quantum-resistant-rustykey](https://antonymott.github.io/quantum-resistant-rustykey/)  
 **Live testbed:** [pqc.rustykey.me](https://pqc.rustykey.me)  
 **License:** ISC

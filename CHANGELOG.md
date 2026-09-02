@@ -1,5 +1,11 @@
 # quantum-resistant-rustykey
 
+## 0.13.8
+
+### Patch Changes
+
+- chore
+
 ## 0.13.7
 
 ### Patch Changes
