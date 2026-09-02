@@ -1,5 +1,11 @@
 # website
 
+## 0.0.3
+
+### Patch Changes
+
+- remove unused refs
+
 ## 0.0.2
 
 ### Patch Changes
