@@ -51,39 +51,64 @@ export async function warmupWebGpu(): Promise<boolean> {
 		compute: { module, entryPoint: "main" },
 	});
 
-	const a = device.createBuffer({
-		size: 256,
-		usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-	});
-	const b = device.createBuffer({
-		size: 256,
-		usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-	});
-	const out = device.createBuffer({
-		size: 256,
-		usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
-	});
+	const bufferBytes = 256;
+	let a: GPUBuffer | undefined;
+	let b: GPUBuffer | undefined;
+	let out: GPUBuffer | undefined;
+	try {
+		a = device.createBuffer({
+			size: bufferBytes,
+			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+		});
+		b = device.createBuffer({
+			size: bufferBytes,
+			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+		});
+		out = device.createBuffer({
+			size: bufferBytes,
+			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+		});
 
-	device.queue.writeBuffer(a, 0, new Uint32Array(64).fill(1));
-	device.queue.writeBuffer(b, 0, new Uint32Array(64).fill(2));
+		device.queue.writeBuffer(a, 0, new Uint32Array(64).fill(1));
+		device.queue.writeBuffer(b, 0, new Uint32Array(64).fill(2));
 
-	const bindGroup = device.createBindGroup({
-		layout: pipeline.getBindGroupLayout(0),
-		entries: [
-			{ binding: 0, resource: { buffer: a } },
-			{ binding: 1, resource: { buffer: b } },
-			{ binding: 2, resource: { buffer: out } },
-		],
-	});
+		const bindGroup = device.createBindGroup({
+			layout: pipeline.getBindGroupLayout(0),
+			entries: [
+				{ binding: 0, resource: { buffer: a } },
+				{ binding: 1, resource: { buffer: b } },
+				{ binding: 2, resource: { buffer: out } },
+			],
+		});
 
-	const encoder = device.createCommandEncoder({ label: "sqisign-warmup" });
-	const pass = encoder.beginComputePass({ label: "sqisign-warmup-pass" });
-	pass.setPipeline(pipeline);
-	pass.setBindGroup(0, bindGroup);
-	pass.dispatchWorkgroups(1);
-	pass.end();
-	device.queue.submit([encoder.finish()]);
+		const encoder = device.createCommandEncoder({ label: "sqisign-warmup" });
+		const pass = encoder.beginComputePass({ label: "sqisign-warmup-pass" });
+		pass.setPipeline(pipeline);
+		pass.setBindGroup(0, bindGroup);
+		pass.dispatchWorkgroups(1);
+		pass.end();
+		device.queue.submit([encoder.finish()]);
 
-	await device.queue.onSubmittedWorkDone();
-	return true;
+		await device.queue.onSubmittedWorkDone();
+		return true;
+	} finally {
+		// Warmup buffers hold constants 1/2, not keys. Still wipe + destroy on every path.
+		const zeros = new Uint8Array(bufferBytes);
+		for (const buffer of [a, b, out]) {
+			if (!buffer) continue;
+			try {
+				device.queue.writeBuffer(buffer, 0, zeros);
+			} catch {
+				// Device-lost / already-destroyed: still attempt destroy below.
+			}
+		}
+		try {
+			await device.queue.onSubmittedWorkDone();
+		} catch {
+			// Queue may already be lost; destroy anyway.
+		}
+		a?.destroy();
+		b?.destroy();
+		out?.destroy();
+	}
 }

@@ -17,6 +17,12 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "Security",
+      collapsed: false,
+      items: ["security/threat-model"],
+    },
+    {
+      type: "category",
       label: "Guides",
       collapsed: false,
       items: [

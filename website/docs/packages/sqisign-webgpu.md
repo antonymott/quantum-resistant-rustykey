@@ -10,7 +10,7 @@ Browser-only SQIsign loaders that run the **same Emscripten WASM** as `loadSqisi
 :::important What this path actually does
 - **Crypto:** identical SQIsign WASM (L1 / L3 / L5).
 - **Worker:** keeps signing off the main thread when COOP/COEP + `SharedArrayBuffer` + WebGPU are available.
-- **WebGPU:** device warmup only (compute shader smoke test) — **no** field arithmetic on GPU yet.
+- **WebGPU:** device warmup only (compute shader smoke test) — **no** field arithmetic on GPU yet. Warmup buffers hold dummy constants, then are overwritten and destroyed; they never receive keys. See the [threat model](../security/threat-model).
 - **`SharedArrayBuffer`:** required for feature gating; not used for crypto buffers in the current code.
 :::
 
