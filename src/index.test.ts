@@ -277,7 +277,9 @@ describe("quantum-resistant-rustykey (mlkem-wasm adapter)", () => {
 		const pk = (await kp.get("public_key")) as Uint8Array;
 		const sk = (await kp.get("private_key")) as Uint8Array;
 		const message = new TextEncoder().encode("sqisign-l1-round-trip");
+		const skBefore = new Uint8Array(sk);
 		const signature = await sq.sign(message, sk);
+		expect(sk).toEqual(skBefore);
 		expect(await sq.verify(signature, message, pk)).toBe(true);
 	}, 120_000);
 

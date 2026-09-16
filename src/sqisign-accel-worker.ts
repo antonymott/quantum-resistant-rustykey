@@ -5,6 +5,7 @@ import {
 	wasmExportWithArgs,
 	withStack,
 	writeBytes,
+	zeroizeBytes,
 } from "./signature-common.js";
 import type { SqisignVariant } from "./types.js";
 import SqisignLvl1Module from "./vendor/sqisignlvl1.js";
@@ -151,55 +152,59 @@ async function runKeygen(
 			),
 		),
 	);
-	return withStack(module, (alloc) => {
-		const pkPtr = alloc(
-			wasmExport(
-				module[
-					`_sqisign_${p}_public_key_bytes` as keyof SqisignModule
-				] as () => number,
-			),
-		);
-		const skPtr = alloc(
-			wasmExport(
-				module[
-					`_sqisign_${p}_private_key_bytes` as keyof SqisignModule
-				] as () => number,
-			),
-		);
-		const seedPtr = writeBytes(module, alloc, seed);
-		const rc = wasmExportWithArgs(
-			module[`_sqisign_${p}_keypair_seeded` as keyof SqisignModule] as (
-				pk: number,
-				sk: number,
-				seed: number,
-			) => number,
-			pkPtr,
-			skPtr,
-			seedPtr,
-		);
-		if (rc !== 0)
-			throw new Error(`SQISign ${variant} keypair failed with code ${rc}`);
-		return {
-			pk: readBytes(
-				module,
-				pkPtr,
+	try {
+		return withStack(module, (alloc) => {
+			const pkPtr = alloc(
 				wasmExport(
 					module[
 						`_sqisign_${p}_public_key_bytes` as keyof SqisignModule
 					] as () => number,
 				),
-			),
-			sk: readBytes(
-				module,
-				skPtr,
+			);
+			const skPtr = alloc(
 				wasmExport(
 					module[
 						`_sqisign_${p}_private_key_bytes` as keyof SqisignModule
 					] as () => number,
 				),
-			),
-		};
-	});
+			);
+			const seedPtr = writeBytes(module, alloc, seed);
+			const rc = wasmExportWithArgs(
+				module[`_sqisign_${p}_keypair_seeded` as keyof SqisignModule] as (
+					pk: number,
+					sk: number,
+					seed: number,
+				) => number,
+				pkPtr,
+				skPtr,
+				seedPtr,
+			);
+			if (rc !== 0)
+				throw new Error(`SQISign ${variant} keypair failed with code ${rc}`);
+			return {
+				pk: readBytes(
+					module,
+					pkPtr,
+					wasmExport(
+						module[
+							`_sqisign_${p}_public_key_bytes` as keyof SqisignModule
+						] as () => number,
+					),
+				),
+				sk: readBytes(
+					module,
+					skPtr,
+					wasmExport(
+						module[
+							`_sqisign_${p}_private_key_bytes` as keyof SqisignModule
+						] as () => number,
+					),
+				),
+			};
+		});
+	} finally {
+		zeroizeBytes(seed);
+	}
 }
 
 async function runSign(
@@ -218,43 +223,47 @@ async function runSign(
 			),
 		),
 	);
-	return withStack(module, (alloc) => {
-		const sigPtr = alloc(
-			wasmExport(
-				module[
-					`_sqisign_${p}_signature_bytes` as keyof SqisignModule
-				] as () => number,
-			),
-		);
-		const msgPtr = writeBytes(module, alloc, msg);
-		const skPtr = writeBytes(module, alloc, sk);
-		const seedPtr = writeBytes(module, alloc, seed);
-		const rc = wasmExportWithArgs(
-			module[`_sqisign_${p}_sign_seeded` as keyof SqisignModule] as (
-				sig: number,
-				msg: number,
-				msgLen: number,
-				sk: number,
-				seed: number,
-			) => number,
-			sigPtr,
-			msgPtr,
-			msg.length,
-			skPtr,
-			seedPtr,
-		);
-		if (rc !== 0)
-			throw new Error(`SQISign ${variant} sign failed with code ${rc}`);
-		return readBytes(
-			module,
-			sigPtr,
-			wasmExport(
-				module[
-					`_sqisign_${p}_signature_bytes` as keyof SqisignModule
-				] as () => number,
-			),
-		);
-	});
+	try {
+		return withStack(module, (alloc) => {
+			const sigPtr = alloc(
+				wasmExport(
+					module[
+						`_sqisign_${p}_signature_bytes` as keyof SqisignModule
+					] as () => number,
+				),
+			);
+			const msgPtr = writeBytes(module, alloc, msg);
+			const skPtr = writeBytes(module, alloc, sk);
+			const seedPtr = writeBytes(module, alloc, seed);
+			const rc = wasmExportWithArgs(
+				module[`_sqisign_${p}_sign_seeded` as keyof SqisignModule] as (
+					sig: number,
+					msg: number,
+					msgLen: number,
+					sk: number,
+					seed: number,
+				) => number,
+				sigPtr,
+				msgPtr,
+				msg.length,
+				skPtr,
+				seedPtr,
+			);
+			if (rc !== 0)
+				throw new Error(`SQISign ${variant} sign failed with code ${rc}`);
+			return readBytes(
+				module,
+				sigPtr,
+				wasmExport(
+					module[
+						`_sqisign_${p}_signature_bytes` as keyof SqisignModule
+					] as () => number,
+				),
+			);
+		});
+	} finally {
+		zeroizeBytes(seed);
+	}
 }
 
 async function runVerify(

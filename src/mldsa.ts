@@ -6,6 +6,7 @@ import {
 	wasmExportWithArgs,
 	withStack,
 	writeBytes,
+	zeroizeBytes,
 } from "./signature-common.js";
 import type { BytesLike, IFnDsa, MlDsaVariant } from "./types.js";
 import type { MlDsa65Wasm } from "./vendor/mldsa65.js";
@@ -140,19 +141,23 @@ class MlDsaWrapper implements IFnDsa {
 			const seed = crypto.getRandomValues(
 				new Uint8Array(api.seedBytes(module)),
 			);
-			return withStack(module, (alloc) => {
-				const pkPtr = alloc(api.publicKeyBytes(module));
-				const skPtr = alloc(api.privateKeyBytes(module));
-				const seedPtr = writeBytes(module, alloc, seed);
-				const rc = api.keypair(module, pkPtr, skPtr, seedPtr);
-				if (rc !== 0) {
-					throw new Error(`ML-DSA keypair failed with code ${rc}`);
-				}
-				return {
-					public_key: readBytes(module, pkPtr, api.publicKeyBytes(module)),
-					private_key: readBytes(module, skPtr, api.privateKeyBytes(module)),
-				};
-			});
+			try {
+				return withStack(module, (alloc) => {
+					const pkPtr = alloc(api.publicKeyBytes(module));
+					const skPtr = alloc(api.privateKeyBytes(module));
+					const seedPtr = writeBytes(module, alloc, seed);
+					const rc = api.keypair(module, pkPtr, skPtr, seedPtr);
+					if (rc !== 0) {
+						throw new Error(`ML-DSA keypair failed with code ${rc}`);
+					}
+					return {
+						public_key: readBytes(module, pkPtr, api.publicKeyBytes(module)),
+						private_key: readBytes(module, skPtr, api.privateKeyBytes(module)),
+					};
+				});
+			} finally {
+				zeroizeBytes(seed);
+			}
 		})();
 
 		return {
@@ -174,17 +179,28 @@ class MlDsaWrapper implements IFnDsa {
 			const rnd = crypto.getRandomValues(
 				new Uint8Array(api.randomBytes(module)),
 			);
-			return withStack(module, (alloc) => {
-				const sigPtr = alloc(api.signatureBytes(module));
-				const msgPtr = writeBytes(module, alloc, msg);
-				const skPtr = writeBytes(module, alloc, key);
-				const rndPtr = writeBytes(module, alloc, rnd);
-				const rc = api.sign(module, sigPtr, msgPtr, msg.length, skPtr, rndPtr);
-				if (rc !== 0) {
-					throw new Error(`ML-DSA sign failed with code ${rc}`);
-				}
-				return readBytes(module, sigPtr, api.signatureBytes(module));
-			});
+			try {
+				return withStack(module, (alloc) => {
+					const sigPtr = alloc(api.signatureBytes(module));
+					const msgPtr = writeBytes(module, alloc, msg);
+					const skPtr = writeBytes(module, alloc, key);
+					const rndPtr = writeBytes(module, alloc, rnd);
+					const rc = api.sign(
+						module,
+						sigPtr,
+						msgPtr,
+						msg.length,
+						skPtr,
+						rndPtr,
+					);
+					if (rc !== 0) {
+						throw new Error(`ML-DSA sign failed with code ${rc}`);
+					}
+					return readBytes(module, sigPtr, api.signatureBytes(module));
+				});
+			} finally {
+				zeroizeBytes(rnd);
+			}
 		});
 	}
 

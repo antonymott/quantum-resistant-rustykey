@@ -1,3 +1,4 @@
+import { AsyncMutex } from "./async-mutex.js";
 import {
 	asBytes,
 	readBytes,
@@ -6,8 +7,8 @@ import {
 	wasmExportWithArgs,
 	withStack,
 	writeBytes,
+	zeroizeBytes,
 } from "./signature-common.js";
-import { AsyncMutex } from "./async-mutex.js";
 import type { BytesLike, IFnDsa, KeyPair, SqisignVariant } from "./types.js";
 import type { SqisignLvl1Wasm } from "./vendor/sqisignlvl1.js";
 import SqisignLvl1Module from "./vendor/sqisignlvl1.js";
@@ -191,21 +192,25 @@ class SqisignWrapper implements IFnDsa {
 			const seed = crypto.getRandomValues(
 				new Uint8Array(api.seedBytes(module)),
 			);
-			return withStack(module, (alloc) => {
-				const pkPtr = alloc(api.publicKeyBytes(module));
-				const skPtr = alloc(api.privateKeyBytes(module));
-				const seedPtr = writeBytes(module, alloc, seed);
-				const rc = api.keypair(module, pkPtr, skPtr, seedPtr);
-				if (rc !== 0) {
-					throw new Error(
-						`SQISign ${this.variant} keypair failed with code ${rc}`,
-					);
-				}
-				return {
-					public_key: readBytes(module, pkPtr, api.publicKeyBytes(module)),
-					private_key: readBytes(module, skPtr, api.privateKeyBytes(module)),
-				};
-			});
+			try {
+				return withStack(module, (alloc) => {
+					const pkPtr = alloc(api.publicKeyBytes(module));
+					const skPtr = alloc(api.privateKeyBytes(module));
+					const seedPtr = writeBytes(module, alloc, seed);
+					const rc = api.keypair(module, pkPtr, skPtr, seedPtr);
+					if (rc !== 0) {
+						throw new Error(
+							`SQISign ${this.variant} keypair failed with code ${rc}`,
+						);
+					}
+					return {
+						public_key: readBytes(module, pkPtr, api.publicKeyBytes(module)),
+						private_key: readBytes(module, skPtr, api.privateKeyBytes(module)),
+					};
+				});
+			} finally {
+				zeroizeBytes(seed);
+			}
 		});
 
 		return {
@@ -225,19 +230,30 @@ class SqisignWrapper implements IFnDsa {
 			const seed = crypto.getRandomValues(
 				new Uint8Array(api.seedBytes(module)),
 			);
-			return withStack(module, (alloc) => {
-				const sigPtr = alloc(api.signatureBytes(module));
-				const msgPtr = writeBytes(module, alloc, msg);
-				const skPtr = writeBytes(module, alloc, keyBytes);
-				const seedPtr = writeBytes(module, alloc, seed);
-				const rc = api.sign(module, sigPtr, msgPtr, msg.length, skPtr, seedPtr);
-				if (rc !== 0) {
-					throw new Error(
-						`SQISign ${this.variant} sign failed with code ${rc}`,
+			try {
+				return withStack(module, (alloc) => {
+					const sigPtr = alloc(api.signatureBytes(module));
+					const msgPtr = writeBytes(module, alloc, msg);
+					const skPtr = writeBytes(module, alloc, keyBytes);
+					const seedPtr = writeBytes(module, alloc, seed);
+					const rc = api.sign(
+						module,
+						sigPtr,
+						msgPtr,
+						msg.length,
+						skPtr,
+						seedPtr,
 					);
-				}
-				return readBytes(module, sigPtr, api.signatureBytes(module));
-			});
+					if (rc !== 0) {
+						throw new Error(
+							`SQISign ${this.variant} sign failed with code ${rc}`,
+						);
+					}
+					return readBytes(module, sigPtr, api.signatureBytes(module));
+				});
+			} finally {
+				zeroizeBytes(seed);
+			}
 		});
 	}
 
@@ -285,4 +301,14 @@ export async function loadSqisignLvl3(): Promise<IFnDsa> {
 export async function loadSqisignLvl5(): Promise<IFnDsa> {
 	await ensureInit("lvl5");
 	return new SqisignWrapper("lvl5");
+}
+
+/** @internal Test hook for heap-residue checks. Not part of the public API. */
+export async function sqisignLvl1ModuleForTests(): Promise<{
+	HEAPU8: Uint8Array;
+	stackSave(): number;
+	stackAlloc(size: number): number;
+	stackRestore(stack: number): void;
+}> {
+	return getSqisignLvl1Module();
 }

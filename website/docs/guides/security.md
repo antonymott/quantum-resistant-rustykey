@@ -46,6 +46,7 @@ See **[SQIsign WASM toolchain](./sqisign-wasm)** for the full reviewer checklist
 - **Concurrency:** one WASM instance per level — `keypair` / `sign` are serialized (global CTR-DRBG).
 - **Tests:** NIST KAT **verify** vectors for all three levels; L1 sign→verify round-trip in extended tests.
 - **“webGPU” loaders:** same WASM in a Worker; WebGPU warmup only — not GPU signing. See [SQIsign-webGPU](../packages/sqisign-webgpu).
+- **Stack copies:** JS-copied `sk` / seed bytes on the Emscripten stack are wiped in `withStack` on success and error paths. C `malloc` leftovers in the SQIsign ref module are **not** claimed wiped. Full write-up: [SQIsign Wasm + WebGPU threat model](../security/threat-model).
 
 Do not claim browser WASM (or a future GPU path) matches upstream native constant-time analysis without separate review.
 

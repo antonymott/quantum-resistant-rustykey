@@ -6,6 +6,7 @@ import {
 	wasmExportWithArgs,
 	withStack,
 	writeBytes,
+	zeroizeBytes,
 } from "./signature-common.js";
 import type { BytesLike, FnDsaVariant, IFnDsa, KeyPair } from "./types.js";
 import type { Falcon512Wasm } from "./vendor/falcon512.js";
@@ -140,19 +141,23 @@ class FnDsaWrapper implements IFnDsa {
 			const seed = crypto.getRandomValues(
 				new Uint8Array(api.seedBytes(module)),
 			);
-			return withStack(module, (alloc) => {
-				const pkPtr = alloc(api.publicKeyBytes(module));
-				const skPtr = alloc(api.privateKeyBytes(module));
-				const seedPtr = writeBytes(module, alloc, seed);
-				const rc = api.keypair(module, pkPtr, skPtr, seedPtr);
-				if (rc !== 0) {
-					throw new Error(`Falcon keypair failed with code ${rc}`);
-				}
-				return {
-					public_key: readBytes(module, pkPtr, api.publicKeyBytes(module)),
-					private_key: readBytes(module, skPtr, api.privateKeyBytes(module)),
-				};
-			});
+			try {
+				return withStack(module, (alloc) => {
+					const pkPtr = alloc(api.publicKeyBytes(module));
+					const skPtr = alloc(api.privateKeyBytes(module));
+					const seedPtr = writeBytes(module, alloc, seed);
+					const rc = api.keypair(module, pkPtr, skPtr, seedPtr);
+					if (rc !== 0) {
+						throw new Error(`Falcon keypair failed with code ${rc}`);
+					}
+					return {
+						public_key: readBytes(module, pkPtr, api.publicKeyBytes(module)),
+						private_key: readBytes(module, skPtr, api.privateKeyBytes(module)),
+					};
+				});
+			} finally {
+				zeroizeBytes(seed);
+			}
 		})();
 
 		return {
@@ -174,17 +179,28 @@ class FnDsaWrapper implements IFnDsa {
 			const seed = crypto.getRandomValues(
 				new Uint8Array(api.seedBytes(module)),
 			);
-			return withStack(module, (alloc) => {
-				const sigPtr = alloc(api.signatureBytes(module));
-				const msgPtr = writeBytes(module, alloc, msg);
-				const skPtr = writeBytes(module, alloc, key);
-				const seedPtr = writeBytes(module, alloc, seed);
-				const rc = api.sign(module, sigPtr, msgPtr, msg.length, skPtr, seedPtr);
-				if (rc !== 0) {
-					throw new Error(`Falcon sign failed with code ${rc}`);
-				}
-				return readBytes(module, sigPtr, api.signatureBytes(module));
-			});
+			try {
+				return withStack(module, (alloc) => {
+					const sigPtr = alloc(api.signatureBytes(module));
+					const msgPtr = writeBytes(module, alloc, msg);
+					const skPtr = writeBytes(module, alloc, key);
+					const seedPtr = writeBytes(module, alloc, seed);
+					const rc = api.sign(
+						module,
+						sigPtr,
+						msgPtr,
+						msg.length,
+						skPtr,
+						seedPtr,
+					);
+					if (rc !== 0) {
+						throw new Error(`Falcon sign failed with code ${rc}`);
+					}
+					return readBytes(module, sigPtr, api.signatureBytes(module));
+				});
+			} finally {
+				zeroizeBytes(seed);
+			}
 		});
 	}
 
