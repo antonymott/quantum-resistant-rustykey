@@ -1,5 +1,11 @@
 # website
 
+## 0.1.0
+
+### Minor Changes
+
+- opfs prf encrypt-decrypt sk
+
 ## 0.0.5
 
 ### Patch Changes

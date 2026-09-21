@@ -1,5 +1,12 @@
 # quantum-resistant-rustykey
 
+## 0.14.0
+
+### Minor Changes
+
+- bf59348: Make browser keygen/sign for all four signature families require WebAuthn UV + PRF + the OPFS encrypted-sk wallet. Node and REST loaders stay unconstrained. Registration uses `prf: {}`; eval runs only on get().
+- opfs prf encrypt-decrypt sk
+
 ## 0.13.9
 
 ### Patch Changes
