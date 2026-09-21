@@ -29,6 +29,7 @@ vendor/sqisign-native (C, ref)
   → src/vendor/sqisignlvl{1,3,5}.js   ← repro.hashes.json
   → tsdown → dist/index.js
   → dist/sqisign-accel-worker.js (all three WASM blobs)
+  → dist/opfs-sk-worker.js (optional PRF-wrapped OPFS wallet; all signature families)
 ```
 
 `repro.hashes.json` covers `src/vendor/sqisignlvl*.js`. Published tarball is `dist/` only — see [Supply-chain provenance](./provenance).

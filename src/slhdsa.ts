@@ -3,6 +3,7 @@ import {
 	slh_dsa_sha2_192s,
 	slh_dsa_sha2_256s,
 } from "@noble/post-quantum/slh-dsa.js";
+import { assertBrowserSkCeremonyAllowed } from "./opfs-sk/browser-gate.js";
 import { asBytes, toHex } from "./signature-common.js";
 import type { BytesLike, IFnDsa, KeyPair, SlhDsaVariant } from "./types.js";
 
@@ -22,6 +23,7 @@ class SlhDsaWrapper implements IFnDsa {
 	}
 
 	keypair(): KeyPair {
+		assertBrowserSkCeremonyAllowed();
 		const pairPromise = Promise.resolve().then(() => {
 			const { secretKey, publicKey } = this.impl().keygen();
 			return { public_key: publicKey, private_key: secretKey };
@@ -36,6 +38,7 @@ class SlhDsaWrapper implements IFnDsa {
 	}
 
 	sign(message: BytesLike, private_key: BytesLike): Promise<Uint8Array> {
+		assertBrowserSkCeremonyAllowed();
 		return Promise.resolve(private_key).then((sk) =>
 			this.impl().sign(asBytes(message), asBytes(sk)),
 		);

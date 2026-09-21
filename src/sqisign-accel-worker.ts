@@ -1,3 +1,4 @@
+import { assertBrowserSkCeremonyAllowed } from "./opfs-sk/browser-gate.js";
 import {
 	asBytes,
 	readBytes,
@@ -299,6 +300,9 @@ async function runVerify(
 
 async function handleOp(request: WorkerOp): Promise<WorkerResult> {
 	try {
+		if (request.op === "keygen" || request.op === "sign") {
+			assertBrowserSkCeremonyAllowed();
+		}
 		if (request.op === "keygen") {
 			const { pk, sk } = await runKeygen(request.variant);
 			return { id: request.id, ok: true, pk, sk };
