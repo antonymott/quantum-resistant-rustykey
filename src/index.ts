@@ -30,6 +30,29 @@ export {
 	MLDSA87_KAT_SIG_HEX,
 } from "./mldsa-kat.js";
 export {
+	OPFS_SK_ALGORITHMS,
+	type OpfsSkAlgorithm,
+} from "./opfs-sk/algorithms.js";
+export {
+	assertBrowserSkCeremonyAllowed,
+	OPFS_SK_SLOT_SD_BUNDLE,
+	OPFS_SK_WORKER_NAME,
+} from "./opfs-sk/browser-gate.js";
+export { assertOpfsSkCrossOriginIsolated } from "./opfs-sk/isolate.js";
+export type { OpfsSkPrfMaterial } from "./opfs-sk/lifecycle.js";
+export {
+	opfsSkPrfMaterialFromCeremony,
+	opfsSkPrfOutputFromExtensionResults,
+} from "./opfs-sk/prf.js";
+export {
+	type IOpfsSkWallet,
+	/** Browser-only OPFS encrypted-at-rest wallet (PRF wrap, Worker, COI). */
+	loadOpfsSkWallet,
+	/** Override URL for `dist/opfs-sk-worker.js` in bundlers. */
+	setOpfsSkWorkerUrl,
+} from "./opfs-sk/wallet.js";
+export { opfsSkTriggerWebAuthn } from "./opfs-sk/webauthn.js";
+export {
 	/** SLH-DSA-SHA2-128s (FIPS 205) — pure JS via @noble/post-quantum. */
 	loadSlhDsa128,
 	/** SLH-DSA-SHA2-192s (FIPS 205). */

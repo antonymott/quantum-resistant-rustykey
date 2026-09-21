@@ -1,3 +1,4 @@
+import { assertBrowserSkCeremonyAllowed } from "./opfs-sk/browser-gate.js";
 import {
 	asBytes,
 	readBytes,
@@ -135,6 +136,7 @@ class FnDsaWrapper implements IFnDsa {
 	constructor(private readonly variant: FnDsaVariant) {}
 
 	keypair(): KeyPair {
+		assertBrowserSkCeremonyAllowed();
 		const pairPromise = (async () => {
 			const api = getApi(this.variant);
 			const module = await api.getModule();
@@ -169,6 +171,7 @@ class FnDsaWrapper implements IFnDsa {
 	}
 
 	sign(message: BytesLike, private_key: BytesLike): Promise<Uint8Array> {
+		assertBrowserSkCeremonyAllowed();
 		return Promise.all([
 			ensureInit(this.variant),
 			Promise.resolve(private_key),

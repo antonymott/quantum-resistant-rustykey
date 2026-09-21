@@ -81,11 +81,16 @@ If the worker fails to load, the library **falls back to main-thread WASM** (sti
 
 ## Usage
 
+`loadSqisignLvl*WebGpu().keypair()` / `.sign()` throw in the page (same gate as the other signature loaders). Browser keygen/sign use the [OPFS encrypted-sk wallet](./opfs-sk) with algorithm ids `sqisign-lvl*-webgpu` (still WASM; no keys on the GPU). `verify()` and `getSqisignWebGpuSupport()` stay available. `benchSqisignWebGpu()` is gated the same way.
+
 ```ts
 import {
-  benchSqisignWebGpu,
   getSqisignWebGpuSupport,
-  loadSqisignLvl5WebGpu,
+  loadOpfsSkWallet,
+  loadSqisignLvl5,
+  opfsSkTriggerWebAuthn,
+  setOpfsSkWorkerUrl,
+  OPFS_SK_SLOT_SD_BUNDLE,
 } from "quantum-resistant-rustykey";
 
 const support = getSqisignWebGpuSupport();
@@ -93,16 +98,22 @@ if (!support.available) {
   console.warn(support.reason);
 }
 
-const sq = await loadSqisignLvl5WebGpu();
-const kp = sq.keypair();
-const pk = await kp.get("public_key");
-const sk = await kp.get("private_key");
+setOpfsSkWorkerUrl("/pqc/opfs-sk-worker.js");
+const { prf } = await opfsSkTriggerWebAuthn({
+  mode: "get",
+  publicKey: authenticationOptions, // RP options used prf: {}
+  salt,
+});
+const wallet = await loadOpfsSkWallet();
 const msg = new TextEncoder().encode("hello");
-const sig = await sq.sign(msg, sk);
-const ok = await sq.verify(sig, msg, pk);
-
-const bench = await benchSqisignWebGpu("lvl5");
-console.log(bench.algorithm); // SQISign-L5-webGPU (worker WASM)
+const { public_key } = await wallet.keygen("sqisign-lvl5-webgpu", prf, {
+  slot: OPFS_SK_SLOT_SD_BUNDLE,
+});
+const sig = await wallet.sign("sqisign-lvl5-webgpu", msg, prf, {
+  slot: OPFS_SK_SLOT_SD_BUNDLE,
+});
+const sq = await loadSqisignLvl5();
+const ok = await sq.verify(sig, msg, public_key);
 ```
 
 Live side-by-side timings: [pqc.rustykey.me](https://pqc.rustykey.me).

@@ -13,6 +13,7 @@ const sidebars: SidebarsConfig = {
         "packages/signatures",
         "packages/slh-dsa",
         "packages/sqisign-webgpu",
+        "packages/opfs-sk",
       ],
     },
     {

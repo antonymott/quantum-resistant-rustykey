@@ -61,3 +61,8 @@ TypeScript types are included (`dist/index.d.ts`) — no `@types/quantum-resista
 WASM modules are compiled from pinned C under `vendor/` (see `vendor.lock.json`). Independent C→WASM check: `REQUIRE_REPRODUCIBLE=1 pnpm build:vendor && pnpm verify:repro`. Provenance: [Supply-chain provenance](https://antonymott.github.io/quantum-resistant-rustykey/docs/guides/provenance).
 
 > Pre-production until v1.0.0. Prefer `@latest` (or a caret range) so dependents pick up patches.
+
+### Browser OPFS encrypted private keys
+
+Browser **keygen and sign** for all four signature families (SQIsign including `*-webgpu` ids, ML-DSA, FN-DSA, SLH-DSA) go through `loadOpfsSkWallet()`: WebAuthn `userVerification: "required"`, `prf: {}` at registration (eval only on get), AES-GCM wrap, OPFS Worker. `load*().keypair()` / `.sign()` throw in the page. Node `load*()` loaders and `verify()` are unchanged. There is no plaintext main-thread fallback; `crossOriginIsolated === true` is required. Docs: [OPFS encrypted-sk wallet](https://antonymott.github.io/quantum-resistant-rustykey/docs/packages/opfs-sk). This is not GPU signing; `*-webgpu` ids still use WASM and do not write keys to GPU buffers.
+

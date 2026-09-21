@@ -22,10 +22,28 @@ The `loadSqisignLvl*WebGpu()` loaders are **experimental** and **not for product
 
 Returned key objects remain readable by the same JS realm that called `keypair`. That class of access is **out of scope** for this library ([`SECURITY.md` Scope](https://github.com/antonymott/quantum-resistant-rustykey/blob/main/SECURITY.md)).
 
+## OPFS encrypted-sk wallet (`loadOpfsSkWallet`)
+
+**Normative browser path** for SQIsign, ML-DSA, FN-DSA, and SLH-DSA (including SQIsign `*-webgpu` algorithm ids). Browser `load*().keypair()` / `.sign()` throw on the page and in non-wallet workers. Node / server REST `load*()` remain unconstrained. `verify()` is not gated.
+
+| Rule | As shipped |
+| --- | --- |
+| Isolation | Throws unless `self.crossOriginIsolated === true`. **No** main-thread plaintext fallback (unlike the SQIsign-webGPU loader, which may fall back to WASM on the page for warmup/verify). |
+| Wrap | AES-256-GCM; wrap key is HKDF-SHA-256 of WebAuthn `prf.results.first` plus the RP salt. Info string `qrr-opfs-sk-wrap-v1`. |
+| Storage | Ciphertext + public key in OPFS via a dedicated Worker (`qrr-opfs-sk`) and `FileSystemSyncAccessHandle`. Not IndexedDB, not SQLite. Default slot `sd-bundle`. |
+| UI thread | Receives public keys and signatures only. PRF bytes are copied then **transferred** into the worker and wiped there after use. |
+| GPU | Unused. `*-webgpu` ids still run the same WASM. Do not write `sk` or wrap keys to GPU buffers. |
+| Strings | Private keys and PRF material are `Uint8Array` only. |
+| Mock keygen/sign | After a successful store or sign, a throwaway keypair (and throwaway sign) runs so leftover WASM bytes are more likely mock material. That is **pollution**, not a claimed `HEAPU8` wipe. C `malloc` / restored C frames remain unwiped. |
+
+WebAuthn: `opfsSkTriggerWebAuthn()` uses `userVerification: "required"`. **create()** sends `prf: {}` (no salt — `eval` on registration options breaks Safari silently and loops Chrome). **get()** is where `prf.eval.first` runs, using the RP salt kept **out of** the RP options blob. Apps using SimpleWebAuthn should do the same. Persist the RP salt and pass `{ prfOutput, salt, userVerified: true }` into the wallet. Caller-owned PRF buffers are not wiped. The wrap `CryptoKey` is non-extractable and dropped for GC; that is not a byte `fill(0)`.
+
+This shrinks **at-rest** and **idle same-tab dump** surface (OPFS holds ciphertext). It does **not** close: DevTools during the keygen/sign window, XSS in the same worker, variable-time SQIsign **ref** C, or leftover C-heap bytes after the API returns.
+
 ## Trust boundaries
 
 1. **Same-tab JS** that holds the `Uint8Array` keys can always read them (DevTools, XSS, a shared closure). Enclave that signer; do not treat Wasm opacity as isolation from the page.
-2. **Cross-origin isolation (COOP / COEP)** is required for the Worker + `SharedArrayBuffer` feature gate. Do not remove, weaken, or bypass `crossOriginIsolated === true` on WebGPU code paths. Forks that drop that gate are out of scope ([`SECURITY.md` Scope](https://github.com/antonymott/quantum-resistant-rustykey/blob/main/SECURITY.md)).
+2. **Cross-origin isolation (COOP / COEP)** is required for the Worker + `SharedArrayBuffer` feature gate. Do not remove, weaken, or bypass `crossOriginIsolated === true` on WebGPU code paths **or** on `loadOpfsSkWallet()`. Forks that drop that gate are out of scope ([`SECURITY.md` Scope](https://github.com/antonymott/quantum-resistant-rustykey/blob/main/SECURITY.md)).
 3. **GPU**. No key material is written to WebGPU buffers. The COOP/COEP gate is also a mitigation against the cross-tab GPU cache-timing class; putting keys on the GPU later would reopen that class and needs a new review.
 4. **Host OS / hypervisor / physical access**. Out of scope. This is a userspace library.
 
@@ -72,6 +90,7 @@ Relevant cases:
 - `src/signature-common.test.ts` — mock heap; secret gone after success and after throw; bytes outside the stack window left intact.
 - `src/wasm-stack-zeroize.test.ts` — live SQIsign L1 `HEAPU8`; JS stack marker gone after success and after throw.
 - `src/index.test.ts` — SQIsign L1 sign→verify also asserts the caller-owned `private_key` buffer is unchanged.
+- `src/opfs-sk/*.test.ts` — AES-GCM wrap rejects JS strings; ciphertext does not contain plaintext; COI/Node gate; sealed keygen/sign for ML-DSA, FN-DSA, SLH-DSA, and SQIsign L1; mock keygen does not issue a second store write.
 
 ## Residual risk (honest)
 

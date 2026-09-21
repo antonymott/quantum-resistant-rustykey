@@ -7,6 +7,8 @@ description: Algorithms and loaders shipped by quantum-resistant-rustykey.
 
 All cryptographic **signature** loaders share one interface: `keypair()`, `sign()`, `verify()`, and `buffer_to_string()`.
 
+In the **browser**, `keypair()` and `sign()` throw. Use [`loadOpfsSkWallet()`](./opfs-sk) (WebAuthn `userVerification: required`, `prf: {}` at registration, eval on get, AES-GCM ciphertext in OPFS). Node and server REST `load*()` loaders are unchanged. `verify()` and ML-KEM are not gated.
+
 ## Public loaders
 
 ```ts
@@ -32,6 +34,9 @@ import {
   loadSqisignLvl5WebGpu,
   getSqisignWebGpuSupport,
   setSqisignAccelWorkerUrl,
+  // Browser OPFS encrypted-sk wallet (COI required)
+  loadOpfsSkWallet,
+  setOpfsSkWorkerUrl,
 } from "quantum-resistant-rustykey";
 ```
 

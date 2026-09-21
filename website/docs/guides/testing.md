@@ -9,6 +9,8 @@ description: Running package tests and the shared signature interface.
 pnpm test
 ```
 
+Runs in Node. Browser `keypair()` / `sign()` require [`loadOpfsSkWallet()`](../packages/opfs-sk).
+
 Covers ML-KEM-512 / 768 / 1024 round-trips, signature suites, and Wasm stack-zeroization checks (see `src/*.test.ts`). Heap-residue assumptions are spelled out in the [SQIsign Wasm + WebGPU threat model](../security/threat-model).
 
 ## Shared signature interface

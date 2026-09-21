@@ -55,6 +55,7 @@ If you recover key material, say which of these you did — they are scored diff
 
 - **Library defect:** leftover bytes in `HEAPU8` / GPU buffers after the API returns (JS stack copies are wiped; C-heap / C-frame residue is still in scope if found); variable-time signing that leaks the key from another origin; memory-safety in our WASM. Report here.
 - **Integration / same-context read:** you opened DevTools on the page that called `keypair()` and read the `Uint8Array` we handed the page. Out of scope for “breaking SQIsign.” Still useful as a demo of why the signer must be enclaved; please do not headline it as a cryptographic break.
+- **OPFS wallet, outside the ceremony:** with `loadOpfsSkWallet`, at-rest bytes are AES-GCM ciphertext. Recovering `sk` from OPFS without the WebAuthn PRF is the intended bar for “extraction after the API returned.” Recovering `sk` **during** that wallet’s keygen/sign window (same-tab DevTools, worker HEAP dump mid-op) is the same class as a same-context read of a live ceremony — still report it, but it is not “the disk was plaintext.” `SECURITY.md` Scope is unchanged: leftover Wasm copies **after** the public API returns remain in scope.
 - **Future GPU math:** Prime+Probe / leftover-locals against shaders that hold secrets. Not reachable on today's warmup shader; in scope the moment we ship secret-touching WGSL.
 
 ## Cryptographic Algorithm Concerns

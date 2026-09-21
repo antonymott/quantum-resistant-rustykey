@@ -18,6 +18,11 @@ const requiredFiles = [
 		label: "dist/sqisign-accel-worker.js",
 		minBytes: 100_000,
 	},
+	{
+		path: join(distDir, "opfs-sk-worker.js"),
+		label: "dist/opfs-sk-worker.js",
+		minBytes: 100_000,
+	},
 ];
 
 /** Designed public exports from src/index.ts (runtime + types). */
@@ -37,6 +42,18 @@ const exportGroups = {
 		"setSqisignAccelWorkerUrl",
 		"SQISIGN_WEBGPU_VARIANT_LABELS",
 	],
+	"OPFS-sk": [
+		"loadOpfsSkWallet",
+		"setOpfsSkWorkerUrl",
+		"OPFS_SK_ALGORITHMS",
+		"assertOpfsSkCrossOriginIsolated",
+		"assertBrowserSkCeremonyAllowed",
+		"OPFS_SK_SLOT_SD_BUNDLE",
+		"OPFS_SK_WORKER_NAME",
+		"opfsSkPrfOutputFromExtensionResults",
+		"opfsSkPrfMaterialFromCeremony",
+		"opfsSkTriggerWebAuthn",
+	],
 };
 
 const typeOnlyExports = [
@@ -50,6 +67,9 @@ const typeOnlyExports = [
 	"MlKemKeyPair",
 	"EncryptResult",
 	"SecretLike",
+	"IOpfsSkWallet",
+	"OpfsSkAlgorithm",
+	"OpfsSkPrfMaterial",
 ];
 
 const errors = [];

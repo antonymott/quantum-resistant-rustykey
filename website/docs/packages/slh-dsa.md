@@ -7,7 +7,7 @@ description: NIST FIPS 205 hash-based signatures (SHA2 small-signature sets).
 
 Stateless **hash-based** signatures standardized in [FIPS 205](https://csrc.nist.gov/pubs/fips/205/final). Security rests on the hash function — conservative assumptions, large signatures, slow signing.
 
-This package ships the three SHA2 **`s` (small-signature)** sets via [`@noble/post-quantum`](https://github.com/paulmillr/noble-post-quantum) (pure JS — works in Node and browsers, no WASM / COOP-COEP).
+This package ships the three SHA2 **`s` (small-signature)** sets via [`@noble/post-quantum`](https://github.com/paulmillr/noble-post-quantum) (pure JS — works in Node and browsers, no WASM / COOP-COEP). Browser `keypair()` / `sign()` still go through [`loadOpfsSkWallet()`](./opfs-sk); Node loaders are unconstrained.
 
 | Loader | Variant | COSE (provisional) | PK | SK | Signature |
 | --- | --- | :---: | :---: | :---: | :---: |

@@ -1,3 +1,4 @@
+import { assertBrowserSkCeremonyAllowed } from "./opfs-sk/browser-gate.js";
 import { asBytes, toHex } from "./signature-common.js";
 import {
 	loadSqisignLvl1,
@@ -229,6 +230,7 @@ class SqisignWebGpuWrapper implements IFnDsa {
 	constructor(private readonly variant: SqisignVariant) {}
 
 	keypair(): KeyPair {
+		assertBrowserSkCeremonyAllowed();
 		const pairPromise = postToWorker({
 			id: nextId++,
 			op: "keygen",
@@ -249,6 +251,7 @@ class SqisignWebGpuWrapper implements IFnDsa {
 	}
 
 	sign(message: BytesLike, private_key: BytesLike): Promise<Uint8Array> {
+		assertBrowserSkCeremonyAllowed();
 		return Promise.resolve(private_key).then(async (sk) => {
 			const msg = asBytes(message);
 			const key = asBytes(sk);
@@ -324,6 +327,7 @@ export async function benchSqisignWebGpu(
 	steps: SqisignBenchSteps;
 }> {
 	const scheme = await loadSqisignWebGpu(variant);
+	assertBrowserSkCeremonyAllowed();
 	const msgBytes = new TextEncoder().encode(message);
 
 	const keygenStart = performance.now();

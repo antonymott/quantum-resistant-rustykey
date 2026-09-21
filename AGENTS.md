@@ -18,7 +18,8 @@ As shipped today they do **not** run SQIsign field arithmetic or isogeny walks o
 - **Crypto:** the same Emscripten WASM as `loadSqisignLvl*()` (`src/sqisign.ts`, worker copy in `src/sqisign-accel-worker.ts`).
 - **Worker:** signing is off the main thread when COOP/COEP + `SharedArrayBuffer` + `navigator.gpu` are available; if the worker fails to load, the library **falls back to main-thread WASM**.
 - **WebGPU:** a dummy XOR warmup compute shader in `src/webgpu/init.ts` — **no key material, ideals, or points are written to GPU buffers**.
-- **Private keys** are `Uint8Array`s that round-trip through JS (`postMessage` without transfer on `sign()`). `withStack()` wipes JS `stackAlloc` regions (and the saved→current stack span) with `HEAPU8.fill(0, …)` on success **and** throw, then `stackRestore`. Caller-owned `private_key` buffers are not wiped. C `malloc` leftovers and restored C frames in the SQIsign **ref** module are **not** claimed wiped — see `website/docs/security/threat-model.md`.
+- **Private keys** (standard loaders) are `Uint8Array`s that round-trip through JS (`postMessage` without transfer on `sign()`). `withStack()` wipes JS `stackAlloc` regions (and the saved→current stack span) with `HEAPU8.fill(0, …)` on success **and** throw, then `stackRestore`. Caller-owned `private_key` buffers are not wiped. C `malloc` leftovers and restored C frames in the SQIsign **ref** module are **not** claimed wiped — see `website/docs/security/threat-model.md`.
+- **OPFS encrypted-sk wallet** (`loadOpfsSkWallet`): **normative browser path** for keygen/sign of SQIsign, ML-DSA, FN-DSA, and SLH-DSA (including SQIsign `*-webgpu` ids, still WASM). Browser `load*().keypair()` / `.sign()` throw unless they run inside the `qrr-opfs-sk` Worker. Requires `crossOriginIsolated === true` with **no main-thread plaintext fallback**. `sk` is AES-GCM wrapped with a WebAuthn PRF + RP salt, stored via `FileSystemSyncAccessHandle`. The UI thread receives only `pk` / signatures. create() uses `prf: {}` (no salt); get() uses `prf.eval`. Mock throwaway keygen/sign after the real op is remnant pollution, not a full `HEAPU8` clean. Do not put wrap keys or `sk` on the GPU. Node / server REST `load*()` loaders are unchanged. `verify()` is not gated.
 
 Do not document, benchmark-claim, or implement “GPU-accelerated signing math” without an explicit maintainer request and a threat-model update. A future WGSL field path is the experimental risk the README warns about — it is not the code that is running today.
 
@@ -28,6 +29,8 @@ Do not document, benchmark-claim, or implement “GPU-accelerated signing math�
    / COOP–COEP gate around WebGPU code paths, even as part of an "unrelated" refactor.
    That gate is not a performance hint — it is the isolation boundary for SharedArrayBuffer,
    Site Isolation, and any future GPU kernel that *does* touch secrets.
+   The same applies to `loadOpfsSkWallet()`: do not add a main-thread plaintext
+   fallback, and do not run that wallet when `crossOriginIsolated !== true`.
 2. **Never** introduce non-constant-time branches, table lookups, or early returns keyed
    on secret material (private keys, ephemeral exponents, isogeny walk data, Cornacchia
    inputs) in signing/keygen code — including changes that look purely stylistic (e.g.,
@@ -64,8 +67,8 @@ Do not document, benchmark-claim, or implement “GPU-accelerated signing math�
 ## Project Overview
 
 - Public npm package: `quantum-resistant-rustykey`
-- Targets: Node (WASM-only backend) and browser (WASM default; optional SQIsign
-  “webGPU” loaders when `crossOriginIsolated === true` — Worker + warmup, see above)
+- Targets: Node (WASM-only backend; plaintext `load*()` unconstrained) and browser (keygen/sign **must** use `loadOpfsSkWallet()` — WebAuthn UV + PRF + OPFS; optional SQIsign
+  “webGPU” loaders when `crossOriginIsolated === true` — Worker + warmup, see above; `*-webgpu` ids still WASM, still wallet-gated for keygen/sign)
 - Docs: GitHub Pages (`antonymott.github.io/quantum-resistant-rustykey`)
 
 ## Setup Commands
@@ -127,4 +130,5 @@ pnpm build:audit
 - `README.md` — public API + WebGPU experimental warning (see Non-negotiable Invariant #7)
 - `SECURITY.md` — vulnerability disclosure process + scope
 - `website/docs/packages/sqisign-webgpu.md` — what the webGPU loaders actually do today
+- `website/docs/packages/opfs-sk.md` — PRF-wrapped OPFS private-key wallet
 - `website/docs/security/threat-model.md` — SQIsign Wasm + WebGPU attack surface (as shipped)

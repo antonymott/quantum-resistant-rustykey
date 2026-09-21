@@ -1,4 +1,5 @@
 import { AsyncMutex } from "./async-mutex.js";
+import { assertBrowserSkCeremonyAllowed } from "./opfs-sk/browser-gate.js";
 import {
 	asBytes,
 	readBytes,
@@ -186,6 +187,7 @@ class SqisignWrapper implements IFnDsa {
 	constructor(private readonly variant: SqisignVariant) {}
 
 	keypair(): KeyPair {
+		assertBrowserSkCeremonyAllowed();
 		const pairPromise = sqisignRngMutex[this.variant].run(async () => {
 			const api = getApi(this.variant);
 			const module = await api.getModule();
@@ -222,6 +224,7 @@ class SqisignWrapper implements IFnDsa {
 	}
 
 	sign(message: BytesLike, private_key: BytesLike): Promise<Uint8Array> {
+		assertBrowserSkCeremonyAllowed();
 		return sqisignRngMutex[this.variant].run(async () => {
 			const module = await ensureInit(this.variant);
 			const api = getApi(this.variant);
